@@ -1,0 +1,87 @@
+{{-- The console listing shell shared by Boat, Schedule, Activity, Hotel, Article
+     and Booking Report (Figma 1:6901, 1:9017, 1:9970, 1:9280, 1:9637, 1:10402).
+
+     Every one of those frames is the same three pieces — a titled header with a
+     primary action, a filter toolbar, then a card holding the table and its
+     pagination footer — so they live here once and each page supplies only its
+     own columns and rows. --}}
+@props([
+    'heading',
+    'subtitle',
+    'action' => null,
+    'actionHref' => '#',
+    'columns' => [],
+    'summary' => '',
+    'panelTitle' => null,
+    'panelBadge' => null,
+])
+
+<div class="flex flex-wrap items-start justify-between gap-4 pt-[24px]">
+    <div data-reveal>
+        <h1 class="text-[36px] font-bold tracking-[-0.96px] text-admin-ink">{{ $heading }}</h1>
+        <p class="mt-[4px] text-[16px] text-admin-muted">{{ $subtitle }}</p>
+    </div>
+
+    @if ($action)
+        <a href="{{ $actionHref }}" data-reveal
+           class="flex h-[44px] items-center gap-[8px] rounded-[8px] bg-editorial px-[20px] text-[16px] font-semibold text-white
+                  transition-transform duration-300 ease-smooth hover:-translate-y-0.5">
+            <span aria-hidden="true">+</span>
+            {{ $action }}
+        </a>
+    @endif
+</div>
+
+@isset($toolbar)
+    <div data-reveal class="mt-[24px] rounded-admin border border-[rgba(192,199,211,0.2)] bg-[rgba(241,244,246,0.3)] p-[24px]">
+        {{ $toolbar }}
+    </div>
+@endisset
+
+<section data-reveal class="mt-[24px] overflow-hidden rounded-admin border border-[rgba(192,199,211,0.2)] bg-surface shadow-admin">
+    @isset($filters)
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[rgba(192,199,211,0.2)] bg-[rgba(241,244,246,0.3)] px-[24px] pb-[25px] pt-[24px]">
+            {{ $filters }}
+        </div>
+    @endisset
+
+    @if ($panelTitle)
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[rgba(192,199,211,0.2)] px-[24px] py-[20px]">
+            <h2 class="flex items-center gap-[10px] text-[20px] font-semibold text-editorial-ink">
+                {{ $panelTitle }}
+                @if ($panelBadge)
+                    <span class="rounded-full bg-[#d2e4ff] px-[10px] py-[2px] text-[12px] font-semibold text-editorial">{{ $panelBadge }}</span>
+                @endif
+            </h2>
+        </div>
+    @endif
+
+    <div class="overflow-x-auto">
+        <table class="w-full min-w-[1000px] border-collapse text-left">
+            <thead class="bg-[#f1f4f6]">
+                <tr>
+                    @foreach ($columns as $column)
+                        <th scope="col" class="px-[16px] py-[16px] text-[14px] font-semibold uppercase leading-[20px] tracking-[0.5px] text-editorial-body">
+                            {{ $column }}
+                        </th>
+                    @endforeach
+                </tr>
+            </thead>
+
+            <tbody>
+                {{ $slot }}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="flex flex-wrap items-center justify-between gap-4 border-t border-[rgba(192,199,211,0.2)] bg-[rgba(241,244,246,0.3)] px-[24px] py-[16px]">
+        <p class="text-[14px] leading-[20px] text-editorial-body">{{ $summary }}</p>
+
+        <div class="flex items-center gap-[8px]">
+            <button type="button" class="rounded-[6px] border border-editorial-line px-[14px] py-[6px] text-[14px] text-admin-nav" disabled>Prev</button>
+            <button type="button" class="rounded-[6px] bg-editorial px-[14px] py-[6px] text-[14px] text-white">1</button>
+            <button type="button" class="rounded-[6px] border border-editorial-line px-[14px] py-[6px] text-[14px] text-editorial-ink transition-colors hover:bg-[#f1f4f6]">2</button>
+            <button type="button" class="rounded-[6px] border border-editorial-line px-[14px] py-[6px] text-[14px] text-editorial-ink transition-colors hover:bg-[#f1f4f6]">Next</button>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,129 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+/* ---------------------------------------------------------------------------
+ | Penida Gili — design tokens (Figma: ANDREAN / MssJRpOHtPvSsjwYQ3K1lR)
+ * ------------------------------------------------------------------------ */
+@theme {
+    --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-jakarta: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+
+    /* Brand */
+    --color-brand: #328ad3;
+
+    /* Text */
+    --color-ink: #000000;
+    --color-ink-muted: rgba(0, 0, 0, 0.63);
+    --color-ink-soft: #333333;
+    --color-on-brand: #ffffff;
+    --color-on-hero: #ffffff;
+    --color-on-hero-muted: rgba(255, 255, 255, 0.63);
+    --color-on-hero-soft: rgba(255, 255, 255, 0.7);
+
+    /* Translucent glass panels used on the hero */
+    --color-glass: rgba(255, 255, 255, 0.15);
+    --color-glass-pill: rgba(255, 255, 255, 0.17);
+
+    /* Editorial sub-palette — the Article page (Figma 1:2095) uses its own
+       darker blue and neutral ramp rather than the marketing brand colours. */
+    --color-editorial: #005ea1;
+    --color-editorial-ink: #181c1e;
+    --color-editorial-body: #414751;
+    --color-editorial-meta: #717782;
+    --color-editorial-rule: #ebeef0;
+    --color-editorial-line: rgba(192, 199, 211, 0.3);
+    --color-editorial-badge: rgba(213, 226, 233, 0.6);
+    --color-editorial-badge-ink: #3c494e;
+    --color-editorial-btn: #2d3133;
+
+    /* Admin console sub-palette (Figma 1:6642 and siblings) */
+    --color-admin-ink: #171717;
+    --color-admin-muted: #818181;
+    --color-admin-nav: #7d7f85;
+    --color-admin-label: #c3c3c3;
+    --color-admin-line: #e8e8e8;
+    --color-admin-canvas: #f7f8fa;
+    --color-admin-field: #fafafa;
+
+    /* Surfaces & lines */
+    --color-surface: #ffffff;
+    --color-surface-muted: rgba(0, 0, 0, 0.03);
+    --color-line: #f1f1f1;
+    --color-line-card: rgba(0, 0, 0, 0.05);
+
+    /* Radii */
+    --radius-field: 10px;
+    --radius-card: 25px;
+    --radius-pill: 32px;
+    --radius-search: 30px;
+    --radius-search-btn: 54px;
+    --radius-editorial: 20px;
+    --radius-editorial-lg: 31px;
+    --radius-detail: 16px;
+    --radius-admin: 12px;
+    --radius-admin-pill: 32px;
+
+    /* Elevation */
+    --shadow-card: 0px 4px 71.9px 0px rgba(0, 0, 0, 0.03);
+    --shadow-card-hover: 0px 24px 60px -12px rgba(0, 0, 0, 0.12);
+    --shadow-editorial: 0px 5px 26px 0px rgba(0, 0, 0, 0.05);
+    --shadow-editorial-hover: 0px 18px 48px -8px rgba(0, 0, 0, 0.12);
+    --shadow-detail: 0px 5px 13px 0px rgba(0, 0, 0, 0.05);
+    --shadow-admin: 0px 4px 10px 0px rgba(0, 0, 0, 0.05);
+
+    /* Motion — one easing curve for the whole site keeps it feeling deliberate */
+    --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Page canvas — the Figma frames sit on white with a 1920px design width. */
+@layer base {
+    body {
+        @apply bg-surface font-sans text-ink antialiased;
+        overflow-x: hidden;
+    }
+
+    /* The mobile tab bar is fixed; keep the last section clear of it. */
+    @media (width < 64rem) {
+        body {
+            padding-bottom: 64px;
+        }
+    }
+}
+
+@utility container-page {
+    width: 100%;
+    max-width: 1520px;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+}
+
+/* ---------------------------------------------------------------------------
+ | Motion
+ |
+ | Reveal-on-scroll is opt-in via `data-reveal`; stagger siblings by setting
+ | `--reveal-delay` inline. The hidden state is scoped to `.js` so the page
+ | still reads correctly with JavaScript disabled, and the whole system is
+ | skipped when the visitor asks for reduced motion.
+ * ------------------------------------------------------------------------ */
+@media (prefers-reduced-motion: no-preference) {
+    .js [data-reveal] {
+        opacity: 0;
+        transform: translateY(24px);
+        transition:
+            opacity 0.7s var(--ease-smooth),
+            transform 0.7s var(--ease-smooth);
+        transition-delay: var(--reveal-delay, 0ms);
+    }
+
+    .js [data-reveal='left'] {
+        transform: translateX(-28px);
+    }
+
+    .js [data-reveal].is-revealed {
+        opacity: 1;
+        transform: none;
+    }
+}
