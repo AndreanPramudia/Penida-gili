@@ -1,4 +1,4 @@
-{{-- Figma node 1:2380 — article detail --}}
+{{-- Figma node 1:2380 — article detail (desktop) / 1:6261 — article detail full (mobile) --}}
 @extends('layouts.app')
 
 @section('title', 'Article')
@@ -6,7 +6,10 @@
 @section('nav-active', 'artikel')
 
 @section('hero')
-    <header class="relative min-h-[171px] w-full overflow-hidden pb-[24px] lg:h-[276px] lg:min-h-0 lg:pb-0">
+    {{-- Mobile (< lg) gets its own layout from the mobile Figma frame. --}}
+    @include('partials.article.mobile-detail', ['article' => $article])
+
+    <header class="relative hidden h-[276px] w-full overflow-hidden lg:block">
         <img src="{{ asset('images/articles/hero-article.png') }}" alt=""
              class="absolute inset-0 size-full object-cover object-bottom">
 
@@ -17,7 +20,7 @@
 @endsection
 
 @section('content')
-    <div class="container-page pt-[41px] font-jakarta">
+    <div class="container-page hidden pt-[41px] font-jakarta lg:block">
         {{-- Figma node 1:2387 — breadcrumb --}}
         <nav data-reveal aria-label="Breadcrumb">
             <ol class="flex flex-wrap items-center gap-[10px] text-[18.1px] font-semibold leading-[26px] tracking-[0.9px]">

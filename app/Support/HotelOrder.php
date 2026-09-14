@@ -17,6 +17,7 @@ class HotelOrder
             'summaryTitle' => 'Hotel Booking Summary',
             'propertyType' => 'Resort',
             'property' => 'The Nusa Penida Resort & Spa',
+            'location' => 'Nusa Penida, Bali, Indonesia',
             'thumb' => 'summary-thumb.png',
             'details' => [
                 ['icon' => 'room-type.svg', 'label' => 'Room Type', 'value' => 'Private Pool Villa'],

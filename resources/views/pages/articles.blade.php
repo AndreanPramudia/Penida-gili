@@ -1,4 +1,4 @@
-{{-- Figma node 1:2095 — article --}}
+{{-- Figma node 1:2095 — article (desktop) / 1:5965 — article full (mobile) --}}
 @extends('layouts.app')
 
 @section('title', 'Article')
@@ -6,7 +6,10 @@
 @section('nav-active', 'artikel')
 
 @section('hero')
-    <header class="relative min-h-[171px] w-full overflow-hidden pb-[24px] lg:h-[276px] lg:min-h-0 lg:pb-0">
+    {{-- Mobile (< lg) gets its own header + list from the mobile Figma frame. --}}
+    @include('partials.article.mobile-list', ['featured' => $featured, 'articles' => $articles])
+
+    <header class="relative hidden h-[276px] w-full overflow-hidden lg:block">
         <img src="{{ asset('images/articles/hero-article.png') }}" alt=""
              class="absolute inset-0 size-full object-cover object-bottom">
 
@@ -21,6 +24,7 @@
 @endsection
 
 @section('content')
+    <div class="hidden lg:block">
     @include('partials.article.filter-header')
 
     @include('partials.article.featured', ['article' => $featured])
@@ -62,4 +66,5 @@
     </section>
 
     @include('partials.article.newsletter')
+    </div>
 @endsection

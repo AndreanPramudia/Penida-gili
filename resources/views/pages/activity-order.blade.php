@@ -1,4 +1,4 @@
-{{-- Figma node 1:2874 — activity order --}}
+{{-- Figma node 1:2874 — activity order (desktop) / 1:4274 — activity order full (mobile) --}}
 @extends('layouts.app')
 
 @section('title', 'Order Summary')
@@ -6,7 +6,10 @@
 @section('nav-active', 'activity')
 
 @section('hero')
-    <header class="relative min-h-[171px] w-full overflow-hidden pb-[24px] lg:h-[276px] lg:min-h-0 lg:pb-0">
+    {{-- Mobile (< lg) gets its own hero + form from the mobile Figma frame. --}}
+    @include('partials.order.activity-mobile', ['order' => $order])
+
+    <header class="relative hidden h-[276px] w-full overflow-hidden lg:block">
         <img src="{{ asset('images/boats/hero-order.png') }}" alt=""
              class="absolute inset-0 size-full object-cover object-bottom">
 
@@ -22,7 +25,7 @@
 
 @section('content')
     <form action="#" method="post"
-          class="container-page grid [&>*]:min-w-0 gap-[32px] pt-[43px] pb-[31px] lg:pb-[74px] lg:grid-cols-[minmax(0,988fr)_minmax(0,494fr)]">
+          class="container-page hidden [&>*]:min-w-0 pt-[43px] pb-[74px] lg:grid lg:grid-cols-[minmax(0,988fr)_minmax(0,494fr)] lg:gap-[32px]">
         @csrf
 
         {{-- The traveler + party fields are identical to the boat order form. --}}

@@ -17,6 +17,9 @@ class BoatOrder
             'tripType' => 'One Way',
             'operator' => 'Maruti Fast Boat',
             'service' => 'Standard Fast Boat Service',
+            'date' => 'Fri, 24 Nov 2023',
+            'departure' => '08:00',
+            'arrival' => '08:45',
             'from' => 'Sanur Beach Port',
             'to' => 'Banjar Nyuh Nusa Penida',
             'lines' => [
@@ -27,6 +30,7 @@ class BoatOrder
                 [
                     'name' => 'adults',
                     'label' => 'Adults',
+                    'hint' => 'Age 13+',
                     'value' => 1,
                     'min' => 1,
                     'price' => 'IDR 180.000 / adult',
@@ -34,6 +38,7 @@ class BoatOrder
                 [
                     'name' => 'children',
                     'label' => 'Child (3 - 6 Years)',
+                    'hint' => 'Age 3-6',
                     'value' => 0,
                     'min' => 0,
                     'price' => 'IDR 135.000 / child',

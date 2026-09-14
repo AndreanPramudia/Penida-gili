@@ -1,4 +1,4 @@
-{{-- Figma node 1:1179 — boat Detail --}}
+{{-- Figma node 1:1179 — boat Detail (desktop) / 1:4759 — Boat Detail full (mobile) --}}
 @extends('layouts.app')
 
 @section('title', $boat['name'])
@@ -6,11 +6,16 @@
 @section('nav-active', 'boat')
 
 @section('hero')
-    @include('partials.boat.detail-hero', ['boat' => $boat])
+    {{-- Mobile (< lg) gets its own hero + sections from the mobile Figma frame. --}}
+    @include('partials.boat.mobile-detail', ['boat' => $boat])
+
+    <div class="hidden lg:block">
+        @include('partials.boat.detail-hero', ['boat' => $boat])
+    </div>
 @endsection
 
 @section('content')
-    <div class="container-page grid [&>*]:min-w-0 gap-[32px] pt-[68px] lg:pt-[161px] pb-[46px] lg:pb-[110px] lg:grid-cols-[minmax(0,994fr)_minmax(0,481fr)] lg:gap-[140px]">
+    <div class="container-page hidden pt-[161px] pb-[110px] lg:grid [&>*]:min-w-0 lg:grid-cols-[minmax(0,994fr)_minmax(0,481fr)] lg:gap-[140px]">
         <div class="flex flex-col gap-[65px]">
             {{-- Figma node 1:1184 — vessel info bento --}}
             <section>

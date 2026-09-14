@@ -1,4 +1,4 @@
-{{-- Figma node 1:1694 — hotel Detail --}}
+{{-- Figma node 1:1694 — hotel Detail (desktop) / 1:3398 — Hotels details full (mobile) --}}
 @extends('layouts.app')
 
 @section('title', $hotel['name'])
@@ -6,7 +6,10 @@
 @section('nav-active', 'hotel')
 
 @section('hero')
-    <header class="relative min-h-[150px] w-full overflow-hidden pb-[24px] lg:h-[184px] lg:min-h-0 lg:pb-0">
+    {{-- Mobile (< lg) gets its own hero + sections from the mobile Figma frame. --}}
+    @include('partials.hotel.mobile-detail', ['hotel' => $hotel])
+
+    <header class="relative hidden h-[184px] w-full overflow-hidden lg:block">
         <img src="{{ asset('images/activities/detail/hero-strip.png') }}" alt=""
              class="absolute inset-0 size-full object-cover">
 
@@ -17,6 +20,7 @@
 @endsection
 
 @section('content')
+    <div class="hidden lg:block">
     {{-- Figma node 1:1698 — hero gallery, 1 large + 4 small --}}
     <section class="container-page pt-[54px]">
         <div data-reveal class="grid [&>*]:min-w-0 gap-[20px] overflow-hidden rounded-detail md:grid-cols-4 md:grid-rows-2">
@@ -190,5 +194,6 @@
         </div>
 
         @include('partials.hotel.booking-sidebar', ['hotel' => $hotel])
+    </div>
     </div>
 @endsection

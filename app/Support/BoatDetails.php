@@ -17,7 +17,7 @@ class BoatDetails
             'departure' => '08:00 AM',
             'to' => 'Nusa Penida',
             'arrival' => '08:45 AM',
-            'price' => 'Rp. 100.0000',
+            'price' => 'Rp. 100.000',
         ];
 
         return [

@@ -1,4 +1,4 @@
-{{-- Figma node 1:1442 — Activity Detail --}}
+{{-- Figma node 1:1442 — Activity Detail (desktop) / 1:4086 — Activity detail full (mobile) --}}
 @extends('layouts.app')
 
 @section('title', $activity['name'])
@@ -6,7 +6,10 @@
 @section('nav-active', 'activity')
 
 @section('hero')
-    <header class="relative min-h-[150px] w-full overflow-hidden pb-[24px] lg:h-[184px] lg:min-h-0 lg:pb-0">
+    {{-- Mobile (< lg) gets its own hero + sections from the mobile Figma frame. --}}
+    @include('partials.activity.mobile-detail', ['activity' => $activity])
+
+    <header class="relative hidden h-[184px] w-full overflow-hidden lg:block">
         <img src="{{ asset('images/activities/detail/hero-strip.png') }}" alt=""
              class="absolute inset-0 size-full object-cover">
 
@@ -17,6 +20,7 @@
 @endsection
 
 @section('content')
+    <div class="hidden lg:block">
     {{-- Figma node 1:1447 — image grid --}}
     <section class="container-page pt-[43px]">
         <div data-reveal class="grid [&>*]:min-w-0 gap-[21.4px] overflow-hidden rounded-detail md:grid-cols-3 md:grid-rows-2">
@@ -134,4 +138,5 @@
             @endforeach
         </div>
     </section>
+    </div>
 @endsection
