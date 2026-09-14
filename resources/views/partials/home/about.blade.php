@@ -59,7 +59,7 @@
                         <img src="{{ asset('images/icons/service/circle.svg') }}" alt="" class="absolute inset-0 size-full">
                         <img src="{{ asset('images/icons/service/values.svg') }}" alt="" class="relative h-[40px] w-[49px]">
                     </span>
-                    <h3 class="pt-[10px] text-[20px] leading-[33px] text-ink">Our Core Values</h3>
+                    <h3 class="pt-[10px] text-[20px] leading-[33px] text-ink">Our Core <br>Values</h3>
                 </div>
                 <ul class="mt-[53px] list-disc ps-[24px] text-[16px] leading-[30px] text-ink-muted">
                     <li>Safety Without Compromise</li>

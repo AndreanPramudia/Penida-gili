@@ -34,21 +34,27 @@
 
             {{-- Search bar --}}
             <form action="{{ route('boats.index') }}" method="get" data-reveal style="--reveal-delay: 320ms"
-                  class="mt-[40px] flex flex-col gap-[16px] rounded-search bg-glass p-[24px] font-jakarta
+                  class="mt-[40px] flex flex-col gap-[16px] rounded-search p-[24px] font-jakarta
+                         bg-white/10 backdrop-blur-2xl backdrop-saturate-150
+                         border border-white/25
+                         shadow-[inset_0_1px_0_rgba(255,255,255,0.4),inset_0_-1px_0_rgba(255,255,255,0.1),0_8px_32px_rgba(0,0,0,0.25)]
                          lg:mt-[86px] lg:h-[131px] lg:flex-row lg:items-center lg:gap-[24px] lg:px-[38px] lg:py-0">
                 @foreach ($fields as $index => $field)
-                    <div class="group flex w-full flex-1 items-center gap-[16px]">
+                    <div class="group flex w-full items-center gap-[16px] {{ $index === 0 ? 'lg:w-auto lg:flex-none' : 'flex-1' }}">
                         <img src="{{ asset('images/icons/search/'.$field['icon']) }}" alt=""
                              class="size-[40px] shrink-0 opacity-80 transition-opacity duration-300 group-focus-within:opacity-100">
                         <label class="block w-full">
                             <span class="block text-[24px] font-medium leading-none text-on-hero">{{ $field['label'] }}</span>
                             <input type="text" name="{{ $field['name'] }}" placeholder="{{ $field['placeholder'] }}"
-                                   class="mt-[12px] w-full bg-transparent text-[21px] leading-none text-on-hero placeholder:text-on-hero-soft focus:outline-none">
+                                   class="mt-[12px] w-full bg-transparent text-[21px] leading-none text-on-hero placeholder:text-on-hero-soft focus:outline-none {{ $index === 0 ? 'lg:w-[120px]' : '' }}">
                         </label>
                     </div>
 
                     @if ($index === 0)
-                        <img src="{{ asset('images/icons/search/transfer.svg') }}" alt="Swap" class="hidden size-[29px] shrink-0 lg:block">
+                        {{-- Swap icon: centered between From & To --}}
+                        <div class="hidden shrink-0 items-center justify-center self-stretch lg:flex">
+                            <img src="{{ asset('images/icons/search/transfer.svg') }}" alt="Swap" class="size-[29px]">
+                        </div>
                     @elseif ($index < count($fields) - 1)
                         <span class="hidden h-[85px] w-px shrink-0 bg-on-hero/30 lg:block"></span>
                     @endif
@@ -64,4 +70,4 @@
             </form>
         </div>
     </div>
-</header>
+</header>   
