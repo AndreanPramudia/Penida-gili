@@ -1,0 +1,161 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\ArticleStatus;
+use App\Models\Concerns\HasSlug;
+use App\Support\ImagePath;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+#[Fillable([
+    'title', 'slug', 'category', 'excerpt', 'subtitle', 'lead', 'lead_follow', 'body', 'content', 'image',
+    'hero_caption', 'author_name', 'author_role', 'read_time_minutes', 'views', 'tags', 'is_featured',
+    'status', 'published_at',
+])]
+class Article extends Model
+{
+    use HasFactory, HasSlug;
+
+    protected function casts(): array
+    {
+        return [
+            'content' => 'array',
+            'tags' => 'array',
+            'is_featured' => 'boolean',
+            'status' => ArticleStatus::class,
+            'published_at' => 'datetime',
+        ];
+    }
+
+    protected function slugSource(): string
+    {
+        return $this->title;
+    }
+
+    #[Scope]
+    protected function published(Builder $query): Builder
+    {
+        return $query->where('status', ArticleStatus::Published)
+            ->where(fn (Builder $q) => $q->whereNull('published_at')->orWhere('published_at', '<=', now()));
+    }
+
+    #[Scope]
+    protected function search(Builder $query, ?string $term): Builder
+    {
+        return $query->when(filled($term), fn (Builder $q) => $q->where(fn (Builder $w) => $w
+            ->where('title', 'like', "%{$term}%")
+            ->orWhere('excerpt', 'like', "%{$term}%")
+            ->orWhere('category', 'like', "%{$term}%")));
+    }
+
+    protected function imageUrl(): Attribute
+    {
+        return Attribute::get(fn () => ImagePath::url($this->image, 'articles'));
+    }
+
+    protected function readTimeLabel(): Attribute
+    {
+        return Attribute::get(fn () => $this->read_time_minutes.' min read');
+    }
+
+    protected function dateLabel(): Attribute
+    {
+        return Attribute::get(fn () => ($this->published_at ?? $this->created_at)?->format('M d, Y'));
+    }
+
+    protected function longDateLabel(): Attribute
+    {
+        return Attribute::get(fn () => ($this->published_at ?? $this->created_at)?->format('F j, Y'));
+    }
+
+    protected function viewsLabel(): Attribute
+    {
+        return Attribute::get(fn () => $this->views >= 1000
+            ? rtrim(rtrim(number_format($this->views / 1000, 1), '0'), '.').'k views'
+            : $this->views.' views');
+    }
+
+    /** Author initials for the console avatar. */
+    protected function authorInitials(): Attribute
+    {
+        return Attribute::get(fn () => collect(explode(' ', $this->author_name))
+            ->filter(fn ($p) => ! str_ends_with($p, '.'))
+            ->take(2)
+            ->map(fn ($p) => mb_strtoupper(mb_substr($p, 0, 1)))
+            ->implode(''));
+    }
+
+    /*
+     * Aliases the editorial views were written against.
+     */
+    protected function author(): Attribute
+    {
+        return Attribute::get(fn () => $this->author_name);
+    }
+
+    protected function readTime(): Attribute
+    {
+        return Attribute::get(fn () => $this->read_time_label);
+    }
+
+    protected function date(): Attribute
+    {
+        return Attribute::get(fn () => $this->long_date_label);
+    }
+
+    protected function href(): Attribute
+    {
+        return Attribute::get(fn () => route('articles.show', $this));
+    }
+
+    protected function hasStructuredContent(): Attribute
+    {
+        return Attribute::get(fn () => filled(data_get($this->content, 'ports.rows')));
+    }
+
+    protected function toc(): Attribute
+    {
+        return Attribute::get(fn () => $this->block('toc'));
+    }
+
+    protected function ports(): Attribute
+    {
+        return Attribute::get(fn () => $this->block('ports', ['headers' => [], 'rows' => []]));
+    }
+
+    protected function timetables(): Attribute
+    {
+        return Attribute::get(fn () => $this->block('timetables'));
+    }
+
+    protected function luggage(): Attribute
+    {
+        return Attribute::get(fn () => $this->block('luggage'));
+    }
+
+    protected function advice(): Attribute
+    {
+        return Attribute::get(fn () => $this->block('advice'));
+    }
+
+    protected function arrival(): Attribute
+    {
+        return Attribute::get(fn () => $this->block('arrival'));
+    }
+
+    protected function popular(): Attribute
+    {
+        return Attribute::get(fn () => $this->block('popular'));
+    }
+
+    /** Typed access to a structured content block, e.g. $article->block('toc'). */
+    public function block(string $key, mixed $default = []): mixed
+    {
+        return data_get($this->content, $key, $default);
+    }
+}

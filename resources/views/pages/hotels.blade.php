@@ -39,9 +39,9 @@
                     'name'        => $hotel['name'],
                     'description' => $hotel['description'],
                     'rating'      => $hotel['rating'],
-                    'image'       => asset('images/hotels/'.$hotel['image']),
+                    'image'       => $hotel['image_url'],
                     'location'    => $hotel['meta'][0]['label'] ?? '',
-                    'price'       => $hotel['price'],
+                    'price'       => $hotel['price_from_label'],
                     'href'        => route('hotels.show', \Illuminate\Support\Str::slug($hotel['name'])),
                 ])
             @endforeach
@@ -62,9 +62,9 @@
                     'name'        => $hotel['name'],
                     'description' => $hotel['description'],
                     'rating'      => $hotel['rating'],
-                    'image'       => asset('images/hotels/'.$hotel['image']),
+                    'image'       => $hotel['image_url'],
                     'meta'        => $hotel['meta'],
-                    'price'       => $hotel['price'],
+                    'price'       => $hotel['price_from_label'],
                     'href'        => route('hotels.show', \Illuminate\Support\Str::slug($hotel['name'])),
                 ])
             @endforeach

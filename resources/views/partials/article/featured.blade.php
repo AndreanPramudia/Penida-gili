@@ -6,7 +6,7 @@
              class="group grid overflow-hidden rounded-editorial border border-editorial-line bg-surface shadow-editorial
                     transition-shadow duration-500 ease-smooth hover:shadow-editorial-hover lg:grid-cols-12">
         <div class="relative min-h-[590px] overflow-hidden lg:col-span-7">
-            <img src="{{ $article['image'] }}" alt="{{ $article['title'] }}"
+            <img src="{{ $article['image_url'] }}" alt="{{ $article['title'] }}"
                  class="size-full object-cover transition-transform duration-700 ease-smooth group-hover:scale-105">
 
             <span class="absolute left-[20.5px] top-[20.5px] flex items-center gap-[7.7px] rounded-full bg-editorial px-[18px] py-[7.7px] text-[17.95px] font-semibold leading-[25.6px] tracking-[0.9px] text-white shadow-lg">
@@ -39,7 +39,7 @@
                     </span>
                     <span>
                         <span class="block text-[17.95px] font-semibold leading-[25.6px] tracking-[0.9px] text-editorial-ink">{{ $article['author'] }}</span>
-                        <span class="block text-[15.4px] leading-[20.5px] text-editorial-meta">{{ $article['authorRole'] }}</span>
+                        <span class="block text-[15.4px] leading-[20.5px] text-editorial-meta">{{ $article['author_role'] }}</span>
                     </span>
                 </div>
 

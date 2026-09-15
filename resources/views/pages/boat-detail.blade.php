@@ -57,14 +57,14 @@
                 <h2 data-reveal class="text-[24px] lg:text-[48.4px] font-bold leading-[30px] lg:leading-[59px] tracking-[-0.48px] text-brand">Fleet Gallery</h2>
 
                 <div class="mt-[43px] grid grid-cols-2 gap-[21.5px]">
-                    @foreach ($boat['gallery'] as $index => $photo)
+                    @foreach ($boat['gallery_photos'] as $index => $photo)
                         <figure data-reveal style="--reveal-delay: {{ $index * 90 }}ms"
                                 @class([
                                     'group overflow-hidden rounded-detail shadow-editorial',
                                     'col-span-2 h-[220px] lg:h-[344px]' => $loop->first,
                                     'h-[258px]' => ! $loop->first,
                                 ])>
-                            <img src="{{ asset('images/boats/gallery/'.$photo['image']) }}" alt="{{ $photo['alt'] }}"
+                            <img src="{{ $photo['url'] }}" alt="{{ $photo['alt'] }}"
                                  class="size-full object-cover transition-transform duration-700 ease-smooth group-hover:scale-105">
                         </figure>
                     @endforeach
@@ -99,6 +99,6 @@
             </section>
         </div>
 
-        @include('partials.boat.booking-widget', ['routes' => $boat['routes'], 'slug' => $boat['slug']])
+        @include('partials.boat.booking-widget', ['routes' => $boat['schedules'], 'slug' => $boat['slug']])
     </div>
 @endsection

@@ -13,10 +13,10 @@
                 'name'        => $operator['name'],
                 'description' => $operator['description'],
                 'rating'      => $operator['rating'],
-                'image'       => asset('images/boats/'.$operator['image']),
-                'routes'      => $operator['routes'],
-                'vessels'     => $operator['vessels'],
-                'href'        => route('boats.show', \Illuminate\Support\Str::slug($operator['name'])),
+                'image'       => $operator['image_url'],
+                'routes'      => $operator['schedules_count'],
+                'vessels'     => $operator['vessels_count'],
+                'href'        => route('boats.show', $operator),
             ])
         @endforeach
     </div>

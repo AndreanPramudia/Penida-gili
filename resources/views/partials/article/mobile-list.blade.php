@@ -21,7 +21,7 @@
     <section class="pb-[20px]">
         <form action="{{ route('articles.index') }}" method="get" class="relative px-[20px]">
             <img src="{{ asset('images/icons/mobile/article/search.svg') }}" alt="" class="pointer-events-none absolute left-[37px] top-1/2 size-[18px] -translate-y-1/2">
-            <input type="search" name="q" placeholder="Search guides, ports, tips..."
+            <input type="search" name="q" value="{{ request('q') }}" placeholder="Search guides, ports, tips..."
                    class="h-[46px] w-full rounded-[12px] border border-[#c0c7d3] bg-white pl-[44px] pr-[16px] text-[16px] text-[#181c1e] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] placeholder:text-[#717782] focus:border-brand focus:outline-none">
         </form>
 
@@ -40,9 +40,10 @@
     </section>
 
     {{-- Featured guide card (1:6039) --}}
+    @if ($featured)
     <a href="{{ $featured['href'] }}" data-reveal class="mx-[20px] mb-[24px] block overflow-hidden rounded-[16px] border border-[rgba(192,199,211,0.5)] bg-white p-px shadow-[0px_4px_20px_0px_rgba(0,0,0,0.05)]">
         <div class="relative h-[224px] overflow-hidden rounded-t-[15px] bg-[#d7dadc]">
-            <img src="{{ $featured['image'] }}" alt="{{ $featured['title'] }}" class="size-full object-cover">
+            <img src="{{ $featured['image_url'] }}" alt="{{ $featured['title'] }}" class="size-full object-cover">
             <div class="absolute inset-0 bg-gradient-to-t from-[rgba(24,28,30,0.8)] via-[rgba(24,28,30,0)] to-[rgba(0,0,0,0.3)]"></div>
 
             <span class="absolute left-[12px] top-[12px] flex items-center gap-[4px] rounded-full bg-[#005ea1] px-[10px] py-[4px] text-[12px] leading-[16px] text-white drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)]">
@@ -66,7 +67,7 @@
                     <span class="flex size-[36px] items-center justify-center rounded-full bg-[#d2e4ff] text-[14px] font-bold leading-[20px] text-[#001d37]">{{ $initials($featured['author']) }}</span>
                     <span>
                         <span class="block text-[12px] font-semibold leading-[12px] text-[#181c1e]">{{ $featured['author'] }}</span>
-                        <span class="block text-[11px] leading-[24px] text-[#525c6f]">{{ $featured['authorRole'] }}</span>
+                        <span class="block text-[11px] leading-[24px] text-[#525c6f]">{{ $featured['author_role'] }}</span>
                     </span>
                 </span>
                 <span class="flex items-center gap-[4px] text-[14px] font-semibold leading-[20px] tracking-[0.7px] text-[#005ea1]">
@@ -76,6 +77,7 @@
             </div>
         </div>
     </a>
+    @endif
 
     {{-- Recent Articles (1:6077 + 1:6085) --}}
     <div data-reveal class="flex items-center justify-between px-[20px] pb-[12px] pt-[8px]">
@@ -91,7 +93,7 @@
             <a href="{{ route('articles.show', \Illuminate\Support\Str::slug($article['title'])) }}" data-reveal style="--reveal-delay: {{ ($index % 4) * 60 }}ms"
                class="flex items-start gap-[14px] rounded-[12px] border border-[rgba(192,199,211,0.4)] bg-white p-[15px] drop-shadow-[0px_2px_6px_rgba(0,0,0,0.03)]">
                 <div class="relative size-[96px] shrink-0 overflow-hidden rounded-[8px] bg-[#d7dadc]">
-                    <img src="{{ asset('images/articles/'.$article['image']) }}" alt="" class="size-full object-cover">
+                    <img src="{{ $article['image_url'] }}" alt="" class="size-full object-cover">
                     <span class="absolute bottom-[4px] left-[4px] rounded-[4px] bg-[rgba(24,28,30,0.7)] px-[6px] py-[2px] text-[10px] font-medium leading-[16px] text-white">
                         {{ \Illuminate\Support\Str::before($article['readTime'], ' read') }}
                     </span>
@@ -124,10 +126,12 @@
 
     {{-- Newsletter CTA (1:6170) --}}
     <section class="px-[20px] pb-[32px]">
-        <form action="#" method="post" data-reveal
+        <form action="{{ route('newsletter.store') }}" method="post" data-reveal
               class="relative flex flex-col gap-[4px] overflow-hidden rounded-[16px] p-[20px] text-white shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)]"
               style="background-image: linear-gradient(140deg, #005ea1 0%, #2178c3 50%, #00386b 100%)">
             @csrf
+            <input type="hidden" name="source" value="articles-mobile">
+            <input type="text" name="website" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
             <span class="pointer-events-none absolute -bottom-[24px] -right-[24px] size-[128px] rounded-full bg-white/10 blur-[12px]"></span>
 
             <p class="flex items-center gap-[8px] text-[12px] font-semibold uppercase leading-[16px] tracking-[0.6px] text-[#d8e4eb]">
@@ -139,12 +143,18 @@
 
             <div class="flex flex-col gap-[10px] pt-[12px]">
                 <label for="m-newsletter-email" class="sr-only">Email address</label>
-                <input id="m-newsletter-email" type="email" name="email" placeholder="Enter your email address"
+                <input id="m-newsletter-email" type="email" name="email" required value="{{ old('email') }}" placeholder="Enter your email address"
                        class="rounded-[8px] bg-white px-[14px] py-[11px] text-[14px] text-[#181c1e] placeholder:text-[#717782] focus:outline-none">
                 <button type="submit" class="rounded-[8px] bg-[#d5e2e9] py-[10px] text-[14px] font-semibold leading-[20px] text-[#111d22] drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)]">Subscribe</button>
             </div>
 
             <p class="pt-[6px] text-center text-[10px] leading-[24px] text-[rgba(210,228,255,0.8)]">No spam. Unsubscribe anytime with 1-click.</p>
+            @if (session('newsletter'))
+                <p class="text-[13px] text-white">{{ session('newsletter') }}</p>
+            @endif
+            @error('email')
+                <p class="text-[13px] text-white !text-red-500">{{ $message }}</p>
+            @enderror
         </form>
     </section>
 </div>

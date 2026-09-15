@@ -14,7 +14,7 @@
 <div class="bg-[#f7fafc] lg:hidden">
     {{-- Hero (1:3442) --}}
     <header class="relative h-[320px] w-full overflow-hidden">
-        <img src="{{ asset('images/hotels/detail/'.$hotel['gallery'][0]['image']) }}" alt="{{ $hotel['gallery'][0]['alt'] }}" class="absolute inset-0 size-full object-cover">
+        <img src="{{ $hotel['gallery_photos'][0]['url'] }}" alt="{{ $hotel['gallery_photos'][0]['alt'] }}" class="absolute inset-0 size-full object-cover">
         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
 
         <div class="absolute inset-x-[20px] bottom-[16px] flex items-end justify-between gap-[12px]">
@@ -73,15 +73,15 @@
                         <div class="flex items-start justify-between gap-[12px]">
                             <div>
                                 <h3 class="text-[18px] leading-[27px] text-[#181c1e]">{{ $room['name'] }}</h3>
-                                <p class="text-[14px] leading-[21px] text-[#414751]">{{ $room['bed'] }} • {{ $room['guests'] }}</p>
+                                <p class="text-[14px] leading-[21px] text-[#414751]">{{ $room['bed'] }} • {{ $room['guests_label'] }}</p>
                             </div>
                             <p class="shrink-0 whitespace-nowrap pt-[2px]">
-                                <span class="text-[16px] font-bold leading-[24px] text-brand">{{ $room['price'] }}</span>
+                                <span class="text-[16px] font-bold leading-[24px] text-brand">{{ $room['price_label'] }}</span>
                                 <span class="text-[12px] leading-[18px] text-[#414751]">/night</span>
                             </p>
                         </div>
 
-                        <a href="{{ route('hotels.order', $hotel['slug']) }}"
+                        <a href="{{ route('hotels.order', [$hotel['slug'], 'room' => $room['id']]) }}"
                            @class([
                                'flex items-center justify-center rounded-[8px] text-[14px] font-semibold leading-[20px] tracking-[0.7px] transition-colors duration-300',
                                'bg-brand py-[8px] text-white' => $selected,
@@ -105,15 +105,15 @@
                 </div>
             </div>
 
-            <p class="text-center text-[14px] leading-[21px] text-[#414751]">{{ $hotel['fullAddress'] }}</p>
+            <p class="text-center text-[14px] leading-[21px] text-[#414751]">{{ $hotel['full_address'] }}</p>
         </section>
     </div>
 
     {{-- Prominent booking action (1:3527) --}}
     <div class="flex h-[80px] items-center justify-between border-t border-[#c0c7d3] bg-white px-[20px] drop-shadow-[0px_-4px_10px_rgba(0,0,0,0.05)]">
         <div>
-            <p class="text-[12px] leading-[18px] text-[#414751]">Total for {{ $hotel['totalNights'] }} nights</p>
-            <p class="text-[22px] font-bold leading-[33px] text-brand">{{ $hotel['totalPrice'] }}</p>
+            <p class="text-[12px] leading-[18px] text-[#414751]">Total for {{ $hotel['default_nights'] }} nights</p>
+            <p class="text-[22px] font-bold leading-[33px] text-brand">{{ $hotel['default_total_label'] }}</p>
         </div>
         <a href="{{ route('hotels.order', $hotel['slug']) }}"
            class="rounded-[12px] bg-brand px-[32px] py-[12px] text-[14px] font-semibold leading-[20px] tracking-[0.7px] text-white shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] transition-transform duration-300 ease-smooth active:scale-[0.98]">

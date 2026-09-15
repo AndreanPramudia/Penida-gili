@@ -25,13 +25,13 @@
     <section class="container-page pt-[43px]">
         <div data-reveal class="grid [&>*]:min-w-0 gap-[21.4px] overflow-hidden rounded-detail md:grid-cols-3 md:grid-rows-2">
             <figure class="group overflow-hidden rounded-detail md:col-span-2 md:row-span-2">
-                <img src="{{ asset('images/activities/detail/'.$activity['gallery'][0]['image']) }}" alt="{{ $activity['gallery'][0]['alt'] }}"
+                <img src="{{ $activity['gallery_photos'][0]['url'] }}" alt="{{ $activity['gallery_photos'][0]['alt'] }}"
                      class="size-full object-cover transition-transform duration-700 ease-smooth group-hover:scale-105">
             </figure>
 
-            @foreach (array_slice($activity['gallery'], 1) as $photo)
+            @foreach (array_slice($activity['gallery_photos'], 1) as $photo)
                 <figure class="group h-[220px] lg:h-[323px] overflow-hidden rounded-detail">
-                    <img src="{{ asset('images/activities/detail/'.$photo['image']) }}" alt="{{ $photo['alt'] }}"
+                    <img src="{{ $photo['url'] }}" alt="{{ $photo['alt'] }}"
                          class="size-full object-cover transition-transform duration-700 ease-smooth group-hover:scale-105">
                 </figure>
             @endforeach
@@ -50,7 +50,7 @@
                 <h1 class="mt-[10.7px] text-[27px] lg:text-[64px] font-bold leading-[36px] lg:leading-[80px] tracking-[-1.28px] text-editorial-ink">{{ $activity['name'] }}</h1>
 
                 <ul class="mt-[21.4px] flex flex-wrap gap-[21.4px] text-[21.4px] leading-[32px] text-editorial-body">
-                    @foreach ($activity['meta'] as $item)
+                    @foreach ($activity['detail_meta'] as $item)
                         <li class="flex items-center gap-[10.7px]">
                             <img src="{{ asset('images/icons/detail/'.$item['icon']) }}" alt="" class="size-[26.7px] object-contain">
                             {{ $item['label'] }}
@@ -95,7 +95,7 @@
                 <p data-reveal class="mt-[21.4px] text-[21.4px] leading-[34.7px] text-editorial-ink">{{ $activity['summary'] }}</p>
 
                 <figure data-reveal class="group mt-[21.4px] h-[228px] lg:h-[544px] overflow-hidden rounded-detail">
-                    <img src="{{ asset('images/activities/detail/'.$activity['summaryImage']['image']) }}" alt="{{ $activity['summaryImage']['alt'] }}"
+                    <img src="{{ asset('images/activities/detail/'.$activity['summary_image']) }}" alt="{{ $activity['name'] }}"
                          class="size-full object-cover transition-transform duration-700 ease-smooth group-hover:scale-105">
                 </figure>
             </section>
@@ -133,8 +133,8 @@
 
         {{-- Scrolls horizontally, matching the Figma carousel row. --}}
         <div class="mt-[37px] lg:mt-[87px] flex gap-[32px] overflow-x-auto pb-4">
-            @foreach ($activity['related'] as $index => $related)
-                @include('components.activity-mini-card', ['activity' => $related, 'delay' => $index * 90])
+            @foreach ($related as $index => $item)
+                @include('components.activity-mini-card', ['activity' => $item, 'delay' => $index * 90])
             @endforeach
         </div>
     </section>

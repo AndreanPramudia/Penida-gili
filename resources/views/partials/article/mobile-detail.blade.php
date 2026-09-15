@@ -49,7 +49,7 @@
 
         {{-- Hero image (1:6331) --}}
         <figure data-reveal class="relative h-[230px] overflow-hidden rounded-[16px] bg-[#f1f4f6] shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)]">
-            <img src="{{ asset('images/articles/detail/hero-fastboat.png') }}" alt="{{ $article['heroCaption'] }}" class="size-full object-cover">
+            <img src="{{ asset('images/articles/detail/hero-fastboat.png') }}" alt="{{ $article['hero_caption'] }}" class="size-full object-cover">
             <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(24,28,30,0.7)] via-transparent to-transparent"></span>
             <figcaption class="absolute inset-x-[12px] bottom-[12px] flex items-center justify-between gap-[8px]">
                 <span class="flex min-w-0 items-center gap-[6px] rounded-[6px] bg-[rgba(24,28,30,0.4)] px-[10px] py-[4px] text-[12px] font-medium leading-[24px] text-white backdrop-blur-[2px]">
@@ -66,6 +66,7 @@
                 <span class="float-left mr-[6px] text-[48px] font-bold leading-[48px] text-[#005ea1]">{{ mb_substr($article['lead'], 0, 1) }}</span>{{ mb_substr($article['lead'], 1) }}
             </p>
 
+            @if ($article['has_structured_content'])
             {{-- 01 Ports --}}
             <section id="m-section-1" class="flex flex-col gap-[12px]">
                 <h2 data-reveal class="flex items-start gap-[8px] text-[20px] font-bold leading-[32.5px] text-[#181c1e]">
@@ -158,7 +159,7 @@
                     <img src="{{ asset('images/icons/mobile/article/quote.svg') }}" alt="" class="h-[18.3px] w-[18.8px]">
                     Captain's Insider Advice
                 </p>
-                <p class="pb-[4px] text-[14px] italic leading-[22.75px] text-[#9fcaff]">"{{ $article['advice'][1]['body'] }}"</p>
+                <p class="pb-[4px] text-[14px] italic leading-[22.75px] text-[#9fcaff]">{{ $article['advice'][1]['body'] ?? $article['excerpt'] }}</p>
                 <footer class="flex items-center gap-[10px] border-t border-[#2178c3] pt-[13px]">
                     <img src="{{ asset('images/articles/detail/author-avatar.png') }}" alt="" class="size-[28px] rounded-full border border-[#d2e4ff] object-cover p-px">
                     <span class="text-[12px] font-medium leading-[19.5px] text-white">{{ $article['author'] }} • 14 Years Strait Navigation</span>
@@ -182,6 +183,13 @@
                 </ul>
             </section>
 
+            @else
+                <div data-reveal class="prose-article flex flex-col gap-[16px]">
+                    @foreach (preg_split('/\R{2,}/', trim($article['body'] ?? '')) as $paragraph)
+                        <p class="text-[17px] lg:text-[20.7px] leading-[28px] lg:leading-[33.6px] text-editorial-body">{{ $paragraph }}</p>
+                    @endforeach
+                </div>
+            @endif
             {{-- Tags (1:6512) --}}
             <ul class="flex flex-wrap gap-[8px] py-[8px]">
                 @foreach (array_slice($article['tags'], 0, 4) as $tag)
@@ -206,13 +214,13 @@
                     <a href="{{ route('articles.index') }}" class="text-[13px] font-bold leading-[21.1px] text-[#005ea1]">View All</a>
                 </div>
                 <div class="flex flex-col gap-[12px]">
-                    @foreach (array_slice($article['related'], 0, 2) as $index => $related)
-                        <a href="#" data-reveal style="--reveal-delay: {{ $index * 60 }}ms" class="flex items-start gap-[12px] rounded-[12px] border border-[rgba(192,199,211,0.3)] bg-white p-[13px]">
-                            <img src="{{ asset('images/articles/detail/'.$related['image']) }}" alt="" class="size-[80px] shrink-0 rounded-[8px] object-cover">
+                    @foreach ($related->take(2) as $index => $item)
+                        <a href="{{ route('articles.show', $item) }}" data-reveal style="--reveal-delay: {{ $index * 60 }}ms" class="flex items-start gap-[12px] rounded-[12px] border border-[rgba(192,199,211,0.3)] bg-white p-[13px]">
+                            <img src="{{ $item['image_url'] }}" alt="" class="size-[80px] shrink-0 rounded-[8px] object-cover">
                             <span class="min-w-0">
-                                <span class="block text-[11px] font-bold uppercase leading-[17.9px] tracking-[0.55px] text-[#005ea1]">{{ $related['category'] }}</span>
-                                <span class="line-clamp-2 text-[14px] font-bold leading-[19.25px] text-[#181c1e]">{{ $related['title'] }}</span>
-                                <span class="block pt-[4px] text-[12px] leading-[19.5px] text-[#717782]">{{ $related['readTime'] }}</span>
+                                <span class="block text-[11px] font-bold uppercase leading-[17.9px] tracking-[0.55px] text-[#005ea1]">{{ $item['category'] }}</span>
+                                <span class="line-clamp-2 text-[14px] font-bold leading-[19.25px] text-[#181c1e]">{{ $item['title'] }}</span>
+                                <span class="block pt-[4px] text-[12px] leading-[19.5px] text-[#717782]">{{ $item['readTime'] }}</span>
                             </span>
                         </a>
                     @endforeach

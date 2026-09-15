@@ -27,7 +27,9 @@
     <div class="hidden lg:block">
     @include('partials.article.filter-header')
 
-    @include('partials.article.featured', ['article' => $featured])
+    @if ($featured)
+        @include('partials.article.featured', ['article' => $featured])
+    @endif
 
     {{-- Figma node 1:2174 — article grid section --}}
     <section class="container-page pt-[34px] lg:pt-[82px] font-jakarta">
@@ -54,7 +56,7 @@
                     'readTime' => $article['readTime'],
                     'date'     => $article['date'],
                     'author'   => $article['author'],
-                    'image'    => asset('images/articles/'.$article['image']),
+                    'image'    => $article['image_url'],
                     'href'     => route('articles.show', \Illuminate\Support\Str::slug($article['title'])),
                 ])
             @endforeach

@@ -152,10 +152,10 @@
 
         <div class="mt-[40px] flex flex-col gap-[32px]">
             @foreach ($operators->take(2) as $index => $operator)
-                <a href="{{ route('boats.show', \Illuminate\Support\Str::slug($operator['name'])) }}" data-reveal style="--reveal-delay: {{ $index * 90 }}ms"
+                <a href="{{ route('boats.show', $operator) }}" data-reveal style="--reveal-delay: {{ $index * 90 }}ms"
                    class="block overflow-hidden rounded-[16px] border border-[#f3f4f6] bg-white p-px shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]">
                     <div class="h-[192px] w-full overflow-hidden rounded-t-[15px]">
-                        <img src="{{ asset('images/boats/'.$operator['image']) }}" alt="{{ $operator['name'] }}" class="size-full object-cover">
+                        <img src="{{ $operator['image_url'] }}" alt="{{ $operator['name'] }}" class="size-full object-cover">
                     </div>
                     <div class="p-[20px]">
                         <div class="flex items-center gap-[4px]">
@@ -166,11 +166,11 @@
                         <div class="mt-[8px] flex items-center justify-between border-t border-[#e5e7eb] pt-[17px] text-[12px] leading-[16px] text-[#64748b]">
                             <span class="flex items-center gap-[4px]">
                                 <img src="{{ asset('images/icons/mobile/routes.svg') }}" alt="" class="size-[10.5px]">
-                                {{ $operator['routes'] }} Routes
+                                {{ $operator['schedules_count'] }} Routes
                             </span>
                             <span class="flex items-center gap-[4px]">
                                 <img src="{{ asset('images/icons/mobile/boat.svg') }}" alt="" class="h-[11.7px] w-[10.8px]">
-                                {{ $operator['vessels'] }} Boat
+                                {{ $operator['vessels_count'] }} Boat
                             </span>
                         </div>
                     </div>

@@ -49,7 +49,7 @@
 
                 <div class="mt-[11px] flex items-center justify-between border-t border-editorial-line pt-[12px]">
                     <span class="text-[21.6px] leading-[32px] text-brand">Total</span>
-                    <span class="text-[24.3px] leading-[38px] text-brand">{{ $order['total'] }}</span>
+                    <span data-quote-total class="text-[24.3px] leading-[38px] text-brand">{{ $order['total'] }}</span>
                 </div>
             </div>
         </div>
@@ -60,7 +60,7 @@
                     class="flex w-full items-center justify-center gap-[11px] rounded-[11px] bg-brand py-[16px] text-[18.9px] font-semibold uppercase leading-[27px] tracking-[0.95px] text-white shadow-lg
                            transition-transform duration-300 ease-smooth hover:-translate-y-0.5">
                 <img src="{{ asset('images/icons/order/cart.svg') }}" alt="" class="size-[20px]">
-                Book Now &ndash; {{ $order['total'] }}
+                <span data-quote-total="button">Book Now &ndash; {{ $order['total'] }}</span>
             </button>
 
             <a href="mailto:hello@penidagili.com"

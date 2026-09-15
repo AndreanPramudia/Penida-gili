@@ -34,9 +34,9 @@
                     'name'        => $activity['name'],
                     'description' => $activity['description'],
                     'rating'      => $activity['rating'],
-                    'image'       => asset('images/activities/'.$activity['image']),
+                    'image'       => $activity['image_url'],
                     'meta'        => $activity['meta'],
-                    'price'       => $activity['price'],
+                    'price'       => $activity['price_label'],
                     'href'        => route('activities.show', \Illuminate\Support\Str::slug($activity['name'])),
                 ])
             @endforeach
@@ -55,9 +55,9 @@
                     'name'        => $activity['name'],
                     'description' => $activity['description'],
                     'rating'      => $activity['rating'],
-                    'image'       => asset('images/activities/'.$activity['image']),
+                    'image'       => $activity['image_url'],
                     'meta'        => $activity['meta'],
-                    'price'       => $activity['price'],
+                    'price'       => $activity['price_label'],
                     'href'        => route('activities.show', \Illuminate\Support\Str::slug($activity['name'])),
                 ])
             @endforeach

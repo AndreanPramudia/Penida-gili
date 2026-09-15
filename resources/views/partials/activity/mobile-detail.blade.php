@@ -10,11 +10,11 @@
 <div class="bg-[#f7fafc] lg:hidden">
     {{-- Hero gallery (1:4130): first photo full-bleed with a photo-count badge. --}}
     <header class="relative h-[400px] w-full overflow-hidden">
-        <img src="{{ asset('images/activities/detail/'.$activity['gallery'][0]['image']) }}" alt="{{ $activity['gallery'][0]['alt'] }}" class="absolute inset-0 size-full object-cover">
+        <img src="{{ $activity['gallery_photos'][0]['url'] }}" alt="{{ $activity['gallery_photos'][0]['alt'] }}" class="absolute inset-0 size-full object-cover">
 
         <span class="absolute bottom-[58px] right-[24px] flex items-center gap-[4px] rounded-full bg-[rgba(24,28,30,0.6)] px-[12px] py-[4px] backdrop-blur-[2px]">
             <img src="{{ asset('images/icons/mobile/detail/camera.svg') }}" alt="" class="size-[13.3px]">
-            <span class="text-[14px] font-semibold leading-[20px] tracking-[0.7px] text-white">1/{{ count($activity['gallery']) }}</span>
+            <span class="text-[14px] font-semibold leading-[20px] tracking-[0.7px] text-white">1/{{ count($activity['gallery_photos']) }}</span>
         </span>
     </header>
 
@@ -27,7 +27,7 @@
             <h1 class="mt-[8px] text-[28px] font-bold leading-[36px] text-[#181c1e]">{{ $activity['name'] }}</h1>
 
             <ul class="mt-[16px] flex flex-wrap items-center gap-[16px] text-[16px] leading-[24px] text-[#414751]">
-                @foreach (array_slice($activity['meta'], 0, 2) as $item)
+                @foreach (array_slice($activity['detail_meta'], 0, 2) as $item)
                     @php $size = $mMetaIcon[$item['icon']] ?? ['w' => 20, 'h' => 20]; @endphp
                     <li class="flex items-center gap-[4px]">
                         <img src="{{ asset('images/icons/mobile/detail/'.$item['icon']) }}" alt="" style="width: {{ $size['w'] }}px; height: {{ $size['h'] }}px">
@@ -87,12 +87,12 @@
     <div class="border-t border-[rgba(192,199,211,0.3)] bg-white px-[20px] pb-[20px] pt-[20px] drop-shadow-[0px_-4px_10px_rgba(0,0,0,0.05)]">
         <p class="text-[14px] leading-[21px] text-[#414751]">From</p>
         <p class="flex items-baseline gap-[4px]">
-            <span class="text-[24px] font-bold leading-[32px] text-brand">{{ $activity['price'] }}</span>
+            <span class="text-[24px] font-bold leading-[32px] text-brand">{{ $activity['price_label'] }}</span>
             <span class="text-[14px] leading-[32px] text-[#414751]">/person</span>
         </p>
 
         <div class="mt-[12px] flex flex-col gap-[12px]">
-            <a href="{{ $activity['orderHref'] }}"
+            <a href="{{ route('activities.order', $activity['slug']) }}"
                class="flex items-center justify-center rounded-[8px] bg-brand px-[24px] py-[12px] text-[14px] font-semibold leading-[20px] tracking-[0.7px] text-white transition-transform duration-300 ease-smooth active:scale-[0.98]">
                 Book Now
             </a>

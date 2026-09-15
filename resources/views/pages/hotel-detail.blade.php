@@ -25,13 +25,13 @@
     <section class="container-page pt-[54px]">
         <div data-reveal class="grid [&>*]:min-w-0 gap-[20px] overflow-hidden rounded-detail md:grid-cols-4 md:grid-rows-2">
             <figure class="group overflow-hidden rounded-detail md:col-span-2 md:row-span-2">
-                <img src="{{ asset('images/hotels/detail/'.$hotel['gallery'][0]['image']) }}" alt="{{ $hotel['gallery'][0]['alt'] }}"
+                <img src="{{ $hotel['gallery_photos'][0]['url'] }}" alt="{{ $hotel['gallery_photos'][0]['alt'] }}"
                      class="size-full object-cover transition-transform duration-700 ease-smooth group-hover:scale-105">
             </figure>
 
-            @foreach (array_slice($hotel['gallery'], 1) as $photo)
+            @foreach (array_slice($hotel['gallery_photos'], 1) as $photo)
                 <figure class="group relative h-[180px] overflow-hidden rounded-detail md:h-auto">
-                    <img src="{{ asset('images/hotels/detail/'.$photo['image']) }}" alt="{{ $photo['alt'] }}"
+                    <img src="{{ $photo['url'] }}" alt="{{ $photo['alt'] }}"
                          class="size-full object-cover transition-transform duration-700 ease-smooth group-hover:scale-105">
 
                     @if (! empty($photo['more']))
@@ -97,7 +97,7 @@
                                  class="group flex flex-col overflow-hidden rounded-detail border border-editorial-line bg-surface shadow-editorial
                                         transition-[transform,box-shadow] duration-500 ease-smooth hover:-translate-y-1 hover:shadow-card-hover sm:flex-row">
                             <div class="h-[220px] w-full shrink-0 overflow-hidden sm:h-auto sm:w-[337px]">
-                                <img src="{{ asset('images/hotels/detail/'.$room['image']) }}" alt="{{ $room['name'] }}"
+                                <img src="{{ \App\Support\ImagePath::url($room['image'] ?: 'room-deluxe.png', 'hotels/detail') }}" alt="{{ $room['name'] }}"
                                      class="size-full object-cover transition-transform duration-700 ease-smooth group-hover:scale-105">
                             </div>
 
@@ -109,7 +109,7 @@
                                     <ul class="flex items-center gap-[20px] pt-[10px] text-[17.4px] leading-[25px] text-editorial-body">
                                         <li class="flex items-center gap-[5px]">
                                             <img src="{{ asset('images/icons/hotel/guests.svg') }}" alt="" class="h-[15px] w-[20.5px]">
-                                            {{ $room['guests'] }}
+                                            {{ $room['guests_label'] }}
                                         </li>
                                         <li class="flex items-center gap-[5px]">
                                             <img src="{{ asset('images/icons/hotel/bed.svg') }}" alt="" class="h-[13px] w-[18.7px]">
@@ -121,11 +121,11 @@
                                 <div class="flex flex-wrap items-end justify-between gap-4 border-t border-editorial-line pt-[21px]">
                                     <p>
                                         <span class="block text-[17.4px] font-semibold leading-[25px] tracking-[0.87px] text-editorial-body">From</span>
-                                        <span class="text-[29.9px] font-semibold leading-[39.9px] text-brand">{{ $room['price'] }}</span>
+                                        <span class="text-[29.9px] font-semibold leading-[39.9px] text-brand">{{ $room['price_label'] }}</span>
                                         <span class="text-[17.4px] leading-[25px] text-editorial-body">/ night</span>
                                     </p>
 
-                                    <a href="{{ route('hotels.order', $hotel['slug']) }}"
+                                    <a href="{{ route('hotels.order', [$hotel['slug'], 'room' => $room['id']]) }}"
                                        @class([
                                            'rounded-full px-[30px] py-[15px] text-[17.4px] font-semibold leading-[25px] tracking-[0.87px] shadow-sm transition-transform duration-300 ease-smooth hover:-translate-y-0.5',
                                            'bg-brand text-white' => $loop->first,
@@ -153,7 +153,7 @@
                         <img src="{{ asset('images/icons/hotel/pin-map.svg') }}" alt="" class="h-[30px] w-[20px] shrink-0">
                         <span>
                             <span class="block text-[29.9px] font-semibold leading-[39.9px] text-editorial-ink">{{ $hotel['name'] }}</span>
-                            <span class="block text-[19.9px] leading-[29.9px] text-editorial-body">{{ $hotel['fullAddress'] }}</span>
+                            <span class="block text-[19.9px] leading-[29.9px] text-editorial-body">{{ $hotel['full_address'] }}</span>
                         </span>
                     </p>
                 </div>

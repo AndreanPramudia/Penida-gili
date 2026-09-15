@@ -4,13 +4,13 @@
 <div class="bg-[#f7fafc] lg:hidden">
     {{-- Hero (1:4803) --}}
     <header class="relative h-[468px] w-full overflow-hidden">
-        <img src="{{ $boat['heroImage'] }}" alt="{{ $boat['name'] }}" class="absolute inset-0 size-full object-cover">
+        <img src="{{ $boat['hero_image_url'] }}" alt="{{ $boat['name'] }}" class="absolute inset-0 size-full object-cover">
         <div class="absolute inset-0 bg-gradient-to-t from-[rgba(24,28,30,0.8)] via-[rgba(24,28,30,0.3)] to-[rgba(24,28,30,0)]"></div>
 
         <div class="absolute inset-x-0 bottom-0 flex flex-col items-start gap-[8px] p-[20px]">
             <span data-reveal class="flex items-center gap-[4px] rounded-full border border-[rgba(192,199,211,0.3)] bg-[rgba(224,227,229,0.2)] px-[13px] py-[5px] backdrop-blur-[2px]">
                 <img src="{{ asset('images/icons/mobile/detail/star-badge.svg') }}" alt="" class="h-[11px] w-[12px]">
-                <span class="text-[14px] font-semibold leading-[20px] tracking-[0.7px] text-[#f7fafc]">{{ $boat['rating'] }} ({{ $boat['reviewCount'] }} Reviews)</span>
+                <span class="text-[14px] font-semibold leading-[20px] tracking-[0.7px] text-[#f7fafc]">{{ $boat['rating'] }} ({{ $boat['review_count_label'] }} Reviews)</span>
             </span>
 
             <h1 data-reveal style="--reveal-delay: 100ms" class="text-[28px] font-bold leading-[36px] text-[#f7fafc] drop-shadow-[0px_2px_1px_rgba(0,0,0,0.06)]">{{ $boat['name'] }}</h1>
@@ -55,16 +55,16 @@
         <section class="flex flex-col gap-[32px]">
             <h2 data-reveal class="text-[28px] font-bold leading-[36px] text-brand">Fleet Gallery</h2>
 
-            @php [$mainPhoto, $thumbs] = [$boat['gallery'][0], array_slice($boat['gallery'], 1)]; @endphp
+            @php [$mainPhoto, $thumbs] = [$boat['gallery_photos'][0], array_slice($boat['gallery_photos'], 1)]; @endphp
             <div class="flex flex-col gap-[8px]">
                 <figure data-reveal class="h-[197px] w-full overflow-hidden rounded-[12px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]">
-                    <img src="{{ asset('images/boats/gallery/'.$mainPhoto['image']) }}" alt="{{ $mainPhoto['alt'] }}" class="size-full object-cover">
+                    <img src="{{ $mainPhoto['url'] }}" alt="{{ $mainPhoto['alt'] }}" class="size-full object-cover">
                 </figure>
 
                 <div class="flex gap-[8px]">
                     @foreach ($thumbs as $index => $photo)
                         <figure data-reveal style="--reveal-delay: {{ ($index + 1) * 90 }}ms" class="h-[128px] min-w-0 flex-1 overflow-hidden rounded-[8px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]">
-                            <img src="{{ asset('images/boats/gallery/'.$photo['image']) }}" alt="{{ $photo['alt'] }}" class="size-full object-cover">
+                            <img src="{{ $photo['url'] }}" alt="{{ $photo['alt'] }}" class="size-full object-cover">
                         </figure>
                     @endforeach
                 </div>
@@ -102,7 +102,7 @@
                 <h2 class="text-[24px] font-semibold leading-[32px] text-[#181c1e]">Popular Routes</h2>
 
                 <ul class="flex flex-col gap-[8px]">
-                    @foreach ($boat['routes'] as $route)
+                    @foreach ($boat['schedules'] as $route)
                         <li @class(['flex flex-col gap-[8px]', 'border-b border-[rgba(192,199,211,0.3)] pb-[17px]' => ! $loop->last])>
                             <div class="flex items-center justify-between">
                                 <div>
@@ -127,7 +127,7 @@
                                     <span class="text-[12px] leading-[18px] text-[#717782]">&nbsp;/pax</span>
                                 </p>
 
-                                <a href="{{ route('boats.order', $boat['slug']) }}"
+                                <a href="{{ route('boats.order', [$boat['slug'], 'schedule' => $route['id']]) }}"
                                    class="rounded-[8px] bg-[#d2e4ff] px-[16px] py-[8px] text-[14px] font-semibold leading-[20px] tracking-[0.7px] text-[#001d37] transition-colors duration-300 active:bg-[#bcd6fb]">
                                     Book Now
                                 </a>

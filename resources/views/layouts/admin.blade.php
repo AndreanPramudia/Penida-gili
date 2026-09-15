@@ -18,7 +18,7 @@
             {{-- Figma node 1:6644 — header --}}
             <header class="flex flex-wrap items-start justify-between gap-4 pt-[55px]">
                 <div>
-                    <p class="text-[26.7px] leading-[1.5] text-admin-ink">Hello, Admin</p>
+                    <p class="text-[26.7px] leading-[1.5] text-admin-ink">Hello, {{ auth()->user()?->name ?? 'Admin' }}</p>
                     <p class="text-[16px] leading-[1.5] text-admin-muted">{{ now()->format('l, j F Y') }}</p>
                 </div>
 
@@ -40,6 +40,7 @@
             </header>
 
             <main>
+                <x-admin.flash />
                 @yield('content')
             </main>
         </div>

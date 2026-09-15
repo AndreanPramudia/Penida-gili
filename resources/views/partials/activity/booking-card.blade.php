@@ -8,16 +8,16 @@
         <p class="mt-[32px] text-[18.7px] leading-[26.7px] text-editorial-body">Only</p>
 
         <p class="flex items-end gap-[10.7px] pb-[21.4px] pt-[10.7px]">
-            <span class="text-[21.4px] font-bold leading-[32px] text-brand">{{ $activity['price'] }}</span>
+            <span class="text-[21.4px] font-bold leading-[32px] text-brand">{{ $activity['price_label'] }}</span>
             <span class="pb-[5.3px] text-[21.4px] leading-[32px] text-editorial-body">/person</span>
         </p>
 
         <p class="flex items-start gap-[10.7px] rounded-[10.7px] bg-[rgba(217,227,249,0.3)] p-[16px] text-[16px] leading-[21.4px] text-editorial-body">
             <img src="{{ asset('images/icons/detail/info.svg') }}" alt="" class="size-[20px] shrink-0">
-            {{ $activity['priceNote'] }}
+            {{ $activity['price_note'] }}
         </p>
 
-        <a href="{{ $activity['orderHref'] }}"
+        <a href="{{ route('activities.order', $activity['slug']) }}"
            class="mt-[32px] flex items-center justify-center rounded-[10.7px] bg-brand py-[16px] text-[21.4px] leading-[32px] text-white shadow-sm
                   transition-transform duration-300 ease-smooth hover:-translate-y-0.5">
             Book Now

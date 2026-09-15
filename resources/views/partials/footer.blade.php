@@ -26,11 +26,19 @@
 
     <div class="pt-[10px]">
         <h2 class="text-[18px] font-semibold leading-[27px] text-ink-muted">Join a Newsletter</h2>
-        <form action="#" method="post" class="mt-[24px] flex gap-[8px]">
+        <form action="{{ route('newsletter.store') }}" method="post" class="mt-[24px] flex gap-[8px]">
             @csrf
-            <input name="email" type="email" placeholder="Your Email" aria-label="Your Email"
+            <input type="hidden" name="source" value="footer-mobile">
+            <input type="text" name="website" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
+            <input name="email" type="email" required value="{{ old('email') }}" placeholder="Your Email" aria-label="Your Email"
                    class="min-w-0 flex-1 rounded-[8px] bg-[#ebeef0] px-[16px] py-[10px] text-[16px] text-ink placeholder:text-[#6b7280] focus:outline-2 focus:outline-brand">
             <button type="submit" class="shrink-0 rounded-[8px] bg-brand px-[16px] py-[8px] text-[16px] font-semibold leading-[24px] text-on-brand">Submit</button>
+            @if (session('newsletter'))
+                <p class="w-full basis-full text-[13px] leading-[18px] text-ink-muted">{{ session('newsletter') }}</p>
+            @endif
+            @error('email')
+                <p class="w-full basis-full text-[13px] leading-[18px] text-ink-muted !text-red-500">{{ $message }}</p>
+            @enderror
         </form>
     </div>
 
@@ -81,11 +89,13 @@
         <div>
             <h2 class="text-[20px] leading-[30px] text-ink">Join a Newsletter</h2>
 
-            <form action="#" method="post" class="mt-[28px] lg:mt-[36px]">
+            <form action="{{ route('newsletter.store') }}" method="post" class="mt-[28px] lg:mt-[36px]">
                 @csrf
+                <input type="hidden" name="source" value="footer">
+                <input type="text" name="website" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
                 <label for="newsletter-email" class="block text-[16px] leading-[30px] text-ink-muted">Your Email</label>
                 <div class="mt-[14px] flex items-center gap-[32px]">
-                    <input id="newsletter-email" name="email" type="email" placeholder="Enter Your Email"
+                    <input id="newsletter-email" name="email" type="email" required value="{{ old('email') }}" placeholder="Enter Your Email"
                            class="h-[58px] w-full max-w-[326px] rounded-field bg-surface-muted px-[26px] text-[16px] leading-[30px] text-ink placeholder:text-ink-muted focus:outline-2 focus:outline-brand">
                     <button type="submit"
                             class="h-[58px] w-[116px] shrink-0 rounded-field bg-brand text-[16px] font-medium leading-[30px] text-on-brand backdrop-blur-[4.7px]
@@ -93,6 +103,12 @@
                         Submit
                     </button>
                 </div>
+                @if (session('newsletter'))
+                    <p class="mt-[10px] text-[14px] leading-[20px] text-ink-muted">{{ session('newsletter') }}</p>
+                @endif
+                @error('email')
+                    <p class="mt-[10px] text-[14px] leading-[20px] text-ink-muted !text-red-500">{{ $message }}</p>
+                @enderror
             </form>
 
             <ul class="mt-[24px] lg:mt-[50px] flex items-center gap-[20px]">

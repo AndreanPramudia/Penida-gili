@@ -12,6 +12,7 @@
     'actionHref' => '#',
     'columns' => [],
     'summary' => '',
+    'paginator' => null,
     'panelTitle' => null,
     'panelBadge' => null,
 ])
@@ -75,13 +76,10 @@
     </div>
 
     <div class="flex flex-wrap items-center justify-between gap-4 border-t border-[rgba(192,199,211,0.2)] bg-[rgba(241,244,246,0.3)] px-[24px] py-[16px]">
-        <p class="text-[14px] leading-[20px] text-editorial-body">{{ $summary }}</p>
-
-        <div class="flex items-center gap-[8px]">
-            <button type="button" class="rounded-[6px] border border-editorial-line px-[14px] py-[6px] text-[14px] text-admin-nav" disabled>Prev</button>
-            <button type="button" class="rounded-[6px] bg-editorial px-[14px] py-[6px] text-[14px] text-white">1</button>
-            <button type="button" class="rounded-[6px] border border-editorial-line px-[14px] py-[6px] text-[14px] text-editorial-ink transition-colors hover:bg-[#f1f4f6]">2</button>
-            <button type="button" class="rounded-[6px] border border-editorial-line px-[14px] py-[6px] text-[14px] text-editorial-ink transition-colors hover:bg-[#f1f4f6]">Next</button>
-        </div>
+        @if ($paginator)
+            <x-admin.pagination :paginator="$paginator" />
+        @else
+            <p class="text-[14px] leading-[20px] text-editorial-body">{{ $summary }}</p>
+        @endif
     </div>
 </section>

@@ -1,8 +1,9 @@
 {{-- Figma node 1:4274 — "activity order full" (mobile, 390px). Rendered below lg only; the desktop layout is hidden there. --}}
 @props(['order'])
 
-<form action="#" method="post" class="bg-[#f7fafc] lg:hidden">
+<form action="{{ $order['action'] }}" method="post" data-quote="{{ json_encode($order['quote']) }}" class="bg-[#f7fafc] lg:hidden">
     @csrf
+        @include('partials.order.hidden-fields', ['order' => $order])
 
     {{-- Hero (1:4318) --}}
     <header class="relative flex h-[250px] items-center justify-center overflow-hidden">
@@ -36,7 +37,7 @@
 
                     <div class="flex items-end justify-between border-t border-[rgba(192,199,211,0.3)] pt-[17px]">
                         <span class="text-[24px] font-semibold leading-[32px] text-[#181c1e]">Total</span>
-                        <span class="text-[28px] font-bold leading-[36px] text-brand">{{ $order['total'] }}</span>
+                        <span data-quote-total class="text-[28px] font-bold leading-[36px] text-brand">{{ $order['total'] }}</span>
                     </div>
                 </div>
 
@@ -53,7 +54,7 @@
     <div class="flex items-center justify-between gap-[16px] border-t border-[rgba(192,199,211,0.2)] bg-white px-[16px] pb-[16px] pt-[17px] drop-shadow-[0px_4px_10px_rgba(0,0,0,0.05)]">
         <div>
             <p class="text-[12px] leading-[16px] text-[#414751]">Total</p>
-            <p class="text-[20px] font-bold leading-[28px] text-brand">{{ $order['total'] }}</p>
+            <p data-quote-total class="text-[20px] font-bold leading-[28px] text-brand">{{ $order['total'] }}</p>
         </div>
 
         <button type="submit"

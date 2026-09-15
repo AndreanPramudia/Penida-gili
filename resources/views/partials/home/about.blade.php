@@ -30,7 +30,7 @@
 
         {{-- Portrait image --}}
         <div data-reveal style="--reveal-delay: 120ms"
-             class="group h-[251px] lg:h-[597px] w-full max-w-[347px] overflow-hidden rounded-card">
+             class="group h-[251px] lg:h-auto lg:self-stretch w-full max-w-[347px] overflow-hidden rounded-card">
             <img src="{{ asset('images/home/about-aerial.png') }}" alt="Aerial view of a fast boat"
                  class="size-full object-cover transition-transform duration-700 ease-smooth group-hover:scale-105">
         </div>

@@ -38,11 +38,11 @@
             @endforeach
         </ul>
 
-        <form action="#" method="get" class="relative w-[333px] shrink-0">
+        <form action="{{ route('articles.index') }}" method="get" class="relative w-[333px] shrink-0">
             <img src="{{ asset('images/icons/article/search.svg') }}" alt=""
                  class="pointer-events-none absolute left-[18px] top-1/2 size-[19px] -translate-y-1/2">
             <label for="article-search" class="sr-only">Search guides</label>
-            <input id="article-search" name="q" type="search" placeholder="Search guides, ports, tips..."
+            <input id="article-search" name="q" type="search" value="{{ request('q') }}" placeholder="Search guides, ports, tips..."
                    class="w-full rounded-full border border-editorial-line bg-surface py-[15px] pl-[52px] pr-[22px] text-[17.95px] text-editorial-ink placeholder:text-editorial-meta focus:border-editorial focus:outline-none">
         </form>
     </div>

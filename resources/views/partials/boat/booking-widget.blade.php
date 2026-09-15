@@ -30,7 +30,7 @@
                         <p class="text-[23.8px] font-semibold leading-[32px] text-brand">{{ $route['price'] }}</p>
                         <p class="text-[18.8px] leading-[27px] text-editorial-meta">/pax</p>
 
-                        <a href="{{ route('boats.order', $slug) }}"
+                        <a href="{{ route('boats.order', [$slug, 'schedule' => $route['id']]) }}"
                            class="rounded-[8px] bg-editorial/10 px-[21px] py-[11px] text-[18.8px] font-semibold leading-[27px] tracking-[0.94px] text-brand
                                   transition-colors duration-300 hover:bg-editorial/20">
                             Book Now

@@ -47,7 +47,7 @@
                 <span class="size-[7.8px] rounded-full bg-[#c0c7d3]" aria-hidden="true"></span>
                 <span class="flex items-center gap-[5px]">
                     <img src="{{ asset('images/icons/article-detail/eye.svg') }}" alt="" class="h-[14.5px] w-[21.3px]">
-                    {{ $article['views'] }}
+                    {{ $article['views_label'] }}
                 </span>
             </div>
 
@@ -74,7 +74,7 @@
                     <span>
                         <span class="block text-[20.7px] font-semibold leading-[31px] text-editorial-ink">Written by {{ $article['author'] }}</span>
                         <span class="flex items-center gap-[5px] text-[18.1px] font-semibold leading-[26px] tracking-[0.9px] text-editorial-body">
-                            {{ $article['authorRole'] }}
+                            {{ $article['author_role'] }}
                             <img src="{{ asset('images/icons/article-detail/shield.svg') }}" alt="" class="h-[15.1px] w-[12.1px]">
                         </span>
                     </span>
@@ -95,13 +95,13 @@
 
         {{-- Figma node 1:2453 — hero image with caption --}}
         <figure data-reveal class="relative mt-[41px] overflow-hidden rounded-editorial shadow-editorial">
-            <img src="{{ asset('images/articles/detail/hero-fastboat.png') }}" alt="{{ $article['heroCaption'] }}"
+            <img src="{{ asset('images/articles/detail/hero-fastboat.png') }}" alt="{{ $article['hero_caption'] }}"
                  class="h-[260px] lg:h-[620px] w-full object-cover">
 
             <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(24,28,30,0.6)] to-transparent" aria-hidden="true"></span>
 
             <figcaption class="absolute inset-x-[31px] bottom-[20px] flex flex-wrap items-end justify-between gap-4">
-                <span class="text-[18.1px] font-semibold leading-[26px] tracking-[0.9px] text-white opacity-90">{{ $article['heroCaption'] }}</span>
+                <span class="text-[18.1px] font-semibold leading-[26px] tracking-[0.9px] text-white opacity-90">{{ $article['hero_caption'] }}</span>
                 <span class="flex items-center gap-[8px] rounded-[8px] bg-[rgba(45,49,51,0.7)] px-[15.5px] py-[5px] backdrop-blur-[8px]">
                     <img src="{{ asset('images/icons/article-detail/gallery.svg') }}" alt="" class="h-[13.6px] w-[15.1px]">
                     <span class="text-[15.5px] leading-[23.3px] text-[#f7fafc]">Maritime Fleet Gallery</span>
@@ -131,17 +131,17 @@
             </div>
 
             <div class="mt-[41px] grid [&>*]:min-w-0 items-stretch gap-[31px] md:grid-cols-2 xl:grid-cols-3">
-                @foreach ($article['related'] as $index => $related)
+                @foreach ($related as $index => $item)
                     @include('components.article-card', [
                         'delay'    => $index * 90,
-                        'title'    => $related['title'],
-                        'excerpt'  => $related['excerpt'],
-                        'category' => $related['category'],
-                        'readTime' => $related['readTime'],
-                        'date'     => $related['date'],
-                        'author'   => $article['author'],
-                        'image'    => asset('images/articles/detail/'.$related['image']),
-                        'href'     => '#',
+                        'title'    => $item['title'],
+                        'excerpt'  => $item['excerpt'],
+                        'category' => $item['category'],
+                        'readTime' => $item['readTime'],
+                        'date'     => $item['date'],
+                        'author'   => $item['author'],
+                        'image'    => $item['image_url'],
+                        'href'     => route('articles.show', $item),
                     ])
                 @endforeach
             </div>
@@ -165,16 +165,24 @@
                         and exclusive voucher codes for Bali archipelago transfers.
                     </p>
 
-                    <form action="#" method="post" class="flex flex-wrap gap-[15.5px] pt-[20.7px]">
+                    <form action="{{ route('newsletter.store') }}" method="post" class="flex flex-wrap gap-[15.5px] pt-[20.7px]">
                         @csrf
+                        <input type="hidden" name="source" value="article-detail">
+                        <input type="text" name="website" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
                         <label for="dispatch-email" class="sr-only">Email address</label>
-                        <input id="dispatch-email" name="email" type="email" placeholder="Enter your email address"
+                        <input id="dispatch-email" name="email" type="email" required value="{{ old('email') }}" placeholder="Enter your email address"
                                class="min-w-0 flex-1 rounded-[15.5px] border border-[#c0c7d3] bg-surface px-[22px] pb-[19px] pt-[18px] text-[20.7px] text-editorial-ink placeholder:text-[#6b7280] focus:border-editorial focus:outline-none">
                         <button type="submit"
                                 class="rounded-[15.5px] bg-editorial px-[31px] py-[16px] text-[20.7px] font-bold leading-[31px] text-white shadow-lg
                                        transition-transform duration-300 ease-smooth hover:-translate-y-0.5">
                             Subscribe Now
                         </button>
+                        @if (session('newsletter'))
+                            <p class="w-full basis-full text-[16px] text-editorial-body">{{ session('newsletter') }}</p>
+                        @endif
+                        @error('email')
+                            <p class="w-full basis-full text-[16px] text-editorial-body !text-red-500">{{ $message }}</p>
+                        @enderror
                     </form>
                 </div>
             </div>

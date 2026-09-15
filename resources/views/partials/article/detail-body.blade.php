@@ -20,9 +20,10 @@
                   first-letter:float-left first-letter:pr-[10px] first-letter:text-[44px] first-letter:font-bold first-letter:leading-[0.9] lg:first-letter:text-[62px]">
             {{ $article['lead'] }}
         </p>
-        <p class="mt-[20.7px] text-[20.7px] leading-[33.6px] text-editorial-body">{{ $article['leadFollow'] }}</p>
+        <p class="mt-[20.7px] text-[20.7px] leading-[33.6px] text-editorial-body">{{ $article['lead_follow'] }}</p>
     </div>
 
+    @if ($article['has_structured_content'])
     {{-- Section 1 — port comparison table (1:2473) --}}
     <section id="section-1" data-reveal class="{{ $card }}">
         <h2 class="flex items-center gap-[15.5px]">
@@ -224,6 +225,13 @@
         </p>
     </section>
 
+    @else
+        <div data-reveal class="prose-article flex flex-col gap-[16px]">
+            @foreach (preg_split('/\R{2,}/', trim($article['body'] ?? '')) as $paragraph)
+                <p class="text-[17px] lg:text-[20.7px] leading-[28px] lg:leading-[33.6px] text-editorial-body">{{ $paragraph }}</p>
+            @endforeach
+        </div>
+    @endif
     {{-- Tags & save (1:2693) --}}
     <div data-reveal class="flex flex-col gap-[20.7px] pt-[20.7px]">
         <div class="flex flex-wrap items-center gap-[10px]">

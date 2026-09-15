@@ -38,13 +38,17 @@
         {{-- Price breakdown (1:3165) --}}
         <div class="mt-[19.8px] rounded-[10px] bg-editorial-rule px-[19.8px] pb-[29.6px] pt-[19.8px]">
             <div class="flex items-center justify-between gap-3">
-                <span class="text-[19.8px] leading-[29.6px] text-editorial-body">{{ $order['lineLabel'] }}</span>
-                <span class="text-[19.8px] leading-[29.6px] text-editorial-ink">{{ $order['lineAmount'] }}</span>
+                <span data-quote-line="label" class="text-[19.8px] leading-[29.6px] text-editorial-body">{{ $order['lineLabel'] }}</span>
+                <span data-quote-line="amount" class="text-[19.8px] leading-[29.6px] text-editorial-ink">{{ $order['lineAmount'] }}</span>
+            </div>
+            <div data-quote-extra class="mt-[8px] flex items-center justify-between gap-3" @if (! $order['extraLabel']) hidden @endif>
+                <span data-quote-extra="label" class="text-[19.8px] leading-[29.6px] text-editorial-body">{{ $order['extraLabel'] }}</span>
+                <span data-quote-extra="amount" class="text-[19.8px] leading-[29.6px] text-editorial-ink">{{ $order['extraAmount'] }}</span>
             </div>
 
             <div class="mt-[10px] flex items-center justify-between gap-3 border-t border-[#c0c7d3] pt-[11px]">
                 <span class="text-[29.6px] font-semibold leading-[39.5px] text-editorial-ink">Total</span>
-                <span class="text-[29.6px] font-semibold leading-[39.5px] text-brand">{{ $order['total'] }}</span>
+                <span data-quote-total class="text-[29.6px] font-semibold leading-[39.5px] text-brand">{{ $order['total'] }}</span>
             </div>
         </div>
 

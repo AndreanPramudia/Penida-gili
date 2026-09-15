@@ -1,0 +1,137 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Enums\ListingStatus;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreHotelRequest;
+use App\Models\Hotel;
+use App\Support\Uploads;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
+
+class HotelController extends Controller
+{
+    public const AMENITIES = [
+        ['label' => 'Free High-Speed Wi-Fi', 'shortLabel' => 'Free Wi-Fi', 'icon' => 'wifi.svg', 'note' => 'Starlink Mesh'],
+        ['label' => 'Infinity Pool', 'shortLabel' => 'Infinity Pool', 'icon' => 'pool.svg', 'note' => 'Panoramic view'],
+        ['label' => 'Full-Service Spa', 'shortLabel' => 'Luxury Spa', 'icon' => 'spa.svg', 'note' => 'Balinese therapy'],
+        ['label' => 'Sunset Bar', 'shortLabel' => 'Sunset Bar', 'icon' => 'bar.svg', 'note' => 'Signature cocktails'],
+        ['label' => 'Oceanfront Restaurant', 'shortLabel' => 'Fine Dining', 'icon' => 'restaurant.svg', 'note' => 'Fresh seafood dining'],
+        ['label' => 'Ocean View Rooms', 'shortLabel' => 'Ocean View', 'icon' => 'ocean-view.svg', 'note' => 'Every room faces the sea'],
+    ];
+
+    /** Hotel listing — Figma node 1:9280. */
+    public function index(Request $request): View
+    {
+        $hotels = Hotel::query()
+            ->with('rooms')
+            ->withCount(['rooms'])
+            ->withSum('rooms as room_stock', 'stock')
+            ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%'.$request->string('q').'%'))
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')->value()))
+            ->orderBy('name')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('admin.hotels', ['hotels' => $hotels, 'filters' => $request->only(['q', 'status'])]);
+    }
+
+    /** Add New Hotel — Figma node 1:7501. */
+    public function create(): View
+    {
+        return $this->form(new Hotel(['status' => ListingStatus::Active, 'stars' => 5, 'category' => 'Resort']));
+    }
+
+    public function store(StoreHotelRequest $request): RedirectResponse
+    {
+        $hotel = DB::transaction(function () use ($request) {
+            $hotel = Hotel::query()->create($this->payload($request));
+            $this->syncRooms($hotel, $request->input('rooms', []));
+
+            return $hotel;
+        });
+
+        return redirect()->route('admin.hotels')->with('flash', "{$hotel->name} listed.");
+    }
+
+    public function edit(Hotel $hotel): View
+    {
+        return $this->form($hotel->load('rooms'));
+    }
+
+    public function update(StoreHotelRequest $request, Hotel $hotel): RedirectResponse
+    {
+        DB::transaction(function () use ($request, $hotel): void {
+            $hotel->update($this->payload($request, $hotel));
+            $this->syncRooms($hotel, $request->input('rooms', []));
+        });
+
+        return redirect()->route('admin.hotels')->with('flash', "{$hotel->name} updated.");
+    }
+
+    public function destroy(Hotel $hotel): RedirectResponse
+    {
+        $hotel->delete();
+
+        return redirect()->route('admin.hotels')->with('flash', "{$hotel->name} removed.");
+    }
+
+    private function form(Hotel $hotel): View
+    {
+        $selected = old('amenities', collect($hotel->amenities ?? [])->pluck('label')->all());
+
+        return view('admin.hotels-create', [
+            'hotel' => $hotel,
+            'rooms' => old('rooms', $hotel->rooms->map->only(['id', 'name', 'guests', 'bed', 'size_label', 'price_per_night', 'stock'])->all()),
+            'amenities' => collect(self::AMENITIES)->map(fn ($a) => $a + ['checked' => in_array($a['label'], $selected, true)])->all(),
+            'categories' => ['Resort', 'Hotel', 'Villa', 'Boutique'],
+            'listingStatuses' => [
+                ['value' => ListingStatus::Active->value, 'label' => 'Active (Visible to island travelers)', 'description' => 'Bookable across every channel'],
+                ['value' => ListingStatus::Draft->value, 'label' => 'In Review (Pending harbor audit)', 'description' => 'Awaiting partner verification'],
+                ['value' => ListingStatus::Inactive->value, 'label' => 'Inactive (Hidden from booking engine)', 'description' => 'Retained but not listed'],
+            ],
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function payload(StoreHotelRequest $request, ?Hotel $existing = null): array
+    {
+        $data = $request->safe()->except(['cover', 'gallery', 'rooms', 'amenities']);
+        $picked = $request->input('amenities', []);
+        $data['amenities'] = array_values(array_filter(self::AMENITIES, fn ($a) => in_array($a['label'], $picked, true)));
+
+        if ($cover = Uploads::store($request->file('cover'), 'hotels')) {
+            $data['image'] = $cover;
+        } elseif (! $existing) {
+            $data['image'] = 'nusa-penida-resort.png';
+        }
+
+        if ($gallery = Uploads::gallery($request->file('gallery'), 'hotels', $request->string('name')->value())) {
+            $data['gallery'] = $gallery;
+        }
+
+        return $data;
+    }
+
+    /**
+     * Upsert the submitted room rows and drop the ones the admin removed.
+     *
+     * @param  array<int, array<string, mixed>>  $rooms
+     */
+    private function syncRooms(Hotel $hotel, array $rooms): void
+    {
+        $keep = [];
+
+        foreach ($rooms as $i => $room) {
+            $attributes = collect($room)->only(['name', 'guests', 'bed', 'size_label', 'price_per_night', 'stock'])->all() + ['sort_order' => $i];
+            $model = ! empty($room['id']) ? $hotel->rooms()->whereKey($room['id'])->first() : null;
+
+            $keep[] = $model ? tap($model)->update($attributes)->id : $hotel->rooms()->create($attributes)->id;
+        }
+
+        $hotel->rooms()->whereKeyNot($keep)->delete();
+    }
+}

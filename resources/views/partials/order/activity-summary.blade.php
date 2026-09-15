@@ -18,7 +18,7 @@
 
         <div class="mb-[22px] flex items-end justify-between border-t border-[#e0e3e5] pt-[23.5px]">
             <span class="text-[33.2px] font-semibold leading-[44.2px] text-editorial-ink">Total</span>
-            <span class="text-[24px] lg:text-[49.7px] font-bold leading-[30px] lg:leading-[60.8px] tracking-[-0.5px] text-brand">{{ $order['total'] }}</span>
+            <span class="text-[24px] lg:text-[49.7px] font-bold leading-[30px] lg:leading-[60.8px] tracking-[-0.5px] text-brand" data-quote-total>{{ $order['total'] }}</span>
         </div>
 
         <div class="flex flex-col gap-[16.6px]">

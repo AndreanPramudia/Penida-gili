@@ -25,12 +25,19 @@
         @foreach ($menu as $key => $item)
             <a href="{{ $item['route'] }}"
                @class([
-                   'flex h-[56px] items-center gap-[16px] rounded-admin-pill px-[25px] text-[21.3px] transition-colors duration-300',
+                   'flex h-[56px] items-center gap-[14px] whitespace-nowrap rounded-admin-pill px-[20px] text-[18.5px] transition-colors duration-300',
                    'border border-admin-line bg-surface font-semibold text-editorial' => $current === $key,
                    'text-admin-nav hover:bg-surface' => $current !== $key,
                ])
                @if ($current === $key) aria-current="page" @endif>
-                <img src="{{ asset('images/icons/admin/'.$item['icon']) }}" alt="" class="size-[22px] shrink-0 object-contain">
+                {{-- Icons ship with a hard-coded fill, so paint them via mask and let the colour follow the active state. --}}
+                <span aria-hidden="true"
+                      style="-webkit-mask: url('{{ asset('images/icons/admin/'.$item['icon']) }}') no-repeat center / contain; mask: url('{{ asset('images/icons/admin/'.$item['icon']) }}') no-repeat center / contain;"
+                      @class([
+                          'block size-[22px] shrink-0 transition-colors duration-300',
+                          'bg-editorial' => $current === $key,
+                          'bg-[#b1b1b1]' => $current !== $key,
+                      ])></span>
                 {{ $item['label'] }}
             </a>
         @endforeach
@@ -40,10 +47,10 @@
         {{-- Figma node I1:6896;1:10690 — account card --}}
         <div class="rounded-[13px] border border-admin-line bg-gradient-to-b from-[#e8f0f2] to-surface px-[22px] py-[28px] text-center">
             <img src="{{ asset('images/icons/admin/crown.svg') }}" alt="" class="mx-auto size-[32px]">
-            <p class="mt-[16px] text-[32px] text-admin-ink">Hi, Admin!</p>
+            <p class="mt-[16px] text-[32px] text-admin-ink">Hi, {{ \Illuminate\Support\Str::before(auth()->user()?->name ?? 'Admin', ' ') }}!</p>
             <p class="mt-[8px] text-[16px] leading-[1.2] text-admin-muted">Full administrative access is granted.</p>
 
-            <form action="#" method="post" class="mt-[20px]">
+            <form action="{{ route('admin.logout') }}" method="post" class="mt-[20px]">
                 @csrf
                 <button type="submit"
                         class="flex h-[40px] w-full items-center justify-center gap-[8px] rounded-[10.7px] bg-editorial text-[16px] tracking-[-0.4px] text-[#fafafa]

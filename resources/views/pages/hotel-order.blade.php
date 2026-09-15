@@ -24,9 +24,10 @@
 @endsection
 
 @section('content')
-    <form action="#" method="post"
+    <form action="{{ $order['action'] }}" method="post" data-quote="{{ json_encode($order['quote']) }}"
           class="container-page hidden [&>*]:min-w-0 pt-[43px] pb-[74px] lg:grid lg:grid-cols-[minmax(0,988fr)_minmax(0,494fr)] lg:gap-[32px]">
         @csrf
+        @include('partials.order.hidden-fields', ['order' => $order])
 
         {{-- The traveler + party fields are identical across all three order flows. --}}
         @include('partials.order.booking-form', ['order' => $order])
