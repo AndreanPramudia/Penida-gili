@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\BookingStatus;
+use App\Enums\ListingStatus;
 use App\Models\Activity;
 use App\Models\BoatOperator;
 use App\Models\Booking;
@@ -95,7 +96,7 @@ class BookingTest extends TestCase
         Notification::fake();
 
         $hotel = Hotel::factory()->create();
-        $room = HotelRoom::factory()->for($hotel)->create(['price_per_night' => 1_000_000]);
+        $room = HotelRoom::factory()->for($hotel)->create(['price_per_night' => 1_000_000, 'stock' => 2]);
 
         $this->post(route('hotels.book', $hotel), $this->traveller([
             'room_id' => $room->id,
@@ -142,6 +143,66 @@ class BookingTest extends TestCase
             'children' => 0,
             'rooms' => 1,
         ]))->assertSessionHasErrors('rooms');
+    }
+
+    public function test_hotel_booking_cannot_exceed_the_units_still_free_for_the_dates(): void
+    {
+        Notification::fake();
+
+        $hotel = Hotel::factory()->create();
+        $room = HotelRoom::factory()->for($hotel)->create(['stock' => 2]);
+        $stay = ['room_id' => $room->id, 'travel_date' => '2030-05-10', 'check_out' => '2030-05-12', 'rooms' => 1];
+
+        // A cancelled overlapping stay frees its unit; a live one does not.
+        $existing = ['travel_date' => '2030-05-10', 'check_out' => '2030-05-12', 'rooms' => 1];
+        Booking::factory()->for($room, 'bookable')->create($existing + ['status' => BookingStatus::Cancelled]);
+        Booking::factory()->for($room, 'bookable')->create($existing + ['status' => BookingStatus::Pending]);
+
+        $this->post(route('hotels.book', $hotel), $this->traveller(['rooms' => 2] + $stay))
+            ->assertSessionHasErrors(['rooms' => 'Only 1 unit is left for the selected dates.']);
+
+        $this->post(route('hotels.book', $hotel), $this->traveller($stay))->assertRedirect();
+
+        // The type is now full for any night that touches 10–12 May, but free right after check-out.
+        $this->post(route('hotels.book', $hotel), $this->traveller(['travel_date' => '2030-05-11', 'check_out' => '2030-05-13'] + $stay))
+            ->assertSessionHasErrors(['rooms' => 'This room type is fully booked for the selected dates.']);
+
+        $this->post(route('hotels.book', $hotel), $this->traveller(['travel_date' => '2030-05-12', 'check_out' => '2030-05-14'] + $stay))
+            ->assertRedirect();
+    }
+
+    public function test_hotel_stays_are_capped_at_thirty_nights(): void
+    {
+        $hotel = Hotel::factory()->create();
+        $room = HotelRoom::factory()->for($hotel)->create();
+
+        $this->post(route('hotels.book', $hotel), $this->traveller([
+            'room_id' => $room->id, 'travel_date' => '2030-05-01', 'check_out' => '2030-06-15', 'rooms' => 1,
+        ]))->assertSessionHasErrors('check_out');
+    }
+
+    public function test_inactive_hotels_cannot_be_ordered_or_booked(): void
+    {
+        $hotel = Hotel::factory()->create(['status' => ListingStatus::Inactive]);
+        $room = HotelRoom::factory()->for($hotel)->create();
+
+        $this->get(route('hotels.order', $hotel))->assertNotFound();
+        $this->post(route('hotels.book', $hotel), $this->traveller([
+            'room_id' => $room->id, 'travel_date' => '2030-05-10', 'check_out' => '2030-05-12', 'rooms' => 1,
+        ]))->assertNotFound();
+
+        $this->assertDatabaseCount('bookings', 0);
+    }
+
+    public function test_order_page_defaults_to_the_first_listed_room(): void
+    {
+        $hotel = Hotel::factory()->create();
+        HotelRoom::factory()->for($hotel)->create(['name' => 'Villa', 'sort_order' => 1, 'price_per_night' => 5_000_000]);
+        $deluxe = HotelRoom::factory()->for($hotel)->create(['name' => 'Deluxe', 'sort_order' => 0, 'price_per_night' => 2_000_000]);
+
+        $this->get(route('hotels.order', $hotel))
+            ->assertOk()
+            ->assertSee('name="room_id" value="'.$deluxe->id.'"', false);
     }
 
     public function test_hotel_booking_requires_checkout_after_checkin(): void

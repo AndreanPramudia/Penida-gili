@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\CreateBooking;
+use App\Enums\ListingStatus;
 use App\Http\Requests\StoreActivityBookingRequest;
 use App\Http\Requests\StoreBoatBookingRequest;
 use App\Http\Requests\StoreHotelBookingRequest;
@@ -32,6 +33,8 @@ class BookingController extends Controller
 
     public function storeHotel(StoreHotelBookingRequest $request, Hotel $hotel): RedirectResponse
     {
+        abort_unless($hotel->status === ListingStatus::Active, 404);
+
         $quote = BookingQuote::forRoom(
             $request->room(),
             $request->date('travel_date'),
