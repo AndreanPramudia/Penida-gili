@@ -57,13 +57,16 @@ class HotelController extends Controller
             $checkOut = $checkIn->copy()->addDay();
         }
 
+        // The sidebar sends guests as "4-2" (guests-rooms); explicit adults/rooms params win.
+        [$guests, $guestRooms] = array_pad(array_map('intval', explode('-', (string) $request->input('guests', '2-1'))), 2, 0);
+
         $quote = BookingQuote::forRoom(
             $room,
             $checkIn,
             $checkOut,
-            $request->integer('adults', $request->integer('guests', 2)),
+            $request->integer('adults', max(1, $guests)),
             $request->integer('children', 0),
-            $request->integer('rooms', 1),
+            $request->integer('rooms', max(1, $guestRooms)),
         );
 
         return view('pages.hotel-order', [

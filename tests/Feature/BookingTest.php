@@ -194,6 +194,18 @@ class BookingTest extends TestCase
         $this->assertDatabaseCount('bookings', 0);
     }
 
+    public function test_sidebar_guest_option_carries_its_room_count_to_the_order_page(): void
+    {
+        $hotel = Hotel::factory()->create();
+        $room = HotelRoom::factory()->for($hotel)->create(['price_per_night' => 1_000_000, 'stock' => 3]);
+
+        $this->get(route('hotels.order', [$hotel, 'room' => $room->id, 'guests' => '4-2', 'check_in' => '2030-05-10', 'check_out' => '2030-05-11']))
+            ->assertOk()
+            ->assertSee('name="rooms"', false)
+            ->assertSee('value="2"', false)
+            ->assertSee('IDR 2.000.000');
+    }
+
     public function test_order_page_defaults_to_the_first_listed_room(): void
     {
         $hotel = Hotel::factory()->create();
