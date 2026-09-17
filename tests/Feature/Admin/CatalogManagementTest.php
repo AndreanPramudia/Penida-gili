@@ -191,6 +191,16 @@ class CatalogManagementTest extends TestCase
         $this->assertDatabaseCount('hotels', 0);
     }
 
+    public function test_room_capacity_cannot_exceed_the_online_booking_cap(): void
+    {
+        $this->actingAs($this->admin)->post(route('admin.hotels.store'), [
+            'name' => 'Big Rooms Inn', 'category' => 'Hotel', 'stars' => 3, 'description' => 'x', 'address' => 'y', 'status' => 'active',
+            'rooms' => [['name' => 'Family', 'guests' => 6, 'bed' => '2 Queen Beds', 'price_per_night' => '1.000.000', 'stock' => 1]],
+        ])->assertSessionHasErrors('rooms.0.guests');
+
+        $this->assertDatabaseCount('hotels', 0);
+    }
+
     public function test_article_scheduling_requires_a_date_and_drafts_stay_unpublished(): void
     {
         $base = ['title' => 'Crossing Tips', 'excerpt' => 'Short', 'category' => 'Boat Tips', 'body' => str_repeat('word ', 400), 'author_name' => 'Capt. Wayan'];

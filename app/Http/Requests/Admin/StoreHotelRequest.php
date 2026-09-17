@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use App\Enums\ListingStatus;
+use App\Support\BookingOptions;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -38,7 +39,8 @@ class StoreHotelRequest extends FormRequest
             'rooms' => ['required', 'array', 'min:1'],
             'rooms.*.id' => ['nullable', 'integer'],
             'rooms.*.name' => ['required', 'string', 'max:120'],
-            'rooms.*.guests' => ['required', 'integer', 'min:1', 'max:12'],
+            // Guests never exceed the online booking cap, or a room could advertise capacity nobody can book.
+            'rooms.*.guests' => ['required', 'integer', 'min:1', 'max:'.BookingOptions::GUESTS_PER_ROOM],
             'rooms.*.bed' => ['nullable', 'string', 'max:60'],
             'rooms.*.size_label' => ['nullable', 'string', 'max:60'],
             'rooms.*.price_per_night' => ['required', 'integer', 'min:0'],
@@ -48,6 +50,9 @@ class StoreHotelRequest extends FormRequest
 
     public function messages(): array
     {
-        return ['rooms.required' => 'Add at least one room type with a nightly rate.'];
+        return [
+            'rooms.required' => 'Add at least one room type with a nightly rate.',
+            'rooms.*.guests.max' => 'Rooms hold at most '.BookingOptions::GUESTS_PER_ROOM.' guests online; extra adults are charged as a surcharge.',
+        ];
     }
 }
