@@ -1,5 +1,6 @@
 import './stepper';
 import './order-quote';
+import './article-editor';
 
 /**
  * Reveal elements as they scroll into view.

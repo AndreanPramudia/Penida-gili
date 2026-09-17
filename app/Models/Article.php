@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 #[Fillable([
-    'title', 'slug', 'category', 'excerpt', 'subtitle', 'lead', 'lead_follow', 'body', 'content', 'image',
+    'title', 'slug', 'category', 'excerpt', 'meta_title', 'meta_description', 'meta_keywords', 'subtitle', 'lead', 'lead_follow', 'body', 'content', 'image',
     'hero_caption', 'author_name', 'author_role', 'read_time_minutes', 'views', 'tags', 'is_featured',
     'status', 'published_at',
 ])]
@@ -25,6 +25,7 @@ class Article extends Model
     {
         return [
             'content' => 'array',
+            'meta_keywords' => 'array',
             'tags' => 'array',
             'is_featured' => 'boolean',
             'status' => ArticleStatus::class,
@@ -51,6 +52,18 @@ class Article extends Model
             ->where('title', 'like', "%{$term}%")
             ->orWhere('excerpt', 'like', "%{$term}%")
             ->orWhere('category', 'like', "%{$term}%")));
+    }
+
+    /** SEO title, falling back to the headline when the admin left it blank. */
+    protected function seoTitle(): Attribute
+    {
+        return Attribute::get(fn () => filled($this->meta_title) ? $this->meta_title : $this->title);
+    }
+
+    /** SEO description, falling back to the card excerpt. */
+    protected function seoDescription(): Attribute
+    {
+        return Attribute::get(fn () => filled($this->meta_description) ? $this->meta_description : $this->excerpt);
     }
 
     protected function imageUrl(): Attribute

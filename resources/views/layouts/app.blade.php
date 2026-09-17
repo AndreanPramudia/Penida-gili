@@ -4,6 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Penida Gili') — Penida Gili</title>
+    @hasSection('meta-description')
+        <meta name="description" content="@yield('meta-description')">
+    @endif
+    @hasSection('meta-keywords')
+        <meta name="keywords" content="@yield('meta-keywords')">
+    @endif
 
     {{-- Set before paint so the reveal styles never hide content for no-JS visitors. --}}
     <script>document.documentElement.classList.add('js')</script>

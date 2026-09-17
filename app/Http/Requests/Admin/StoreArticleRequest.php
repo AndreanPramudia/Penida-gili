@@ -17,7 +17,14 @@ class StoreArticleRequest extends FormRequest
             ->values()
             ->all();
 
-        $this->merge(['tags' => $tags]);
+        $keywords = collect(preg_split('/\s*,\s*/', (string) $this->input('meta_keywords', '')))
+            ->map(fn (string $k) => trim($k))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        $this->merge(['tags' => $tags, 'meta_keywords' => $keywords]);
     }
 
     public function rules(): array
@@ -28,6 +35,10 @@ class StoreArticleRequest extends FormRequest
             'title' => ['required', 'string', 'max:200'],
             'slug' => ['nullable', 'string', 'max:200', 'regex:/^[a-z0-9-]+$/', Rule::unique('articles', 'slug')->ignore($articleId)],
             'excerpt' => ['required', 'string', 'max:500'],
+            'meta_title' => ['nullable', 'string', 'max:70'],
+            'meta_description' => ['nullable', 'string', 'max:160'],
+            'meta_keywords' => ['nullable', 'array', 'max:15'],
+            'meta_keywords.*' => ['string', 'max:40'],
             'subtitle' => ['nullable', 'string', 'max:500'],
             'category' => ['required', 'string', 'max:60'],
             'body' => ['required', 'string'],

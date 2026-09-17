@@ -208,6 +208,40 @@ class CatalogManagementTest extends TestCase
         $this->assertSame(2, $article->read_time_minutes);
     }
 
+    public function test_article_form_renders_and_stores_seo_fields_with_fallbacks(): void
+    {
+        $this->actingAs($this->admin)->get(route('admin.articles.create'))
+            ->assertOk()
+            ->assertSee('SEO (Google)')
+            ->assertSee('Article Information')
+            ->assertSee('Image &amp; Content', false);
+
+        $base = ['title' => 'Crossing Tips', 'excerpt' => 'Short summary', 'category' => 'Boat Tips', 'body' => 'Body text', 'author_name' => 'Capt. Wayan', 'status' => 'published'];
+
+        $this->actingAs($this->admin)->post(route('admin.articles.store'), $base + [
+            'meta_title' => 'Crossing Tips | Penida Gili',
+            'meta_description' => 'Everything about the crossing.',
+            'meta_keywords' => 'nusa penida, fast boat, , fast boat',
+        ])->assertRedirect(route('admin.articles'));
+
+        $article = Article::query()->sole();
+        $this->assertSame(['nusa penida', 'fast boat'], $article->meta_keywords);
+        $this->assertSame('Crossing Tips | Penida Gili', $article->seo_title);
+
+        $this->get(route('articles.show', $article))
+            ->assertOk()
+            ->assertSee('<title>Crossing Tips | Penida Gili — Penida Gili</title>', false)
+            ->assertSee('<meta name="description" content="Everything about the crossing.">', false)
+            ->assertSee('<meta name="keywords" content="nusa penida, fast boat">', false);
+
+        $article->update(['meta_title' => null, 'meta_description' => null, 'meta_keywords' => null]);
+
+        $this->get(route('articles.show', $article))
+            ->assertSee('<title>Crossing Tips — Penida Gili</title>', false)
+            ->assertSee('<meta name="description" content="Short summary">', false)
+            ->assertDontSee('name="keywords"', false);
+    }
+
     public function test_report_lists_bookings_and_changes_status(): void
     {
         $booking = Booking::factory()->create(['customer_name' => 'Report Person', 'status' => BookingStatus::Pending]);
