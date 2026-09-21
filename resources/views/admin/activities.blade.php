@@ -8,45 +8,105 @@
 @section('content')
     <x-admin.listing
         heading="Activity"
-        subtitle="Curate experiences, tours and cultural shows sold alongside fast boat tickets."
+        subtitle="Manage Balinese cultural tours, day passes, watersports, and photography packages."
         action="Add New Activity"
         :action-href="route('admin.activities.create')"
-        :columns="['Activity', 'Category', 'Location', 'Price', 'Status', 'Sold', 'Actions']"
+        :columns="['Activity Details', 'Category', 'Location', 'Price / Pax', 'Status', 'Total Sold', 'Actions']"
         :paginator="$activities">
 
         <x-slot:filters>
-            <x-admin.filters :action="route('admin.activities')" :filters="$filters" :statuses="\App\Enums\ListingStatus::options()" placeholder="Search activities..." />
+            <x-admin.filters :action="route('admin.activities')" :filters="$filters" :statuses="\App\Enums\ListingStatus::options()" placeholder="Search by title, location or vendor..." />
         </x-slot:filters>
 
         @forelse ($activities as $activity)
             <tr class="border-b border-[rgba(192,199,211,0.2)] last:border-b-0">
+                {{-- Activity details: thumbnail, name, rating • hours • badge/reviews (1:10054) --}}
                 <td class="px-[16px] py-[16px]">
-                    <span class="flex items-center gap-[12px]">
-                        <img src="{{ $activity->image_url }}" alt="" class="size-[48px] shrink-0 rounded-[8px] object-cover">
-                        <span>
-                            <span class="block text-[15px] font-semibold leading-[22px] text-editorial-ink">{{ $activity->name }}</span>
-                            <span class="flex flex-wrap items-center gap-[8px] text-[13px] leading-[18px] text-editorial-meta">
-                                <span class="text-[#ca8a04]">&#9733; {{ $activity->rating }}</span>
-                                <span>{{ $activity->hours_label ?? '—' }}</span>
-                                <span class="rounded-[4px] bg-[#f1f4f6] px-[6px] py-[1px]">{{ $activity->badge ?? $activity->review_count.' ulasan' }}</span>
+                    <span class="flex items-center gap-[14px]">
+                        <img src="{{ $activity->image_url }}" alt="" class="size-[56px] shrink-0 rounded-[8px] object-cover">
+                        <span class="min-w-0">
+                            <a href="{{ route('admin.activities.edit', $activity) }}" class="block truncate text-[14px] font-semibold leading-[20px] text-editorial-ink hover:text-editorial">{{ $activity->name }}</a>
+                            <span class="mt-[4px] flex flex-wrap items-center gap-[8px] text-[12px] leading-[16px] text-editorial-body">
+                                <span class="flex items-center gap-[2px]">
+                                    <img src="{{ asset('images/icons/admin/activity/star.svg') }}" alt="" class="h-[11px] w-[11.7px]">
+                                    {{ $activity->rating }}
+                                </span>
+                                @if ($activity->hours_label)
+                                    <span class="text-editorial-meta">&bull;</span>
+                                    <span>{{ $activity->hours_label }}</span>
+                                @endif
+                                <span class="text-editorial-meta">&bull;</span>
+                                @if ($activity->badge)
+                                    <span class="rounded-[4px] bg-[#d2e4ff] px-[8px] py-[2px] font-semibold text-[#005ea1]">{{ $activity->badge }}</span>
+                                @else
+                                    <span>{{ $activity->review_count }} ulasan</span>
+                                @endif
                             </span>
                         </span>
                     </span>
                 </td>
+
+                {{-- Category pill with glyph (1:10075) --}}
                 <td class="px-[16px] py-[16px]">
-                    <span class="rounded-[6px] bg-[#f1f4f6] px-[10px] py-[6px] text-[13px] text-editorial-body">{{ $activity->category }}</span>
+                    <span class="inline-flex max-w-[140px] items-center gap-[6px] rounded-[6px] bg-[#ebeef0] px-[10px] py-[4px] text-[12px] font-medium leading-[16px] text-editorial-body">
+                        <img src="{{ asset('images/icons/admin/activity/'.$activity->category_icon) }}" alt="" class="size-[12px] shrink-0 object-contain">
+                        {{ $activity->category }}
+                    </span>
                 </td>
-                <td class="px-[16px] py-[16px] text-[14px] leading-[20px] text-editorial-body">{{ $activity->location }}</td>
+
+                {{-- Location with pin (1:10079) --}}
                 <td class="px-[16px] py-[16px]">
-                    <span class="block text-[15px] font-semibold leading-[22px] text-editorial">{{ $activity->price_label }}</span>
-                    <span class="block text-[13px] leading-[18px] text-editorial-meta">{{ $activity->price_was_label ?? '/ pax' }}</span>
+                    <span class="flex max-w-[120px] items-center gap-[6px] text-[12px] leading-[16px] text-editorial-body">
+                        <img src="{{ asset('images/icons/admin/activity/pin.svg') }}" alt="" class="h-[11.7px] w-[9.3px] shrink-0">
+                        {{ $activity->location }}
+                    </span>
                 </td>
+
+                {{-- Price: brand-blue figure, then "/ pax" or the struck-through old price (1:10084 / 1:10140) --}}
+                <td class="px-[16px] py-[16px]">
+                    <span class="block text-[14px] font-semibold leading-[20px] text-editorial">{{ $activity->price_label }}</span>
+                    @if ($activity->price_was_label)
+                        <span class="block text-[12px] leading-[16px] text-editorial-meta line-through">{{ $activity->price_was_label }}</span>
+                    @else
+                        <span class="block text-[12px] leading-[16px] text-editorial-body">/ pax</span>
+                    @endif
+                </td>
+
                 <td class="px-[16px] py-[16px]"><x-admin.status :label="$activity->status->label()" :tone="$activity->status->tone()" /></td>
+
+                {{-- Total sold: figure over "pax" (1:10093) --}}
                 <td class="px-[16px] py-[16px]">
-                    <span class="block text-[15px] font-semibold leading-[22px] text-editorial-ink">{{ number_format($activity->sold_count) }}</span>
+                    <span class="block text-[14px] leading-[20px] text-editorial-ink">{{ number_format($activity->sold_count) }}</span>
+                    <span class="block text-[12px] leading-[16px] text-editorial-body">pax</span>
                 </td>
+
+                {{-- View · Edit · Duplicate · Delete (1:10096) --}}
                 <td class="px-[16px] py-[16px]">
-                    <x-admin.row-actions :label="$activity->name" :edit-href="route('admin.activities.edit', $activity)" :delete-action="route('admin.activities.destroy', $activity)" />
+                    <span class="flex items-center justify-end gap-[6px]">
+                        <a href="{{ route('activities.show', $activity) }}" target="_blank" rel="noopener" aria-label="View {{ $activity->name }}"
+                           class="flex size-[28px] items-center justify-center rounded-[8px] transition-colors duration-300 hover:bg-[#f1f4f6]">
+                            <img src="{{ asset('images/icons/admin/activity/action-view.svg') }}" alt="" class="h-[11.25px] w-[16.5px]">
+                        </a>
+                        <a href="{{ route('admin.activities.edit', $activity) }}" aria-label="Edit {{ $activity->name }}"
+                           class="flex size-[28px] items-center justify-center rounded-[8px] transition-colors duration-300 hover:bg-[#f1f4f6]">
+                            <img src="{{ asset('images/icons/admin/activity/action-edit.svg') }}" alt="" class="size-[13.5px]">
+                        </a>
+                        <form action="{{ route('admin.activities.duplicate', $activity) }}" method="post">
+                            @csrf
+                            <button type="submit" aria-label="Duplicate {{ $activity->name }}"
+                                    class="flex size-[28px] items-center justify-center rounded-[8px] transition-colors duration-300 hover:bg-[#f1f4f6]">
+                                <img src="{{ asset('images/icons/admin/activity/action-duplicate.svg') }}" alt="" class="h-[15px] w-[12.75px]">
+                            </button>
+                        </form>
+                        <form action="{{ route('admin.activities.destroy', $activity) }}" method="post" onsubmit="return confirm('Delete {{ addslashes($activity->name) }}? This cannot be undone.')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" aria-label="Delete {{ $activity->name }}"
+                                    class="flex size-[28px] items-center justify-center rounded-[8px] transition-colors duration-300 hover:bg-[#fee2e2]">
+                                <img src="{{ asset('images/icons/admin/activity/action-delete.svg') }}" alt="" class="h-[13.5px] w-[12px]">
+                            </button>
+                        </form>
+                    </span>
                 </td>
             </tr>
         @empty

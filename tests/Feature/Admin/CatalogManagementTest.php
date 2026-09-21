@@ -146,6 +146,33 @@ class CatalogManagementTest extends TestCase
         $this->assertSame('kecak-fire-dance', $activity->slug);
     }
 
+    public function test_activity_listing_shows_figma_columns_and_duplicates_as_a_draft(): void
+    {
+        $activity = Activity::factory()->create([
+            'name' => 'Kecak Fire Dance', 'category' => 'Cultural Show', 'location' => 'Uluwatu, Badung',
+            'price_adult' => 180_000, 'price_was' => 250_000, 'sold_count' => 520, 'status' => ListingStatus::Active,
+        ]);
+
+        $this->actingAs($this->admin)->get(route('admin.activities'))
+            ->assertOk()
+            ->assertSeeInOrder(['Activity Details', 'Category', 'Location', 'Price / Pax', 'Status', 'Total Sold', 'Actions'])
+            ->assertSee('cat-cultural-show.svg')
+            ->assertSee('IDR 180.000')
+            ->assertSee('Rp. 250.000')
+            ->assertSee('520')
+            ->assertSee(route('admin.activities.duplicate', $activity));
+
+        $this->actingAs($this->admin)->post(route('admin.activities.duplicate', $activity))
+            ->assertRedirect();
+
+        $copy = Activity::query()->where('id', '!=', $activity->id)->sole();
+        $this->assertSame('Kecak Fire Dance (Copy)', $copy->name);
+        $this->assertSame(ListingStatus::Draft, $copy->status);
+        $this->assertSame(0, $copy->sold_count);
+        $this->assertNotSame($activity->slug, $copy->slug);
+        $this->assertSame(180_000, $copy->price_adult);
+    }
+
     public function test_admin_can_create_a_hotel_with_rooms_and_sync_them_on_update(): void
     {
         $payload = [

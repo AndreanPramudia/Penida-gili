@@ -54,6 +54,17 @@ class ActivityController extends Controller
         return redirect()->route('admin.activities')->with('flash', "{$activity->name} updated.");
     }
 
+    /** Clone a listing as a draft so the admin can adjust the copy before publishing. */
+    public function duplicate(Activity $activity): RedirectResponse
+    {
+        $copy = $activity->replicate(['slug', 'sold_count', 'review_count', 'rating']);
+        $copy->name = $activity->name.' (Copy)';
+        $copy->status = ListingStatus::Draft;
+        $copy->save();
+
+        return redirect()->route('admin.activities.edit', $copy)->with('flash', "{$activity->name} duplicated as a draft.");
+    }
+
     public function destroy(Activity $activity): RedirectResponse
     {
         $activity->delete();

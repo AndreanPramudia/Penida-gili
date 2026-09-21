@@ -67,6 +67,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/activity', [Admin\ActivityController::class, 'store'])->name('activities.store');
         Route::get('/activity/{activity}/edit', [Admin\ActivityController::class, 'edit'])->name('activities.edit');
         Route::put('/activity/{activity}', [Admin\ActivityController::class, 'update'])->name('activities.update');
+        Route::post('/activity/{activity}/duplicate', [Admin\ActivityController::class, 'duplicate'])->name('activities.duplicate');
         Route::delete('/activity/{activity}', [Admin\ActivityController::class, 'destroy'])->name('activities.destroy');
 
         Route::get('/hotel', [Admin\HotelController::class, 'index'])->name('hotels');

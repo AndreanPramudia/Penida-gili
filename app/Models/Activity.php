@@ -91,6 +91,22 @@ class Activity extends Model
             : null);
     }
 
+    /** Console category pill glyph (Figma 1:9970); matched loosely so new categories still get one. */
+    protected function categoryIcon(): Attribute
+    {
+        return Attribute::get(function (): string {
+            $category = mb_strtolower((string) $this->category);
+
+            return match (true) {
+                str_contains($category, 'water') => 'cat-water-sports.svg',
+                str_contains($category, 'wildlife'), str_contains($category, 'nature'), str_contains($category, 'adventure') => 'cat-wildlife-nature.svg',
+                str_contains($category, 'show'), str_contains($category, 'dance') => 'cat-cultural-show.svg',
+                str_contains($category, 'culture') => 'cat-photography-culture.svg',
+                default => 'cat-photography.svg',
+            };
+        });
+    }
+
     protected function priceLabel(): Attribute
     {
         return Attribute::get(fn () => Money::idr($this->price_adult));
