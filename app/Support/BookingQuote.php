@@ -156,6 +156,8 @@ final class BookingQuote
             'nationalities' => BookingOptions::nationalities(),
             'dialCodes' => BookingOptions::dialCodes(),
             'countries' => BookingOptions::countries(),
+            'confirm' => $this->confirmRows(),
+            'emailHref' => $this->emailHref(),
             // Consumed by resources/js/order-quote.js to recompute the total client-side.
             'quote' => [
                 'perRoom' => $this->bookable instanceof HotelRoom,
@@ -172,6 +174,59 @@ final class BookingQuote
             $this->bookable instanceof Schedule => $this->scheduleDraft($this->bookable),
             $this->bookable instanceof HotelRoom => $this->roomDraft($this->bookable),
             $this->bookable instanceof Activity => $this->activityDraft($this->bookable),
+        };
+    }
+
+    /** mailto: link with the order pre-written so "Book With Email" is one click. */
+    private function emailHref(): string
+    {
+        $rows = collect($this->confirmRows())->map(fn ($r) => $r['label'].': '.$r['value']);
+        $guests = $this->adults.' adult(s), '.$this->children.' child(ren)'.($this->bookable instanceof HotelRoom ? ', '.$this->rooms.' room(s)' : '');
+
+        $body = implode("\n", [
+            'Hi Penida Gili, I would like to book the following:',
+            '',
+            ...$rows,
+            'Guests: '.$guests,
+            'Total: '.Money::idr($this->total()),
+            '',
+            'Full Name: ',
+            'Email Address: ',
+            'Nationality: ',
+            'Phone Number: ',
+            'Order Notes: ',
+        ]);
+
+        $subject = 'Booking request — '.$this->confirmRows()[0]['value'];
+
+        // Gmail's web composer works everywhere; a plain mailto: silently does nothing when the
+        // device has no default mail app configured.
+        return 'https://mail.google.com/mail/?view=cm&fs=1&to='.rawurlencode(config('penida.booking.email'))
+            .'&su='.rawurlencode($subject).'&body='.rawurlencode($body);
+    }
+
+    /**
+     * Static rows for the pre-submit confirmation dialog.
+     *
+     * @return list<array{label: string, value: string}>
+     */
+    private function confirmRows(): array
+    {
+        return match (true) {
+            $this->bookable instanceof HotelRoom => [
+                ['label' => 'Booking', 'value' => $this->bookable->hotel->name],
+                ['label' => 'Room', 'value' => $this->bookable->name],
+                ['label' => 'Stay', 'value' => $this->date->format('D, d M Y').' → '.$this->checkOut->format('D, d M Y')],
+            ],
+            $this->bookable instanceof Schedule => [
+                ['label' => 'Booking', 'value' => $this->bookable->operator->name],
+                ['label' => 'Route', 'value' => $this->bookable->fromPort->name.' → '.$this->bookable->toPort->name],
+                ['label' => 'Departure', 'value' => $this->date->format('D, d M Y').' · '.Carbon::parse($this->bookable->departure_time)->format('H:i')],
+            ],
+            $this->bookable instanceof Activity => [
+                ['label' => 'Booking', 'value' => $this->bookable->name],
+                ['label' => 'Date', 'value' => $this->date->format('D, d M Y')],
+            ],
         };
     }
 

@@ -39,16 +39,16 @@
         <div class="mt-[19.8px] rounded-[10px] bg-editorial-rule px-[19.8px] pb-[29.6px] pt-[19.8px]">
             <div class="flex items-center justify-between gap-3">
                 <span data-quote-line="label" class="text-[19.8px] leading-[29.6px] text-editorial-body">{{ $order['lineLabel'] }}</span>
-                <span data-quote-line="amount" class="text-[19.8px] leading-[29.6px] text-editorial-ink">{{ $order['lineAmount'] }}</span>
+                <span data-quote-line="amount" class="shrink-0 whitespace-nowrap text-right text-[19.8px] leading-[29.6px] text-editorial-ink">{{ $order['lineAmount'] }}</span>
             </div>
             <div data-quote-extra class="mt-[8px] flex items-center justify-between gap-3" @if (! $order['extraLabel']) hidden @endif>
                 <span data-quote-extra="label" class="text-[19.8px] leading-[29.6px] text-editorial-body">{{ $order['extraLabel'] }}</span>
-                <span data-quote-extra="amount" class="text-[19.8px] leading-[29.6px] text-editorial-ink">{{ $order['extraAmount'] }}</span>
+                <span data-quote-extra="amount" class="shrink-0 whitespace-nowrap text-right text-[19.8px] leading-[29.6px] text-editorial-ink">{{ $order['extraAmount'] }}</span>
             </div>
 
             <div class="mt-[10px] flex items-center justify-between gap-3 border-t border-[#c0c7d3] pt-[11px]">
                 <span class="text-[29.6px] font-semibold leading-[39.5px] text-editorial-ink">Total</span>
-                <span data-quote-total class="text-[29.6px] font-semibold leading-[39.5px] text-brand">{{ $order['total'] }}</span>
+                <span data-quote-total class="shrink-0 whitespace-nowrap text-[29.6px] font-semibold leading-[39.5px] text-brand">{{ $order['total'] }}</span>
             </div>
         </div>
 
@@ -61,7 +61,7 @@
                 <img src="{{ asset('images/icons/order/arrow-book.svg') }}" alt="" class="size-[19.8px]">
             </button>
 
-            <a href="mailto:hello@penidagili.com"
+            <a href="{{ $order['emailHref'] }}" target="_blank" rel="noopener" data-email-book
                class="flex w-full items-center justify-center rounded-[10px] border border-brand bg-surface px-[31px] py-[16px] text-[19.3px] font-semibold leading-[27.6px] tracking-[0.97px] text-editorial-ink
                       transition-colors duration-300 hover:bg-brand/5">
                 Book With Email

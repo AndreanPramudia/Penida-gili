@@ -22,7 +22,7 @@
     <div class="relative -mt-[24px] flex flex-col gap-[16px] px-[20px] pb-[32px]">
         {{-- Main info card (1:4137) --}}
         <section data-reveal class="rounded-[12px] bg-white px-[24px] pb-[24px] pt-[24px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)]">
-            <span class="inline-block rounded-full bg-[#d5e2e9] px-[12px] py-[4px] text-[14px] font-semibold leading-[20px] tracking-[0.7px] text-[#58646a]">{{ $activity['badge'] }}</span>
+            @if ($activity['badge'])<span class="inline-block rounded-full bg-[#d5e2e9] px-[12px] py-[4px] text-[14px] font-semibold leading-[20px] tracking-[0.7px] text-[#58646a]">{{ $activity['badge'] }}</span>@endif
 
             <h1 class="mt-[8px] text-[28px] font-bold leading-[36px] text-[#181c1e]">{{ $activity['name'] }}</h1>
 
@@ -72,7 +72,7 @@
             <p class="text-[16px] leading-[26px] text-[#414751]">{{ $activity['summary'] }}</p>
         </section>
 
-        <section id="m-experiences" data-reveal class="flex flex-col gap-[16px] pt-[16px]">
+        <section id="m-experiences" data-reveal class="flex flex-col gap-[16px] pt-[16px]" @if (empty($activity['experiences'])) hidden @endif>
             <h2 class="text-[24px] font-semibold leading-[32px] text-[#181c1e]">Experiences Awaiting You</h2>
             @foreach ($activity['experiences'] as $experience)
                 <div>

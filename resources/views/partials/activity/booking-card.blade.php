@@ -7,9 +7,9 @@
 
         <p class="mt-[32px] text-[18.7px] leading-[26.7px] text-editorial-body">Only</p>
 
-        <p class="flex items-end gap-[10.7px] pb-[21.4px] pt-[10.7px]">
-            <span class="text-[21.4px] font-bold leading-[32px] text-brand">{{ $activity['price_label'] }}</span>
-            <span class="pb-[5.3px] text-[21.4px] leading-[32px] text-editorial-body">/person</span>
+        <p class="flex items-baseline gap-[8px] pb-[21.4px] pt-[10.7px]">
+            <span class="text-[24px] font-bold leading-[32px] text-brand">{{ $activity['price_label'] }}</span>
+            <span class="text-[18.7px] leading-[32px] text-editorial-body">/ person</span>
         </p>
 
         <p class="flex items-start gap-[10.7px] rounded-[10.7px] bg-[rgba(217,227,249,0.3)] p-[16px] text-[16px] leading-[21.4px] text-editorial-body">

@@ -24,12 +24,13 @@
     {{-- Figma node 1:1447 — image grid --}}
     <section class="container-page pt-[43px]">
         <div data-reveal class="grid [&>*]:min-w-0 gap-[21.4px] overflow-hidden rounded-detail md:grid-cols-3 md:grid-rows-2">
-            <figure class="group overflow-hidden rounded-detail md:col-span-2 md:row-span-2">
+            {{-- Fixed heights keep the collage the same shape regardless of the uploaded photo's aspect ratio. --}}
+            <figure class="group h-[461px] lg:h-[667px] overflow-hidden rounded-detail md:col-span-2 md:row-span-2">
                 <img src="{{ $activity['gallery_photos'][0]['url'] }}" alt="{{ $activity['gallery_photos'][0]['alt'] }}"
                      class="size-full object-cover transition-transform duration-700 ease-smooth group-hover:scale-105">
             </figure>
 
-            @foreach (array_slice($activity['gallery_photos'], 1) as $photo)
+            @foreach (array_slice($activity['gallery_photos'], 1, 2) as $photo)
                 <figure class="group h-[220px] lg:h-[323px] overflow-hidden rounded-detail">
                     <img src="{{ $photo['url'] }}" alt="{{ $photo['alt'] }}"
                          class="size-full object-cover transition-transform duration-700 ease-smooth group-hover:scale-105">
@@ -43,9 +44,11 @@
         <div>
             {{-- Figma node 1:1586 — header info --}}
             <div data-reveal class="border-b border-editorial-line pb-[33px]">
-                <span class="inline-block rounded-full bg-[#d5e2e9] px-[16px] py-[5.3px] text-[16px] leading-[32px] text-[#58646a]">
-                    {{ $activity['badge'] }}
-                </span>
+                @if ($activity['badge'])
+                    <span class="inline-block rounded-full bg-[#d5e2e9] px-[16px] py-[5.3px] text-[16px] leading-[32px] text-[#58646a]">
+                        {{ $activity['badge'] }}
+                    </span>
+                @endif
 
                 <h1 class="mt-[10.7px] text-[27px] lg:text-[64px] font-bold leading-[36px] lg:leading-[80px] tracking-[-1.28px] text-editorial-ink">{{ $activity['name'] }}</h1>
 
@@ -65,8 +68,9 @@
             <ul data-reveal style="--reveal-delay: 90ms"
                 class="flex flex-col gap-[21.4px] border-b border-editorial-line py-[33px] sm:flex-row">
                 @foreach ($activity['highlights'] as $highlight)
-                    <li class="flex flex-1 items-start gap-[16px]">
-                        <img src="{{ asset('images/icons/detail/'.$highlight['icon']) }}" alt="" class="h-[56px] w-[45px] shrink-0 object-contain">
+                    <li class="flex flex-1 items-center gap-[16px]">
+                        {{-- The SVGs already carry their rounded tint background; give all three the same box. --}}
+                        <img src="{{ asset('images/icons/detail/'.$highlight['icon']) }}" alt="" class="h-[56px] w-auto shrink-0 object-contain">
                         <span>
                             <span class="block text-[21.4px] font-semibold leading-[32px] text-editorial-ink">{{ $highlight['title'] }}</span>
                             <span class="block text-[18.7px] font-semibold leading-[26.7px] tracking-[0.93px] text-editorial-body">{{ $highlight['note'] }}</span>
@@ -101,7 +105,7 @@
             </section>
 
             {{-- Figma node 1:1654 — experiences --}}
-            <section id="experiences" class="pt-[43px]">
+            <section id="experiences" class="pt-[43px]" @if (empty($activity['experiences'])) hidden @endif>
                 <h2 data-reveal class="text-[32px] font-semibold leading-[42.7px] text-editorial-ink">Experiences Awaiting You</h2>
 
                 <div class="mt-[32px] flex flex-col gap-[32px]">
@@ -132,7 +136,7 @@
         </div>
 
         {{-- Scrolls horizontally, matching the Figma carousel row. --}}
-        <div class="mt-[37px] lg:mt-[87px] flex gap-[32px] overflow-x-auto pb-4">
+        <div class="mt-[37px] lg:mt-[87px] flex items-stretch gap-[32px] overflow-x-auto pb-4">
             @foreach ($related as $index => $item)
                 @include('components.activity-mini-card', ['activity' => $item, 'delay' => $index * 90])
             @endforeach

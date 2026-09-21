@@ -9,8 +9,9 @@
              class="size-full object-cover transition-transform duration-700 ease-smooth group-hover:scale-105">
     </div>
 
-    <div class="flex flex-col gap-[10.7px] p-[21.4px]">
-        <h3 class="text-[21.4px] font-semibold leading-[32px] text-editorial-ink transition-colors duration-300 group-hover:text-brand">
+    {{-- Fixed-height title + reserved strikethrough line keep every card's rows on the same baseline. --}}
+    <div class="flex flex-1 flex-col gap-[10.7px] p-[21.4px]">
+        <h3 class="line-clamp-2 min-h-[64px] text-[21.4px] font-semibold leading-[32px] text-editorial-ink transition-colors duration-300 group-hover:text-brand">
             <a href="{{ route('activities.show', $activity['slug']) }}" class="before:absolute before:inset-0">{{ $activity['name'] }}</a>
         </h3>
 
@@ -31,8 +32,8 @@
             <span class="text-[16px] leading-[21.4px] text-editorial-body">({{ $activity['review_count'] }} Review)</span>
         </p>
 
-        <p class="pt-[10.7px] text-right">
-            <span class="block text-[16px] leading-[21.4px] text-editorial-body line-through">{{ $activity['price_was_label'] }}</span>
+        <p class="mt-auto pt-[10.7px] text-right">
+            <span class="block min-h-[21.4px] text-[16px] leading-[21.4px] text-editorial-body line-through">{{ $activity['price_was_label'] }}</span>
             <span class="text-[24px] font-bold leading-[32px] text-brand">{{ $activity['price_label'] }}</span>
             <span class="text-[16px] leading-[21.4px] text-editorial-body">/ Pax</span>
         </p>

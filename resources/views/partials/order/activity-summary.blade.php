@@ -29,7 +29,7 @@
                 <img src="{{ asset('images/icons/order/check-circle.svg') }}" alt="" class="size-[20.7px]">
             </button>
 
-            <a href="mailto:hello@penidagili.com"
+            <a href="{{ $order['emailHref'] }}" target="_blank" rel="noopener" data-email-book
                class="flex w-full items-center justify-center rounded-[11px] border border-editorial-line bg-editorial-rule py-[18px] text-[19.3px] font-semibold leading-[27.6px] tracking-[0.97px] text-editorial-ink
                       transition-colors duration-300 hover:bg-[#dfe4e7]">
                 Book With Email

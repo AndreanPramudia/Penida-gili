@@ -63,7 +63,7 @@
                 <span data-quote-total="button">Book Now &ndash; {{ $order['total'] }}</span>
             </button>
 
-            <a href="mailto:hello@penidagili.com"
+            <a href="{{ $order['emailHref'] }}" target="_blank" rel="noopener" data-email-book
                class="mt-[11px] flex w-full items-center justify-center gap-[11px] rounded-[11px] border border-[#c0c7d3] bg-[#f7fafc] py-[17.6px] font-jakarta text-[19.3px] font-semibold leading-[27.6px] tracking-[0.97px] text-editorial-ink
                       transition-colors duration-300 hover:bg-[#ebeef0]">
                 <img src="{{ asset('images/icons/order/cart-outline.svg') }}" alt="" class="h-[16px] w-[18px]">

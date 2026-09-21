@@ -70,18 +70,18 @@
                     </div>
                 </div>
 
-                <x-admin.form-section title="Pricing Configuration" icon="kpi-revenue.svg">
+                <x-admin.panel title="Pricing Configuration" icon="kpi-revenue.svg">
                     <p class="flex items-start gap-[12px] rounded-[8px] bg-[#f1f4f6] p-[16px] font-jakarta text-[15px] leading-[24px] text-editorial-body">
-                        <span aria-hidden="true" class="text-editorial">&#9432;</span>
-                        Fares are stored in whole rupiah. The adult fare is what the public search shows.
+                        <img src="{{ asset('images/icons/order/info.svg') }}" alt="" class="mt-[4px] size-[16px] shrink-0">
+                        Set base fares for this specific schedule. These prices will override default route pricing if defined here.
                     </p>
 
-                    <div class="mt-[24px] grid [&>*]:min-w-0 gap-[24px] sm:grid-cols-3">
-                        <x-admin.field label="Adult Fare (Local Pax)" name="price_adult" type="number" :value="$schedule->price_adult" placeholder="0" prefix="IDR" :required="true" />
-                        <x-admin.field label="Foreign Pax Fare" name="price_foreign" type="number" :value="$schedule->price_foreign" placeholder="0" prefix="IDR" />
-                        <x-admin.field label="Child Fare" name="price_child" type="number" :value="$schedule->price_child" placeholder="0" prefix="IDR" :required="true" />
+                    <div class="mt-[24px] grid [&>*]:min-w-0 gap-[16px] sm:grid-cols-3">
+                        <x-admin.field label="Base Price (Local Pax)" name="price_adult" type="number" :value="$schedule->price_adult" placeholder="0" prefix="IDR" :required="true" />
+                        <x-admin.field label="Base Price (Foreign Pax)" name="price_foreign" type="number" :value="$schedule->price_foreign" placeholder="0" prefix="IDR" />
+                        <x-admin.field label="Child Price" name="price_child" type="number" :value="$schedule->price_child" placeholder="0" prefix="IDR" :required="true" />
                     </div>
-                </x-admin.form-section>
+                </x-admin.panel>
             </div>
 
             {{-- Figma 1:7280 right column --}}

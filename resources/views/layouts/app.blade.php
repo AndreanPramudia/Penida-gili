@@ -27,5 +27,7 @@
     @include('partials.footer')
 
     @include('partials.mobile-tabbar')
+
+    @include('partials.order.confirm-dialog')
 </body>
 </html>

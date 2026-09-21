@@ -3,13 +3,22 @@
 
 @section('title', 'Booking '.$booking->reference)
 
-@section('nav-active', 'boat')
+@php
+    // Keep the nav highlight and hero on the product the guest just booked.
+    [$section, $heroImage] = match (true) {
+        $booking->bookable instanceof \App\Models\HotelRoom => ['hotel', 'images/hotels/hero-hotel.png'],
+        $booking->bookable instanceof \App\Models\Activity => ['activity', 'images/activities/hero-activity.png'],
+        default => ['boat', 'images/boats/hero-order.png'],
+    };
+@endphp
+
+@section('nav-active', $section)
 
 @section('hero')
     <header class="relative hidden h-[276px] w-full overflow-hidden lg:block">
-        <img src="{{ asset('images/boats/hero-order.png') }}" alt="" class="absolute inset-0 size-full object-cover object-bottom">
+        <img src="{{ asset($heroImage) }}" alt="" class="absolute inset-0 size-full object-cover object-bottom">
         <div class="relative z-10">
-            @include('partials.nav', ['active' => 'boat'])
+            @include('partials.nav', ['active' => $section])
             <div class="container-page mt-[27px] text-center">
                 <h1 data-reveal class="text-[48px] font-bold leading-[60px] text-on-hero">Booking Received</h1>
             </div>

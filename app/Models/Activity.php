@@ -72,9 +72,19 @@ class Activity extends Model
                 ->map(fn (array $photo) => $photo + ['url' => ImagePath::url($photo['image'], 'activities/detail')])
                 ->values();
 
-            return $items->isNotEmpty()
-                ? $items->all()
-                : [['image' => $this->image, 'alt' => $this->name, 'url' => ImagePath::url($this->image, 'activities')]];
+            $cover = ['image' => $this->image, 'alt' => $this->name, 'url' => ImagePath::url($this->image, 'activities')];
+
+            if ($items->isEmpty()) {
+                $items = collect([$cover]);
+            }
+
+            // The detail collage has three frames; repeat what we have rather than leave holes.
+            $pool = $items->all();
+            while (count($pool) < 3) {
+                $pool[] = $pool[(count($pool) - 1) % count($items)];
+            }
+
+            return $pool;
         });
     }
 
