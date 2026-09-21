@@ -41,15 +41,15 @@
             {{-- Pricing breakdown --}}
             <div class="mt-[11px] rounded-[11px] bg-[#f1f4f6] p-[21.6px]">
                 @foreach ($order['lines'] as $line)
-                    <div class="flex items-center justify-between">
-                        <span class="text-[18.9px] leading-[27px] text-editorial-body">{{ $line['label'] }}</span>
-                        <span class="text-[18.9px] leading-[27px] text-editorial-ink">{{ $line['amount'] }}</span>
+                    <div class="flex items-start justify-between gap-[16px]">
+                        <span class="min-w-0 flex-1 text-[18.9px] leading-[27px] text-editorial-body">{{ $line['label'] }}</span>
+                        <span class="shrink-0 whitespace-nowrap text-right text-[18.9px] leading-[27px] text-editorial-ink">{{ $line['amount'] }}</span>
                     </div>
                 @endforeach
 
                 <div class="mt-[11px] flex items-center justify-between border-t border-editorial-line pt-[12px]">
                     <span class="text-[21.6px] leading-[32px] text-brand">Total</span>
-                    <span data-quote-total class="text-[24.3px] leading-[38px] text-brand">{{ $order['total'] }}</span>
+                    <span data-quote-total class="shrink-0 whitespace-nowrap text-right text-[24.3px] leading-[38px] text-brand">{{ $order['total'] }}</span>
                 </div>
             </div>
         </div>
