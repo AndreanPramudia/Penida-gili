@@ -64,7 +64,8 @@ document.querySelectorAll('form[data-quote]').forEach((form) => {
             document.querySelectorAll('[data-quote-extra]').forEach((el) => {
                 if (el.dataset.quoteExtra === 'label') el.textContent = `${extraAdults} Extra Adult${extraAdults > 1 ? 's' : ''} x ${idr(quote.extraAdultPrice)}`;
                 else if (el.dataset.quoteExtra === 'amount') el.textContent = idr(surcharge);
-                else el.hidden = extraAdults === 0;
+                // Wrapper rows and bare grid cells alike disappear when there is no surcharge.
+                el.hidden = extraAdults === 0;
             });
         } else {
             total = a * quote.unitAdult + c * quote.unitChild;

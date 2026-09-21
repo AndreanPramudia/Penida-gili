@@ -37,19 +37,17 @@
 
         {{-- Price breakdown (1:3165) --}}
         <div class="mt-[19.8px] rounded-[10px] bg-editorial-rule px-[19.8px] pb-[29.6px] pt-[19.8px]">
-            {{-- Labels may wrap; amounts never do, so the figures stay in one right-aligned column. --}}
-            <div class="flex items-start justify-between gap-[16px]">
-                <span data-quote-line="label" class="min-w-0 flex-1 text-[19.8px] leading-[29.6px] text-editorial-body">{{ $order['lineLabel'] }}</span>
-                <span data-quote-line="amount" class="shrink-0 whitespace-nowrap text-right text-[19.8px] leading-[29.6px] text-editorial-ink">{{ $order['lineAmount'] }}</span>
-            </div>
-            <div data-quote-extra class="mt-[8px] flex items-start justify-between gap-[16px]" @if (! $order['extraLabel']) hidden @endif>
-                <span data-quote-extra="label" class="min-w-0 flex-1 text-[19.8px] leading-[29.6px] text-editorial-body">{{ $order['extraLabel'] }}</span>
-                <span data-quote-extra="amount" class="shrink-0 whitespace-nowrap text-right text-[19.8px] leading-[29.6px] text-editorial-ink">{{ $order['extraAmount'] }}</span>
-            </div>
+            {{-- Two-column grid: labels may wrap, amounts sit in one left-aligned column sized to the widest figure. --}}
+            <div class="grid grid-cols-[minmax(0,1fr)_auto] gap-x-[24px] gap-y-[8px]">
+                <span data-quote-line="label" class="text-[19.8px] leading-[29.6px] text-editorial-body">{{ $order['lineLabel'] }}</span>
+                <span data-quote-line="amount" class="whitespace-nowrap text-[19.8px] leading-[29.6px] text-editorial-ink">{{ $order['lineAmount'] }}</span>
 
-            <div class="mt-[10px] flex items-baseline justify-between gap-[16px] border-t border-[#c0c7d3] pt-[11px]">
+                <span data-quote-extra="label" class="text-[19.8px] leading-[29.6px] text-editorial-body" @if (! $order['extraLabel']) hidden @endif>{{ $order['extraLabel'] }}</span>
+                <span data-quote-extra="amount" class="whitespace-nowrap text-[19.8px] leading-[29.6px] text-editorial-ink" @if (! $order['extraLabel']) hidden @endif>{{ $order['extraAmount'] }}</span>
+
+                <span class="col-span-2 mt-[2px] border-t border-[#c0c7d3]" aria-hidden="true"></span>
                 <span class="text-[29.6px] font-semibold leading-[39.5px] text-editorial-ink">Total</span>
-                <span data-quote-total class="shrink-0 whitespace-nowrap text-right text-[29.6px] font-semibold leading-[39.5px] text-brand">{{ $order['total'] }}</span>
+                <span data-quote-total class="whitespace-nowrap text-[29.6px] font-semibold leading-[39.5px] text-brand">{{ $order['total'] }}</span>
             </div>
         </div>
 
