@@ -170,7 +170,7 @@
                         and exclusive voucher codes for Bali archipelago transfers.
                     </p>
 
-                    <form action="{{ route('newsletter.store') }}" method="post" class="flex flex-wrap gap-[15.5px] pt-[20.7px]">
+                    <form action="{{ route('newsletter.store') }}" method="post" data-confirm="newsletter" class="flex flex-wrap gap-[15.5px] pt-[20.7px]">
                         @csrf
                         <input type="hidden" name="source" value="article-detail">
                         <input type="text" name="website" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">

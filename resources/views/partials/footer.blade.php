@@ -26,7 +26,7 @@
 
     <div class="pt-[10px]">
         <h2 class="text-[18px] font-semibold leading-[27px] text-ink-muted">Join a Newsletter</h2>
-        <form action="{{ route('newsletter.store') }}" method="post" class="mt-[24px] flex gap-[8px]">
+        <form action="{{ route('newsletter.store') }}" method="post" data-confirm="newsletter" class="mt-[24px] flex gap-[8px]">
             @csrf
             <input type="hidden" name="source" value="footer-mobile">
             <input type="text" name="website" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
@@ -89,7 +89,7 @@
         <div>
             <h2 class="text-[20px] leading-[30px] text-ink">Join a Newsletter</h2>
 
-            <form action="{{ route('newsletter.store') }}" method="post" class="mt-[28px] lg:mt-[36px]">
+            <form action="{{ route('newsletter.store') }}" method="post" data-confirm="newsletter" class="mt-[28px] lg:mt-[36px]">
                 @csrf
                 <input type="hidden" name="source" value="footer">
                 <input type="text" name="website" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">

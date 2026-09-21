@@ -19,7 +19,7 @@
                 and insider discounts on Sanjaya Fastboat crossings.
             </p>
 
-            <form action="{{ route('newsletter.store') }}" method="post" class="flex w-full max-w-[574px] gap-[15px] pt-[10px]">
+            <form action="{{ route('newsletter.store') }}" method="post" data-confirm="newsletter" class="flex w-full max-w-[574px] gap-[15px] pt-[10px]">
                 @csrf
                 <input type="hidden" name="source" value="articles">
                 <input type="text" name="website" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">

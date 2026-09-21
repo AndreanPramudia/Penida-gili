@@ -33,5 +33,7 @@
     @include('partials.footer')
 
     @include('partials.mobile-tabbar')
+
+    @include('partials.confirm-modal')
 </body>
 </html>

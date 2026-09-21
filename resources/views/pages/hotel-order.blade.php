@@ -24,7 +24,7 @@
 @endsection
 
 @section('content')
-    <form action="{{ $order['action'] }}" method="post" data-quote="{{ json_encode($order['quote']) }}"
+    <form action="{{ $order['action'] }}" method="post" data-quote="{{ json_encode($order['quote']) }}" data-confirm="booking" data-confirm-product="{{ $order['property'] }}"
           class="container-page hidden [&>*]:min-w-0 pt-[43px] pb-[74px] lg:grid lg:grid-cols-[minmax(0,988fr)_minmax(0,494fr)] lg:gap-[32px]">
         @csrf
         @include('partials.order.hidden-fields', ['order' => $order])

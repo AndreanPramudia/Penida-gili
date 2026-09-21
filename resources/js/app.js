@@ -1,6 +1,7 @@
 import './stepper';
 import './order-quote';
 import './article-editor';
+import './confirm-submit';
 
 /**
  * Reveal elements as they scroll into view.
