@@ -6,10 +6,7 @@
                backdrop:bg-[rgba(24,28,30,0.55)] backdrop:backdrop-blur-[2px]"
         aria-labelledby="confirm-modal-title">
     <form method="dialog" class="flex flex-col">
-        <div class="flex items-start gap-[12px] border-b border-[rgba(192,199,211,0.3)] px-[24px] py-[20px]">
-            <span class="flex size-[40px] shrink-0 items-center justify-center rounded-full bg-[#d2e4ff]">
-                <img src="{{ asset('images/icons/order/check-circle.svg') }}" alt="" class="size-[20px]">
-            </span>
+        <div class="border-b border-[rgba(192,199,211,0.3)] px-[24px] py-[20px]">
             <div class="min-w-0">
                 <h2 id="confirm-modal-title" class="text-[18px] font-bold leading-[28px]" data-confirm-title>Confirm your booking</h2>
                 <p class="text-[14px] leading-[20px] text-[#414751]" data-confirm-intro>Please double-check your details before we send them.</p>

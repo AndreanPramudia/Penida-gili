@@ -42,7 +42,7 @@ if (modal && typeof modal.showModal === 'function') {
     };
     const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
-    /** @returns {Array<[string, string]>} */
+    /** @returns {Array<[string, string, string?]>} label, value, optional tag pill, optional plain suffix */
     const bookingRows = (form) => {
         const list = [];
         const product = form.dataset.confirmProduct || document.querySelector('main h1')?.textContent?.trim();
@@ -56,8 +56,15 @@ if (modal && typeof modal.showModal === 'function') {
         const adults = Number(text(form, 'adults') || 0);
         const children = Number(text(form, 'children') || 0);
         const rooms = Number(text(form, 'rooms') || 0);
-        const party = [adults ? plural(adults, 'adult', 'adults') : null, children ? plural(children, 'child', 'children') : null].filter(Boolean).join(', ');
-        if (party) list.push(['Guests', party + (rooms ? ` · ${plural(rooms, 'room', 'rooms')}` : '')]);
+        if (adults) {
+            // "2 adults (+1 child) · 1 room" — the child count is a tag so the adult count stays the headline.
+            list.push([
+                'Guests',
+                plural(adults, 'adult', 'adults'),
+                children ? `+${plural(children, 'child', 'children')}` : '',
+                rooms ? ` · ${plural(rooms, 'room', 'rooms')}` : '',
+            ]);
+        }
 
         list.push(['Full name', text(form, 'full_name')]);
         list.push(['Email', text(form, 'email')]);
@@ -83,7 +90,7 @@ if (modal && typeof modal.showModal === 'function') {
         accept.textContent = copy.accept;
 
         rows.innerHTML = '';
-        (kind === 'newsletter' ? newsletterRows(form) : bookingRows(form)).forEach(([label, value]) => {
+        (kind === 'newsletter' ? newsletterRows(form) : bookingRows(form)).forEach(([label, value, tag, suffix]) => {
             const row = document.createElement('div');
             row.className = 'flex items-start justify-between gap-[16px]';
             const dt = document.createElement('dt');
@@ -94,6 +101,15 @@ if (modal && typeof modal.showModal === 'function') {
                 ? 'text-right text-[16px] font-bold text-brand'
                 : 'text-right font-semibold text-[#181c1e] [overflow-wrap:anywhere]';
             dd.textContent = value;
+            if (tag) {
+                const pill = document.createElement('span');
+                pill.className = 'ml-[6px] inline-block rounded-full bg-[#d2e4ff] px-[8px] py-[1px] align-[1px] text-[12px] font-semibold leading-[18px] text-[#005ea1]';
+                pill.textContent = `(${tag})`;
+                dd.appendChild(pill);
+            }
+            if (suffix) {
+                dd.appendChild(document.createTextNode(suffix));
+            }
             row.append(dt, dd);
             rows.appendChild(row);
         });
