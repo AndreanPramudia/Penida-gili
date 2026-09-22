@@ -40,7 +40,11 @@ class VesselController extends Controller
 
     public function store(StoreVesselRequest $request): RedirectResponse
     {
-        $vessel = Vessel::query()->create($this->payload($request) + ['code' => $request->input('code') ?: Vessel::nextCode()]);
+        // The Figma form has no operator picker: the fleet belongs to the (single) operator on file.
+        $vessel = Vessel::query()->create($this->payload($request) + [
+            'code' => $request->input('code') ?: Vessel::nextCode(),
+            'boat_operator_id' => $request->input('boat_operator_id') ?: BoatOperator::query()->orderBy('id')->value('id'),
+        ]);
 
         return redirect()->route('admin.boats')->with('flash', "{$vessel->name} added to the fleet.");
     }
@@ -68,7 +72,6 @@ class VesselController extends Controller
     {
         return view('admin.boats-create', [
             'vessel' => $vessel,
-            'operators' => BoatOperator::query()->orderBy('name')->pluck('name', 'id'),
             'facilities' => collect(self::FACILITIES)->map(fn ($label) => [
                 'label' => $label,
                 'checked' => in_array($label, old('facilities', $vessel->facilities ?? []), true),

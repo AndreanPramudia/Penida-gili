@@ -39,13 +39,19 @@ class CatalogManagementTest extends TestCase
 
         $this->actingAs($this->admin)->get(route('admin.boats.create'))
             ->assertOk()
-            ->assertSeeInOrder(['Publishing Settings', 'Publish Immediately', 'Save as Draft', 'Boat Details', 'Initial Status', 'Boat Photos', 'Boat Facilities']);
+            ->assertSeeInOrder(['Publishing Settings', 'Publish Immediately', 'Save as Draft', 'Boat Details', 'Initial Status', 'Boat Photos', 'Boat Facilities'])
+            ->assertDontSee('Top Speed')
+            ->assertDontSee('Vessel Code')
+            ->assertDontSee('Last Inspection Date')
+            ->assertDontSee('name="boat_operator_id"', false);
 
-        $base = ['boat_operator_id' => $operator->id, 'name' => 'Sanjaya Explorer', 'type' => 'Luxury Catamaran', 'capacity' => 120];
+        // No operator field on the form: the vessel is attached to the operator on file.
+        $base = ['name' => 'Sanjaya Explorer', 'type' => 'Luxury Catamaran', 'capacity' => 120];
 
         $this->actingAs($this->admin)->post(route('admin.boats.store'), $base + ['publish' => 'draft', 'status' => ListingStatus::Active->value])
             ->assertRedirect(route('admin.boats'));
         $this->assertSame(ListingStatus::Draft, Vessel::query()->sole()->status);
+        $this->assertSame($operator->id, Vessel::query()->sole()->boat_operator_id);
 
         Vessel::query()->delete();
 

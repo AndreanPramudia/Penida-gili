@@ -43,14 +43,6 @@
 
                     {{-- Operational state; "Save as Draft" above overrides it while the boat is unpublished. --}}
                     <x-admin.field label="Initial Status" name="status" :value="$isDraft ? 'active' : $vessel->status?->value" :options="$operationalStatuses" />
-
-                    <x-admin.field label="Operator" name="boat_operator_id" :value="$vessel->boat_operator_id" :options="$operators->all()" placeholder="Select operator..." :required="true" />
-
-                    <x-admin.field label="Top Speed (Knots)" name="top_speed_knots" type="number" :value="$vessel->top_speed_knots" placeholder="e.g. 28" />
-
-                    <x-admin.field label="Vessel Code" name="code" :value="$vessel->code" placeholder="Auto-generated (SFB-001)" help="Leave blank to assign the next SFB number." />
-
-                    <x-admin.field label="Last Inspection Date" name="inspected_at" type="date" :value="$vessel->inspected_at?->toDateString()" />
                 </div>
             </x-admin.form-section>
 
