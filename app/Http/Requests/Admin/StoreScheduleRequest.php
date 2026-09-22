@@ -13,7 +13,7 @@ class StoreScheduleRequest extends FormRequest
     {
         return [
             'boat_operator_id' => ['required', Rule::exists('boat_operators', 'id')],
-            'vessel_id' => ['nullable', Rule::exists('vessels', 'id')->where('boat_operator_id', $this->integer('boat_operator_id'))],
+            'vessel_id' => ['required', Rule::exists('vessels', 'id')->where('boat_operator_id', $this->integer('boat_operator_id'))],
             'from_port_id' => ['required', Rule::exists('ports', 'id')],
             'to_port_id' => ['required', 'different:from_port_id', Rule::exists('ports', 'id')],
             'departure_time' => ['required', 'date_format:H:i'],

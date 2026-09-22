@@ -169,10 +169,12 @@ class CatalogManagementTest extends TestCase
     public function test_schedule_with_every_day_selected_is_stored_as_daily(): void
     {
         $operator = BoatOperator::factory()->create();
+        $vessel = Vessel::factory()->for($operator, 'operator')->create();
         [$from, $to] = Port::factory()->count(2)->create();
 
         $this->actingAs($this->admin)->post(route('admin.schedules.store'), [
             'boat_operator_id' => $operator->id,
+            'vessel_id' => $vessel->id,
             'from_port_id' => $from->id,
             'to_port_id' => $to->id,
             'departure_time' => '08:00',

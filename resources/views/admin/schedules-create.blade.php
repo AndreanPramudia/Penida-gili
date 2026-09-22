@@ -43,7 +43,7 @@
                                 <x-admin.field label="Arrival Port" name="to_port_id" :value="$schedule->to_port_id" :options="$ports->all()" placeholder="Select port..." :required="true" />
                             </div>
 
-                            <x-admin.field label="Assigned Vessel" name="vessel_id" :value="$schedule->vessel_id" :options="$vesselOptions" placeholder="Select available vessel..." help="Optional — must belong to the chosen operator." />
+                            <x-admin.field label="Assigned Vessel" name="vessel_id" :value="$schedule->vessel_id" :options="$vesselOptions" placeholder="Select available vessel..." :required="true" help="Must belong to the chosen operator." />
 
                             <div class="grid [&>*]:min-w-0 gap-[24px] sm:grid-cols-2">
                                 <x-admin.field label="Departure Time" name="departure_time" type="time" :value="$schedule->departure_time ? \Illuminate\Support\Carbon::parse($schedule->departure_time)->format('H:i') : null" :required="true" />
