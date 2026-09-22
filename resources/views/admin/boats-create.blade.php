@@ -1,10 +1,12 @@
-{{-- Figma node 1:7132 — admin Add New Boat (also serves Edit) --}}
+{{-- Figma node 1:7132 — admin Add New Boat (also serves Edit).
+     Publishing Settings sits above the form, as on the hotel/activity editors. --}}
 @extends('layouts.admin')
 
 @php
     $editing = $vessel->exists;
     $backHref = route('admin.boats');
     $submitLabel = $editing ? 'Save Changes' : 'Save Vessel';
+    $isDraft = $vessel->status === \App\Enums\ListingStatus::Draft;
 @endphp
 
 @section('title', $editing ? 'Edit '.$vessel->name : 'Add New Boat')
@@ -21,40 +23,46 @@
             @csrf
             @if ($editing) @method('PUT') @endif
 
-            {{-- Figma node 1:7159 --}}
-            <x-admin.form-section title="Vessel Details" icon="form-vessel.svg">
+            {{-- Publishing Settings — same radio cards as the hotel/activity editors --}}
+            <x-admin.form-section title="Publishing Settings" icon="nav-schedule.svg">
+                <x-admin.radio-cards name="publish" :options="$publishModes" :selected="$isDraft ? 'draft' : 'publish'" />
+            </x-admin.form-section>
+
+            {{-- Figma node 1:7159 — Boat Details --}}
+            <x-admin.form-section title="Boat Details" icon="form-vessel.svg">
                 <div class="grid [&>*]:min-w-0 gap-[24px] md:grid-cols-2">
                     <div class="md:col-span-2">
-                        <x-admin.field label="Boat Name" name="name" :value="$vessel->name" placeholder="e.g. Sanjaya Ocean Queen" :required="true" />
+                        <x-admin.field label="Boat Name" name="name" :value="$vessel->name" placeholder="Maruti Fast Boat" :required="true" />
                     </div>
-
-                    <x-admin.field label="Operator" name="boat_operator_id" :value="$vessel->boat_operator_id" :options="$operators->all()" placeholder="Select operator..." :required="true" />
 
                     <x-admin.field label="Vessel Type" name="type" :value="$vessel->type" :options="$types" placeholder="Select Type" :required="true" />
 
                     <x-admin.field label="Passenger Capacity (Pax)" name="capacity" type="number" :value="$vessel->capacity ?? 100" :required="true" />
 
-                    <x-admin.field label="Top Speed (Knots)" name="top_speed_knots" type="number" :value="$vessel->top_speed_knots" placeholder="e.g. 28" />
-
                     <x-admin.field label="Engine Details" name="engine" :value="$vessel->engine" placeholder="4 x 250HP Yamaha Outboards" />
 
-                    <x-admin.field label="Vessel Code" name="code" :value="$vessel->code" placeholder="Auto-generated (SFB-001)" help="Leave blank to assign the next SFB number." />
+                    {{-- Operational state; "Save as Draft" above overrides it while the boat is unpublished. --}}
+                    <x-admin.field label="Initial Status" name="status" :value="$isDraft ? 'active' : $vessel->status?->value" :options="$operationalStatuses" />
 
-                    <x-admin.field label="Status" name="status" :value="$vessel->status?->value" :options="\App\Enums\ListingStatus::options()" :required="true" />
+                    <x-admin.field label="Operator" name="boat_operator_id" :value="$vessel->boat_operator_id" :options="$operators->all()" placeholder="Select operator..." :required="true" />
+
+                    <x-admin.field label="Top Speed (Knots)" name="top_speed_knots" type="number" :value="$vessel->top_speed_knots" placeholder="e.g. 28" />
+
+                    <x-admin.field label="Vessel Code" name="code" :value="$vessel->code" placeholder="Auto-generated (SFB-001)" help="Leave blank to assign the next SFB number." />
 
                     <x-admin.field label="Last Inspection Date" name="inspected_at" type="date" :value="$vessel->inspected_at?->toDateString()" />
                 </div>
             </x-admin.form-section>
 
-            {{-- Figma node 1:7206 --}}
-            <x-admin.form-section title="Vessel Photos" icon="form-camera.svg">
+            {{-- Figma node 1:7206 — Boat Photos --}}
+            <x-admin.form-section title="Boat Photos" icon="form-camera.svg">
                 <x-admin.uploader name="photos" />
                 @error('photos.*') <p class="mt-[8px] font-jakarta text-[13px] text-[#dc2626]">{{ $message }}</p> @enderror
                 <x-admin.gallery-preview :cover="$vessel->image" folder="boats" />
             </x-admin.form-section>
 
-            {{-- Figma node 1:7222 --}}
-            <x-admin.form-section title="Vessel Facilities" icon="form-check.svg">
+            {{-- Figma node 1:7222 — Boat Facilities --}}
+            <x-admin.form-section title="Boat Facilities" icon="form-check.svg">
                 <div class="grid [&>*]:min-w-0 gap-[16px] sm:grid-cols-2 xl:grid-cols-3">
                     @foreach ($facilities as $facility)
                         <label class="flex items-center gap-[12px]">

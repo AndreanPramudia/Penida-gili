@@ -20,6 +20,7 @@ class StoreVesselRequest extends FormRequest
             'capacity' => ['required', 'integer', 'min:1', 'max:1000'],
             'top_speed_knots' => ['nullable', 'integer', 'min:1', 'max:80'],
             'engine' => ['nullable', 'string', 'max:160'],
+            'publish' => ['nullable', Rule::in(['publish', 'draft'])],
             'status' => ['required', Rule::enum(ListingStatus::class)],
             'inspected_at' => ['nullable', 'date'],
             'facilities' => ['nullable', 'array'],

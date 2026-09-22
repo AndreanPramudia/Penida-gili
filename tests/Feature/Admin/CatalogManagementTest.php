@@ -33,6 +33,31 @@ class CatalogManagementTest extends TestCase
         $this->admin = User::factory()->create(['is_admin' => true]);
     }
 
+    public function test_boat_form_shows_publishing_settings_and_draft_overrides_operational_status(): void
+    {
+        $operator = BoatOperator::factory()->create();
+
+        $this->actingAs($this->admin)->get(route('admin.boats.create'))
+            ->assertOk()
+            ->assertSeeInOrder(['Publishing Settings', 'Publish Immediately', 'Save as Draft', 'Boat Details', 'Initial Status', 'Boat Photos', 'Boat Facilities']);
+
+        $base = ['boat_operator_id' => $operator->id, 'name' => 'Sanjaya Explorer', 'type' => 'Luxury Catamaran', 'capacity' => 120];
+
+        $this->actingAs($this->admin)->post(route('admin.boats.store'), $base + ['publish' => 'draft', 'status' => ListingStatus::Active->value])
+            ->assertRedirect(route('admin.boats'));
+        $this->assertSame(ListingStatus::Draft, Vessel::query()->sole()->status);
+
+        Vessel::query()->delete();
+
+        $this->actingAs($this->admin)->post(route('admin.boats.store'), $base + ['publish' => 'publish', 'status' => ListingStatus::Inactive->value])
+            ->assertRedirect(route('admin.boats'));
+        $this->assertSame(ListingStatus::Inactive, Vessel::query()->sole()->status);
+
+        $this->actingAs($this->admin)->get(route('admin.boats.edit', Vessel::query()->sole()))
+            ->assertOk()
+            ->assertSee('Non-Active (Maintenance)');
+    }
+
     public function test_admin_can_create_edit_and_delete_a_vessel(): void
     {
         Storage::fake('public');

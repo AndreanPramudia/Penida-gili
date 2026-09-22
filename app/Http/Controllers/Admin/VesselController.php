@@ -74,14 +74,27 @@ class VesselController extends Controller
                 'checked' => in_array($label, old('facilities', $vessel->facilities ?? []), true),
             ])->all(),
             'types' => ['Catamaran Fast Ferry', 'Mono-hull Fastboat', 'Luxury Catamaran'],
+            'publishModes' => [
+                ['value' => 'publish', 'label' => 'Publish Immediately', 'description' => 'Visible in the fleet and available for schedules right away'],
+                ['value' => 'draft', 'label' => 'Save as Draft', 'description' => 'Keep the boat hidden until you are ready'],
+            ],
+            'operationalStatuses' => [
+                ListingStatus::Active->value => 'Active (Ready for Routes)',
+                ListingStatus::Inactive->value => 'Non-Active (Maintenance)',
+            ],
         ]);
     }
 
     /** @return array<string, mixed> */
     private function payload(StoreVesselRequest $request): array
     {
-        $data = $request->safe()->except(['photos', 'code']);
+        $data = $request->safe()->except(['photos', 'code', 'publish']);
         $data['facilities'] = $request->input('facilities', []);
+
+        // "Save as Draft" hides the boat regardless of the operational status picked below it.
+        $data['status'] = $request->input('publish') === 'draft'
+            ? ListingStatus::Draft->value
+            : $request->input('status', ListingStatus::Active->value);
 
         if ($photo = Uploads::store($request->file('photos.0'), 'vessels')) {
             $data['image'] = $photo;
