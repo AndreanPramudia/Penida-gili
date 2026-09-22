@@ -14,9 +14,14 @@
         :columns="['Property', 'Location', 'Rating', 'Rooms', 'From / Night', 'Status', 'Actions']"
         :paginator="$hotels">
 
-        <x-slot:filters>
-            <x-admin.filters :action="route('admin.hotels')" :filters="$filters" :statuses="\App\Enums\ListingStatus::options()" placeholder="Search hotels..." />
-        </x-slot:filters>
+        <x-slot:toolbar>
+            @include('partials.admin.hotel-filters', [
+                'action' => route('admin.hotels'),
+                'filters' => $filters,
+                'destinations' => $destinations,
+                'statuses' => \App\Enums\ListingStatus::options(),
+            ])
+        </x-slot:toolbar>
 
         @forelse ($hotels as $hotel)
             <tr class="border-b border-[rgba(192,199,211,0.2)] last:border-b-0">

@@ -23,6 +23,9 @@ class HotelController extends Controller
         ['label' => 'Ocean View Rooms', 'shortLabel' => 'Ocean View', 'icon' => 'ocean-view.svg', 'note' => 'Every room faces the sea'],
     ];
 
+    /** Destination pill options (Figma 1:9314); matched against the hotel address. */
+    public const DESTINATIONS = ['Nusa Penida', 'Nusa Lembongan', 'Sanur', 'Bali', 'Gili'];
+
     /** Hotel listing — Figma node 1:9280. */
     public function index(Request $request): View
     {
@@ -30,13 +33,22 @@ class HotelController extends Controller
             ->with('rooms')
             ->withCount(['rooms'])
             ->withSum('rooms as room_stock', 'stock')
-            ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%'.$request->string('q').'%'))
+            ->when($request->filled('q'), fn ($q) => $q->where(fn ($w) => $w
+                ->where('name', 'like', '%'.$request->string('q').'%')
+                ->orWhere('address', 'like', '%'.$request->string('q').'%')
+                ->orWhere('partner_label', 'like', '%'.$request->string('q').'%')))
+            ->when($request->filled('destination'), fn ($q) => $q->where('address', 'like', '%'.$request->string('destination').'%'))
+            ->when($request->filled('stars'), fn ($q) => $q->where('stars', $request->integer('stars')))
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')->value()))
             ->orderBy('name')
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.hotels', ['hotels' => $hotels, 'filters' => $request->only(['q', 'status'])]);
+        return view('admin.hotels', [
+            'hotels' => $hotels,
+            'filters' => $request->only(['q', 'destination', 'stars', 'status']),
+            'destinations' => self::DESTINATIONS,
+        ]);
     }
 
     /** Add New Hotel — Figma node 1:7501. */

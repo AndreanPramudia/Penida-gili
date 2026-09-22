@@ -510,6 +510,30 @@ class CatalogManagementTest extends TestCase
         $this->actingAs($this->admin)->get(route('admin.dashboard'))->assertOk()->assertSee('Total Revenue');
     }
 
+    public function test_hotel_toolbar_filters_by_search_destination_stars_and_status(): void
+    {
+        Hotel::factory()->create(['name' => 'Semabu Hills', 'address' => 'Ped, Nusa Penida, Bali', 'stars' => 5, 'status' => ListingStatus::Active, 'partner_label' => 'Hilltop Panorama']);
+        Hotel::factory()->create(['name' => 'Batu Karang', 'address' => 'Jungutbatu, Nusa Lembongan', 'stars' => 4, 'status' => ListingStatus::Draft]);
+
+        $this->actingAs($this->admin)->get(route('admin.hotels'))
+            ->assertOk()
+            ->assertSee('Search by hotel name, beach or area...')
+            ->assertSeeInOrder(['All Destinations', 'Nusa Penida', 'All Star Ratings', '5 Stars', 'Status: All', 'Status: Active'])
+            ->assertSee('Semabu Hills')->assertSee('Batu Karang');
+
+        $this->actingAs($this->admin)->get(route('admin.hotels', ['q' => 'hilltop']))
+            ->assertSee('Semabu Hills')->assertDontSee('Batu Karang');
+
+        $this->actingAs($this->admin)->get(route('admin.hotels', ['destination' => 'Nusa Lembongan']))
+            ->assertSee('Batu Karang')->assertDontSee('Semabu Hills');
+
+        $this->actingAs($this->admin)->get(route('admin.hotels', ['stars' => 5]))
+            ->assertSee('Semabu Hills')->assertDontSee('Batu Karang');
+
+        $this->actingAs($this->admin)->get(route('admin.hotels', ['status' => 'draft']))
+            ->assertSee('Batu Karang')->assertDontSee('Semabu Hills');
+    }
+
     public function test_hotel_room_rates_show_in_public_listing_after_admin_creates_them(): void
     {
         $hotel = Hotel::factory()->create(['name' => 'Rate Check Resort']);
