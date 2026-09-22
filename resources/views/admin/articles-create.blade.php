@@ -107,6 +107,36 @@
                                 </span>
                             </div>
                         </div>
+
+                        <div class="grid [&>*]:min-w-0 gap-[16px] sm:grid-cols-2">
+                            {{-- AUTHOR bar (Figma): half-width under the category row; "Add new author…" reveals name / role fields --}}
+                        @php $currentAuthor = old('author_id', $article->author_id ?? ($authors->firstWhere('name', $article->author_name)?->id)); @endphp
+                        <div class="flex flex-col gap-[6px]" data-author>
+                            <label for="article-author-id" class="{{ $label }}">Author</label>
+                            <span class="relative block">
+                                <select id="article-author-id" name="author_id" class="{{ $input }} appearance-none pr-[40px] font-medium" data-author-select>
+                                    @foreach ($authors as $author)
+                                        <option value="{{ $author->id }}" @selected((string) $currentAuthor === (string) $author->id)>{{ $author->signature }}</option>
+                                    @endforeach
+                                    <option value="new" @selected($currentAuthor === 'new' || (blank($currentAuthor) && $authors->isEmpty()))>+ Add new author…</option>
+                                </select>
+                                <img src="{{ $icon('field-chevron.svg') }}" alt="" class="pointer-events-none absolute right-[12px] top-1/2 h-[5.6px] w-[9px] -translate-y-1/2">
+                            </span>
+                            @error('author_id') <span class="font-jakarta text-[13px] text-[#dc2626]">{{ $message }}</span> @enderror
+
+                            <div class="mt-[4px] grid [&>*]:min-w-0 gap-[10px] rounded-[8px] border border-[rgba(192,199,211,0.5)] bg-[#f7fafc] p-[10px]" data-author-new @if ($currentAuthor !== 'new' && ! ($authors->isEmpty() && blank($currentAuthor))) hidden @endif>
+                                <div class="flex flex-col gap-[4px]">
+                                    <label for="article-author" class="font-jakarta text-[11px] font-semibold text-editorial-body">Author Name <span class="text-[#ba1a1a]">*</span></label>
+                                    <input id="article-author" name="author_name" value="{{ old('author_name') }}" placeholder="Capt. Wayan Sudira" class="{{ $input }} bg-surface py-[9px] text-[12px] leading-[16px]">
+                                    @error('author_name') <span class="font-jakarta text-[13px] text-[#dc2626]">{{ $message }}</span> @enderror
+                                </div>
+                                <div class="flex flex-col gap-[4px]">
+                                    <label for="article-author-role" class="font-jakarta text-[11px] font-semibold text-editorial-body">Author Role / Title</label>
+                                    <input id="article-author-role" name="author_role" value="{{ old('author_role') }}" placeholder="Master Mariner" class="{{ $input }} bg-surface py-[9px] text-[12px] leading-[16px]">
+                                </div>
+                            </div>
+                        </div>
+                        </div>
                     </div>
                 </section>
 
@@ -213,34 +243,6 @@
                             <input id="article-published-at" name="published_at" type="datetime-local" value="{{ old('published_at', $article->published_at?->format('Y-m-d\TH:i')) }}"
                                    class="{{ $input }} bg-surface text-[16px] leading-[24px]">
                             @error('published_at') <span class="font-jakarta text-[13px] text-[#dc2626]">{{ $message }}</span> @enderror
-                        </div>
-
-                        {{-- AUTHOR bar (1:8366): pick an author; "Add new author…" reveals name / role fields --}}
-                        @php $currentAuthor = old('author_id', $article->author_id ?? ($authors->firstWhere('name', $article->author_name)?->id)); @endphp
-                        <div class="flex flex-col gap-[6px]" data-author>
-                            <label for="article-author-id" class="{{ $sideLabel }}">Author</label>
-                            <span class="relative block">
-                                <select id="article-author-id" name="author_id" class="{{ $input }} appearance-none bg-surface py-[10px] pr-[40px] text-[14px] leading-[20px]" data-author-select>
-                                    @foreach ($authors as $author)
-                                        <option value="{{ $author->id }}" @selected((string) $currentAuthor === (string) $author->id)>{{ $author->signature }}</option>
-                                    @endforeach
-                                    <option value="new" @selected($currentAuthor === 'new' || (blank($currentAuthor) && $authors->isEmpty()))>+ Add new author…</option>
-                                </select>
-                                <img src="{{ $icon('side-chevron.svg') }}" alt="" class="pointer-events-none absolute right-[10px] top-1/2 size-[16px] -translate-y-1/2">
-                            </span>
-                            @error('author_id') <span class="font-jakarta text-[13px] text-[#dc2626]">{{ $message }}</span> @enderror
-
-                            <div class="mt-[4px] grid [&>*]:min-w-0 gap-[10px] rounded-[8px] border border-[rgba(192,199,211,0.5)] bg-[#f7fafc] p-[10px]" data-author-new @if ($currentAuthor !== 'new' && ! ($authors->isEmpty() && blank($currentAuthor))) hidden @endif>
-                                <div class="flex flex-col gap-[4px]">
-                                    <label for="article-author" class="font-jakarta text-[11px] font-semibold text-editorial-body">Author Name <span class="text-[#ba1a1a]">*</span></label>
-                                    <input id="article-author" name="author_name" value="{{ old('author_name') }}" placeholder="Capt. Wayan Sudira" class="{{ $input }} bg-surface py-[9px] text-[12px] leading-[16px]">
-                                    @error('author_name') <span class="font-jakarta text-[13px] text-[#dc2626]">{{ $message }}</span> @enderror
-                                </div>
-                                <div class="flex flex-col gap-[4px]">
-                                    <label for="article-author-role" class="font-jakarta text-[11px] font-semibold text-editorial-body">Author Role / Title</label>
-                                    <input id="article-author-role" name="author_role" value="{{ old('author_role') }}" placeholder="Master Mariner" class="{{ $input }} bg-surface py-[9px] text-[12px] leading-[16px]">
-                                </div>
-                            </div>
                         </div>
 
                         <x-admin.toggle name="is_featured" label="Feature at the top of the blog" description="Shows this article as the featured guide" :checked="old('is_featured', $article->is_featured)" />

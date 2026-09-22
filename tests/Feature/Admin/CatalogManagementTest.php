@@ -523,11 +523,11 @@ class CatalogManagementTest extends TestCase
             ->assertOk()
             ->assertSeeInOrder([
                 'Save Draft', 'Publish Article',
-                'Article Core Editorial', 'min read', 'Article Title', 'Subtitle / Summary Hook', 'Primary Category', 'Target Reader Segment',
+                'Article Core Editorial', 'min read', 'Article Title', 'Subtitle / Summary Hook', 'Primary Category', 'Target Reader Segment', 'Author', '+ Add new author…',
                 'H2', 'H3', 'Word Count:',
                 'Featured Hero Image', 'Replace Photo', 'Image Caption', 'Descriptive Alt Text (Accessibility & SEO)',
                 'Publishing Settings', 'Publish Immediately', 'Schedule for Later', 'Save as Draft', 'Scheduled Release Date & Time',
-                'Author', '+ Add new author…', 'Author Name', 'Author Role / Title',
+
                 'SEO Optimization', 'Score:', 'URL Permalink Slug', 'Meta Title', '/60 chars', 'Meta Description', '/160 chars', 'Live Google SERP Preview',
                 'Tags & Taxonomy', 'Type tag and hit Enter...',
                 'Contextual Fast Ticket Desk', 'Embed Quick Fast Ticket Desk Widget', 'Pre-selected Route', 'Direct conversion tracking enabled',
