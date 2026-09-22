@@ -20,7 +20,7 @@
                              placeholder="Reference, name or email">
                 <label class="relative block">
                     <span class="sr-only">Travel date</span>
-                    <input type="date" name="date" value="{{ $filters['date'] ?? '' }}"
+                    <input type="date" name="date" value="{{ $filters['date'] ?? '' }}" onchange="this.form.requestSubmit()"
                            class="rounded-[8px] border border-[#c0c7d3] bg-surface px-[17px] py-[9px] text-[16px] leading-[24px] text-editorial-ink focus:outline-2 focus:outline-editorial">
                 </label>
             </x-admin.filters>
