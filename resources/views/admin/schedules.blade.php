@@ -15,7 +15,7 @@
         :paginator="$schedules">
 
         <x-slot:toolbar>
-            <x-admin.filters :action="route('admin.schedules')" :filters="$filters" :statuses="\App\Enums\ListingStatus::options()" placeholder="e.g. Sanur" />
+            @include('partials.admin.route-filters', ['action' => route('admin.schedules'), 'filters' => $filters, 'vessels' => $vessels])
         </x-slot:toolbar>
 
         @forelse ($schedules as $schedule)

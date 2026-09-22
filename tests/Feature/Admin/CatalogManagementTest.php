@@ -115,6 +115,38 @@ class CatalogManagementTest extends TestCase
             ->assertOk()->assertSee('Alpha Express')->assertDontSee('Beta Voyager');
     }
 
+    public function test_schedule_listing_filters_by_route_boat_and_date(): void
+    {
+        $sanur = Port::factory()->create(['name' => 'Sanur Beach Port', 'area' => 'Bali']);
+        $penida = Port::factory()->create(['name' => 'Banjar Nyuh Nusa Penida', 'area' => 'Nusa Penida']);
+        $gili = Port::factory()->create(['name' => 'Gili Trawangan', 'area' => 'Lombok']);
+        $queen = Vessel::factory()->create(['name' => 'Sanjaya Ocean Queen']);
+        $explorer = Vessel::factory()->create(['name' => 'Sanjaya Explorer']);
+
+        $daily = Schedule::factory()->create(['from_port_id' => $sanur->id, 'to_port_id' => $penida->id, 'vessel_id' => $queen->id, 'days' => null, 'departure_time' => '08:00']);
+        $weekend = Schedule::factory()->create(['from_port_id' => $sanur->id, 'to_port_id' => $gili->id, 'vessel_id' => $explorer->id, 'days' => ['Sat', 'Sun'], 'departure_time' => '10:00']);
+
+        $this->actingAs($this->admin)->get(route('admin.schedules'))
+            ->assertOk()
+            ->assertSeeInOrder(['Search Route', 'Boat', 'Date', 'Filter'])
+            ->assertDontSee('All Statuses');
+
+        $this->actingAs($this->admin)->get(route('admin.schedules', ['q' => 'Sanur to Nusa Penida']))
+            ->assertSee('Banjar Nyuh Nusa Penida')->assertDontSee('Gili Trawangan');
+
+        $this->actingAs($this->admin)->get(route('admin.schedules', ['q' => 'Gili']))
+            ->assertSee('Gili Trawangan')->assertDontSee('Banjar Nyuh Nusa Penida');
+
+        $this->actingAs($this->admin)->get(route('admin.schedules', ['vessel' => $explorer->id]))
+            ->assertSee('Gili Trawangan')->assertDontSee('Banjar Nyuh Nusa Penida');
+
+        // 2030-05-08 is a Wednesday: only the daily run operates; the weekend run appears on the Saturday.
+        $this->actingAs($this->admin)->get(route('admin.schedules', ['date' => '2030-05-08']))
+            ->assertSee('Banjar Nyuh Nusa Penida')->assertDontSee('Gili Trawangan');
+        $this->actingAs($this->admin)->get(route('admin.schedules', ['date' => '2030-05-11']))
+            ->assertSee('Gili Trawangan');
+    }
+
     public function test_schedule_requires_distinct_ports_and_ordered_times(): void
     {
         $operator = BoatOperator::factory()->create();

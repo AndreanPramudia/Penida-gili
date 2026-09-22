@@ -18,16 +18,30 @@ class ScheduleController extends Controller
     /** Schedule listing — Figma node 1:9017. */
     public function index(Request $request): View
     {
+        // "Sanur to Nusa Penida" pins each end; a lone term may match either port.
+        [$from, $to] = array_pad(preg_split('/\s+(?:to|-|→|>)\s+/iu', $request->string('q')->trim()->value(), 2), 2, null);
+        $date = $request->date('date');
+
         $schedules = Schedule::query()
             ->with(['operator', 'vessel', 'fromPort', 'toPort'])
-            ->when($request->filled('q'), fn ($q) => $q->betweenPorts($request->string('q')->value(), null)
-                ->orWhereHas('toPort', fn ($p) => $p->where('name', 'like', '%'.$request->string('q').'%')))
-            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')->value()))
+            ->when(filled($from) && filled($to), fn ($q) => $q->betweenPorts($from, $to))
+            ->when(filled($from) && blank($to), fn ($q) => $q->where(fn ($w) => $w
+                ->betweenPorts($from, null)
+                ->orWhere(fn ($x) => $x->betweenPorts(null, $from))))
+            ->when($request->filled('vessel'), fn ($q) => $q->where('vessel_id', $request->integer('vessel')))
+            // Schedules with no days run daily; otherwise the chosen date's weekday must be listed.
+            ->when($date, fn ($q) => $q->where(fn ($w) => $w
+                ->whereNull('days')
+                ->orWhereJsonContains('days', $date->format('D'))))
             ->orderBy('departure_time')
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.schedules', ['schedules' => $schedules, 'filters' => $request->only(['q', 'status'])]);
+        return view('admin.schedules', [
+            'schedules' => $schedules,
+            'filters' => $request->only(['q', 'vessel', 'date']),
+            'vessels' => Vessel::query()->orderBy('name')->pluck('name', 'id'),
+        ]);
     }
 
     /** Add New Schedule — Figma node 1:7269. */
