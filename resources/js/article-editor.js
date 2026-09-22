@@ -16,7 +16,7 @@ document.querySelectorAll('[data-keywords]').forEach((root) => {
         list.innerHTML = '';
         keywords.forEach((keyword, index) => {
             const chip = document.createElement('span');
-            chip.className = 'flex items-center gap-[6px] rounded-full bg-editorial/10 px-[10px] py-[4px] font-jakarta text-[13px] font-semibold text-editorial';
+            chip.className = 'flex items-center gap-[6px] rounded-full px-[10px] py-[4px] font-jakarta text-[13px] font-semibold ' + (root.dataset.chipClass || 'bg-editorial/10 text-editorial');
             chip.textContent = keyword;
 
             const remove = document.createElement('button');

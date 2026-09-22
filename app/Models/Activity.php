@@ -19,8 +19,9 @@ use Illuminate\Support\Carbon;
 #[Fillable([
     'name', 'slug', 'badge', 'category', 'location', 'place_label', 'opens_at', 'closes_at', 'duration_label',
     'description', 'intro', 'summary', 'summary_image', 'image', 'gallery', 'highlights', 'experiences',
-    'included', 'excluded', 'days', 'price_adult', 'price_child', 'price_was', 'price_note',
-    'rating', 'review_count', 'sold_count', 'status',
+    'included', 'excluded', 'important_notes', 'days', 'price_adult', 'price_child', 'price_was', 'dual_pricing', 'price_foreign',
+    'price_note', 'max_daily_capacity', 'instant_confirmation', 'cancellation_policy', 'rating', 'review_count', 'sold_count',
+    'status', 'is_public', 'publish_at',
 ])]
 class Activity extends Model
 {
@@ -39,6 +40,12 @@ class Activity extends Model
             'price_adult' => 'integer',
             'price_child' => 'integer',
             'price_was' => 'integer',
+            'price_foreign' => 'integer',
+            'max_daily_capacity' => 'integer',
+            'instant_confirmation' => 'boolean',
+            'dual_pricing' => 'boolean',
+            'is_public' => 'boolean',
+            'publish_at' => 'datetime',
             'status' => ListingStatus::class,
         ];
     }

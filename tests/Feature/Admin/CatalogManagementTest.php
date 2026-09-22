@@ -243,6 +243,7 @@ class CatalogManagementTest extends TestCase
             'price_adult' => '180.000',
             'price_was' => 'Rp 250.000',
             'included' => "Entrance ticket\nSeat reservation",
+            'max_daily_capacity' => '50',
             'status' => 'active',
         ])->assertRedirect(route('admin.activities'));
 
@@ -251,6 +252,76 @@ class CatalogManagementTest extends TestCase
         $this->assertSame(250_000, $activity->price_was);
         $this->assertSame(['Entrance ticket', 'Seat reservation'], $activity->included);
         $this->assertSame('kecak-fire-dance', $activity->slug);
+    }
+
+    public function test_activity_editor_follows_figma_and_stores_the_new_fields(): void
+    {
+        $this->actingAs($this->admin)->get(route('admin.activities.create'))
+            ->assertOk()
+            ->assertSeeInOrder([
+                'Save Draft', 'Publish Activity',
+                'Basic Information', 'Short Catchy Tagline / Badge', 'Full Description',
+                'Schedule & Operational Hours', 'Select All Days', 'Instant Confirmation', 'Cancellation Policy',
+                'Experience Highlights & Inclusions', '+ Add inclusion...', '+ Add exclusion...', 'Important Notes',
+                'Media & Gallery Upload', '/ 8 Photos', 'Hero Featured Cover',
+                'Publishing Status', 'Public Visibility',
+                'Pricing & Quota Capacity', 'Original / Strikethrough Price', 'Domestic vs Foreign Price', 'Max Daily Capacity / Quota', 'pax / day',
+            ])
+            ->assertDontSee('Location Details');
+
+        // Chips arrive comma separated; the header "Save Draft" button overrides the radio;
+        // "Scheduled" keeps the draft with a go-live timestamp.
+        $this->actingAs($this->admin)->post(route('admin.activities.store'), [
+            'name' => 'Manta Point Snorkel',
+            'category' => 'Water Sports',
+            'description' => "Swim with mantas.\nBoat departs at dawn.",
+            'price_adult' => '350.000',
+            'dual_pricing' => 'on',
+            'price_foreign' => '500.000',
+            'max_daily_capacity' => '24',
+            'included' => 'Snorkel gear, Lunch box',
+            'excluded' => 'Hotel transfer',
+            'instant_confirmation' => 'on',
+            'cancellation_policy' => 'free_48h',
+            'important_notes' => 'Bring reef-safe sunscreen.',
+            'status' => 'scheduled',
+            'publish_at' => '2026-10-01 08:00',
+            'is_public' => 'on',
+        ])->assertSessionHasNoErrors()->assertRedirect(route('admin.activities'));
+
+        $activity = Activity::query()->sole();
+        $this->assertSame(ListingStatus::Draft, $activity->status);
+        $this->assertSame('2026-10-01 08:00', $activity->publish_at->format('Y-m-d H:i'));
+        $this->assertSame(['Snorkel gear', 'Lunch box'], $activity->included);
+        $this->assertSame(['Hotel transfer'], $activity->excluded);
+        $this->assertTrue($activity->dual_pricing);
+        $this->assertSame(500_000, $activity->price_foreign);
+        $this->assertSame(24, $activity->max_daily_capacity);
+        $this->assertTrue($activity->instant_confirmation);
+        $this->assertTrue($activity->is_public);
+        $this->assertSame('free_48h', $activity->cancellation_policy);
+        $this->assertSame('Swim with mantas.', $activity->intro);
+
+        // Publish Activity wins over the radios and clears the schedule; foreign price is dropped when single-tier.
+        $this->actingAs($this->admin)->put(route('admin.activities.update', $activity), [
+            'name' => 'Manta Point Snorkel',
+            'category' => 'Water Sports',
+            'description' => 'Swim with mantas.',
+            'price_adult' => '350.000',
+            'max_daily_capacity' => '24',
+            'status' => 'draft',
+            'submit_as' => 'publish',
+        ])->assertSessionHasNoErrors();
+
+        $activity->refresh();
+        $this->assertSame(ListingStatus::Active, $activity->status);
+        $this->assertNull($activity->publish_at);
+        $this->assertFalse($activity->dual_pricing);
+        $this->assertNull($activity->price_foreign);
+
+        $this->actingAs($this->admin)->post(route('admin.activities.store'), [
+            'name' => 'No quota', 'category' => 'Adventure', 'description' => 'x', 'price_adult' => '1', 'status' => 'active',
+        ])->assertSessionHasErrors('max_daily_capacity');
     }
 
     public function test_activity_toolbar_filters_by_search_category_status_and_sort(): void

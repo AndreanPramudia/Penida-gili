@@ -10,6 +10,7 @@ use App\Models\Schedule;
 use App\Support\Uploads;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class ActivityController extends Controller
@@ -109,19 +110,29 @@ class ActivityController extends Controller
             'statuses' => [
                 ['value' => ListingStatus::Active->value, 'label' => 'Active / Published', 'description' => 'Visible & bookable immediately'],
                 ['value' => ListingStatus::Draft->value, 'label' => 'Draft', 'description' => 'Save work without releasing'],
-                ['value' => ListingStatus::Inactive->value, 'label' => 'Inactive', 'description' => 'Hidden from the catalogue'],
+                ['value' => 'scheduled', 'label' => 'Scheduled', 'description' => 'Go live at specific timestamp'],
             ],
+            'cancellationPolicies' => StoreActivityRequest::CANCELLATION_POLICIES,
         ]);
     }
 
     /** @return array<string, mixed> */
     private function payload(StoreActivityRequest $request, ?Activity $existing = null): array
     {
-        $data = $request->safe()->except(['cover', 'gallery', 'included', 'excluded']);
+        $data = $request->safe()->except(['cover', 'gallery', 'included', 'excluded', 'scheduled', 'submit_as']);
         $data['included'] = $this->lines($request->input('included'));
         $data['excluded'] = $this->lines($request->input('excluded'));
         $data['days'] = $request->input('days') ?: null;
         $data['price_child'] = $data['price_child'] ?? 0;
+        $data['instant_confirmation'] = $request->boolean('instant_confirmation');
+        $data['dual_pricing'] = $request->boolean('dual_pricing');
+        $data['price_foreign'] = $data['dual_pricing'] ? ($data['price_foreign'] ?? null) : null;
+        $data['is_public'] = $request->boolean('is_public');
+        $data['publish_at'] = $request->boolean('scheduled') ? $data['publish_at'] : null;
+
+        // The editor has a single Full Description; the card blurb and detail intro fall back to it.
+        $data['summary'] = $data['summary'] ?? $data['description'];
+        $data['intro'] = $data['intro'] ?? trim(Str::of($data['description'])->split('/\R/')->first(default: ''));
 
         if ($cover = Uploads::store($request->file('cover'), 'activities')) {
             $data['image'] = $cover;
@@ -139,6 +150,7 @@ class ActivityController extends Controller
     /** @return list<string> */
     private function lines(?string $text): array
     {
-        return collect(preg_split('/\R/', (string) $text))->map('trim')->filter()->values()->all();
+        // Chips arrive comma separated; pasted text may still use one item per line.
+        return collect(preg_split('/[\r\n,]+/', (string) $text))->map(fn (string $line) => trim($line))->filter()->values()->all();
     }
 }
