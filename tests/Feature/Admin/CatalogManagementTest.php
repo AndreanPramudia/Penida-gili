@@ -380,7 +380,7 @@ class CatalogManagementTest extends TestCase
             'description' => 'Perched on the cliffs.',
             'address' => 'Nusa Penida, Bali',
             'status' => 'active',
-            'amenities' => ['Infinity Pool'],
+            'amenities' => ['Oceanfront Infinity Pool'],
             'rooms' => [
                 ['name' => 'Deluxe', 'guests' => 2, 'bed' => '1 King Bed', 'price_per_night' => '2.500.000', 'stock' => 4],
                 ['name' => 'Villa', 'guests' => 2, 'bed' => '1 King Bed', 'price_per_night' => '5.800.000', 'stock' => 2],
@@ -393,7 +393,7 @@ class CatalogManagementTest extends TestCase
         $hotel = Hotel::query()->sole();
         $this->assertCount(2, $hotel->rooms);
         $this->assertSame(2_500_000, $hotel->price_from);
-        $this->assertSame('Infinity Pool', $hotel->amenities[0]['label']);
+        $this->assertSame('Oceanfront Infinity Pool', $hotel->amenities[0]['label']);
 
         $deluxe = $hotel->rooms->firstWhere('name', 'Deluxe');
         $villa = $hotel->rooms->firstWhere('name', 'Villa');
@@ -404,6 +404,65 @@ class CatalogManagementTest extends TestCase
 
         $this->assertSame('Deluxe Ocean', $deluxe->fresh()->name);
         $this->assertModelMissing($villa);
+    }
+
+    public function test_hotel_editor_follows_figma_and_stores_partner_fields(): void
+    {
+        $this->actingAs($this->admin)->get(route('admin.hotels.create'))
+            ->assertOk()
+            ->assertSeeInOrder([
+                'Save Draft', 'Publish Hotel Listing',
+                'Property Overview', 'Property Name', 'Accommodation Type', 'Star Rating', 'Property Description',
+                'Room Categories & Inventory Manager', 'Categories Active', '+ Add Another Room Category',
+                'Premium Hotel Amenities', 'Starlink Mesh', '24/7 Butler Service', 'Air Conditioning',
+                'Photo Gallery & Room Images', 'images uploaded', 'Browse Files', 'Featured Hero',
+                'Location & Harbor Proximity', 'Island / Region', 'Specific Coastal Area', 'Harbor Transfer Distance', 'Map Pin Coordinates',
+                'Fastboat Transfer Bundle', 'Sanjaya Exclusive', 'Recommended Departure Port', 'Preferred Ferry Arrival Pier', 'Free Harbor Pick-up included in bundle',
+                'Channel Manager & OTA Sync', 'Auto-sync inventory',
+                'Publishing & Commission', 'Partner Commission Rate', 'Listing Status', 'In Review (Pending harbor audit)', 'Confirm & Publish Partner',
+            ]);
+
+        $payload = [
+            'name' => 'Toya Pakeh Cliff Resort',
+            'category' => 'Luxury Resort',
+            'stars' => 5,
+            'description' => 'Cliffside sanctuary.',
+            'region' => 'Nusa Penida',
+            'address' => 'Toya Pakeh, Crystal Bay Road',
+            'harbor_distance' => '8 minutes from Banjar Nyuh Harbor',
+            'coordinates' => '-8.6792° S, 115.4851° E',
+            'transfer_bundle' => 'on',
+            'departure_port' => 'Sanur Beach Terminal (Berth 3 & 4)',
+            'arrival_pier' => 'Banjar Nyuh Pier, Nusa Penida',
+            'commission_rate' => '12',
+            'status' => 'active',
+            'submit_as' => 'draft',
+            'rooms' => [['name' => 'Deluxe', 'guests' => 2, 'price_per_night' => '2.500.000', 'stock' => 8]],
+        ];
+
+        $this->actingAs($this->admin)->post(route('admin.hotels.store'), $payload)
+            ->assertSessionHasNoErrors()->assertRedirect(route('admin.hotels'));
+
+        $hotel = Hotel::query()->sole();
+        // Save Draft parks the listing in review even though Active was ticked.
+        $this->assertSame(ListingStatus::Draft, $hotel->status);
+        $this->assertSame('Nusa Penida', $hotel->region);
+        $this->assertSame('8 minutes from Banjar Nyuh Harbor', $hotel->harbor_distance);
+        $this->assertSame('-8.6792° S, 115.4851° E', $hotel->coordinates);
+        $this->assertTrue($hotel->transfer_bundle);
+        $this->assertFalse($hotel->harbor_pickup);
+        $this->assertFalse($hotel->auto_sync);
+        $this->assertSame('Banjar Nyuh Pier, Nusa Penida', $hotel->arrival_pier);
+        $this->assertSame(12, $hotel->commission_rate);
+
+        $this->actingAs($this->admin)->get(route('admin.hotels.edit', $hotel))
+            ->assertOk()
+            ->assertSee('Toya Pakeh Cliff Resort')
+            ->assertSee('8 Units Left')
+            ->assertSee('IDR 2.500.000');
+
+        $this->actingAs($this->admin)->post(route('admin.hotels.store'), ['commission_rate' => '150'] + $payload)
+            ->assertSessionHasErrors('commission_rate');
     }
 
     public function test_hotel_requires_at_least_one_room(): void

@@ -4,6 +4,7 @@ import './article-editor';
 import './confirm-submit';
 import './schedule-summary';
 import './activity-editor';
+import './hotel-editor';
 
 /**
  * Reveal elements as they scroll into view.
