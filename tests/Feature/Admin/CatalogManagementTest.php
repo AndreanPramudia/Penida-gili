@@ -253,6 +253,30 @@ class CatalogManagementTest extends TestCase
         $this->assertSame('kecak-fire-dance', $activity->slug);
     }
 
+    public function test_activity_toolbar_filters_by_search_category_status_and_sort(): void
+    {
+        Activity::factory()->create(['name' => 'Kecak Dance', 'category' => 'Cultural Show', 'location' => 'Uluwatu', 'status' => ListingStatus::Active, 'sold_count' => 10, 'rating' => 4.9]);
+        Activity::factory()->create(['name' => 'Manta Snorkel', 'category' => 'Water Sports', 'location' => 'Manta Bay', 'status' => ListingStatus::Draft, 'sold_count' => 500, 'rating' => 4.1]);
+
+        $this->actingAs($this->admin)->get(route('admin.activities'))
+            ->assertOk()
+            ->assertSee('Search by title, location or vendor...')
+            ->assertSeeInOrder(['All Categories', 'Status: All', 'Most Booked', 'Reset filters'])
+            ->assertSeeInOrder(['Manta Snorkel', 'Kecak Dance']);
+
+        $this->actingAs($this->admin)->get(route('admin.activities', ['q' => 'manta bay']))
+            ->assertSee('Manta Snorkel')->assertDontSee('Kecak Dance');
+
+        $this->actingAs($this->admin)->get(route('admin.activities', ['category' => 'Cultural Show']))
+            ->assertSee('Kecak Dance')->assertDontSee('Manta Snorkel');
+
+        $this->actingAs($this->admin)->get(route('admin.activities', ['status' => 'draft']))
+            ->assertSee('Manta Snorkel')->assertDontSee('Kecak Dance');
+
+        $this->actingAs($this->admin)->get(route('admin.activities', ['sort' => 'top_rated']))
+            ->assertSeeInOrder(['Kecak Dance', 'Manta Snorkel']);
+    }
+
     public function test_activity_listing_shows_figma_columns_and_duplicates_as_a_draft(): void
     {
         $activity = Activity::factory()->create([

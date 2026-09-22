@@ -14,9 +14,15 @@
         :columns="['Activity Details', 'Category', 'Location', 'Price / Pax', 'Status', 'Total Sold', 'Actions']"
         :paginator="$activities">
 
-        <x-slot:filters>
-            <x-admin.filters :action="route('admin.activities')" :filters="$filters" :statuses="\App\Enums\ListingStatus::options()" placeholder="Search by title, location or vendor..." />
-        </x-slot:filters>
+        <x-slot:toolbar>
+            @include('partials.admin.activity-filters', [
+                'action' => route('admin.activities'),
+                'filters' => $filters,
+                'categories' => $categories,
+                'statuses' => \App\Enums\ListingStatus::options(),
+                'sorts' => $sorts,
+            ])
+        </x-slot:toolbar>
 
         @forelse ($activities as $activity)
             <tr class="border-b border-[rgba(192,199,211,0.2)] last:border-b-0">

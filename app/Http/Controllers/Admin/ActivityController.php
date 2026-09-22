@@ -16,17 +16,45 @@ class ActivityController extends Controller
 {
     public const CATEGORIES = ['Photography', 'Cultural Show', 'Wildlife & Nature', 'Water Sports', 'Adventure'];
 
+    /** Sort pill options (Figma 1:10022); the key is the query value. */
+    public const SORTS = [
+        'most_booked' => 'Most Booked',
+        'top_rated' => 'Top Rated',
+        'newest' => 'Newest',
+        'price_low' => 'Price: Low to High',
+        'price_high' => 'Price: High to Low',
+    ];
+
     /** Activity listing — Figma node 1:9970. */
     public function index(Request $request): View
     {
+        $sort = $request->string('sort')->value();
+        $sort = array_key_exists($sort, self::SORTS) ? $sort : 'most_booked';
+
         $activities = Activity::query()
-            ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%'.$request->string('q').'%'))
+            ->when($request->filled('q'), fn ($q) => $q->where(fn ($w) => $w
+                ->where('name', 'like', '%'.$request->string('q').'%')
+                ->orWhere('location', 'like', '%'.$request->string('q').'%')
+                ->orWhere('place_label', 'like', '%'.$request->string('q').'%')))
+            ->when($request->filled('category'), fn ($q) => $q->where('category', $request->string('category')->value()))
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')->value()))
-            ->orderByDesc('sold_count')
+            ->tap(fn ($q) => match ($sort) {
+                'top_rated' => $q->orderByDesc('rating'),
+                'newest' => $q->latest(),
+                'price_low' => $q->orderBy('price_adult'),
+                'price_high' => $q->orderByDesc('price_adult'),
+                default => $q->orderByDesc('sold_count'),
+            })
+            ->orderBy('name')
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.activities', ['activities' => $activities, 'filters' => $request->only(['q', 'status'])]);
+        return view('admin.activities', [
+            'activities' => $activities,
+            'filters' => $request->only(['q', 'category', 'status']) + ['sort' => $sort],
+            'categories' => self::CATEGORIES,
+            'sorts' => self::SORTS,
+        ]);
     }
 
     /** Add New Activity — Figma node 1:8502. */
