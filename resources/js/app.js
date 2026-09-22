@@ -2,6 +2,7 @@ import './stepper';
 import './order-quote';
 import './article-editor';
 import './confirm-submit';
+import './schedule-summary';
 
 /**
  * Reveal elements as they scroll into view.

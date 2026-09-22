@@ -147,6 +147,48 @@ class CatalogManagementTest extends TestCase
             ->assertSee('Gili Trawangan');
     }
 
+    public function test_schedule_form_matches_figma_and_derives_ports_operator_and_status(): void
+    {
+        $operator = BoatOperator::factory()->create();
+        $vessel = Vessel::factory()->for($operator, 'operator')->create(['name' => 'Sanjaya Explorer I', 'capacity' => 60]);
+        [$from, $to] = Port::factory()->count(2)->create();
+
+        $this->actingAs($this->admin)->get(route('admin.schedules.create'))
+            ->assertOk()
+            ->assertSeeInOrder([
+                'Schedule Details', 'Route Segment', 'Select an established route...', 'Assigned Vessel', 'Departure Time', 'Est. Arrival Time',
+                'Operating Days (Frequency)', 'Pricing Configuration', 'Base Price (Local Pax)', 'Base Price (Foreign Pax)', 'Child Price',
+                'Publishing Settings', 'Publish Immediately', 'Save as Draft', 'High Season Alert', 'View Analytics',
+                'Schedule Summary', 'Total Capacity', 'Est. Duration', 'Publish Schedule', 'Cancel',
+            ])
+            ->assertDontSee('Departure Port')
+            ->assertDontSee('name="boat_operator_id"', false);
+
+        $this->actingAs($this->admin)->post(route('admin.schedules.store'), [
+            'route' => $from->id.'-'.$to->id,
+            'vessel_id' => $vessel->id,
+            'departure_time' => '08:00',
+            'arrival_time' => '08:45',
+            'price_adult' => 100000,
+            'price_foreign' => 150000,
+            'price_child' => 75000,
+            'days' => ['Mon', 'Wed'],
+            'publish' => 'draft',
+        ])->assertRedirect(route('admin.schedules'));
+
+        $schedule = Schedule::query()->sole();
+        $this->assertSame($from->id, $schedule->from_port_id);
+        $this->assertSame($to->id, $schedule->to_port_id);
+        $this->assertSame($operator->id, $schedule->boat_operator_id);
+        $this->assertSame(ListingStatus::Draft, $schedule->status);
+        $this->assertSame(['Mon', 'Wed'], $schedule->days);
+
+        $this->actingAs($this->admin)->get(route('admin.schedules.edit', $schedule))
+            ->assertOk()
+            ->assertSee('60 pax')
+            ->assertSee('45 mins');
+    }
+
     public function test_schedule_requires_distinct_ports_and_ordered_times(): void
     {
         $operator = BoatOperator::factory()->create();
