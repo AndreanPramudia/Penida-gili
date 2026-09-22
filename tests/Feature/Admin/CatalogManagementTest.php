@@ -593,8 +593,25 @@ class CatalogManagementTest extends TestCase
     {
         $booking = Booking::factory()->create(['customer_name' => 'Report Person', 'status' => BookingStatus::Pending]);
 
-        $this->actingAs($this->admin)->get(route('admin.report'))->assertOk()->assertSee('Report Person');
+        $this->actingAs($this->admin)->get(route('admin.report'))
+            ->assertOk()
+            ->assertSeeInOrder(['Booking Report', 'Download Report', 'Search Route', 'Boat', 'Date', 'Filter'])
+            ->assertSeeInOrder(['Passenger', 'Route', 'Date & Time', 'Amount', 'Status', 'Action'])
+            ->assertSee('Report Person')
+            ->assertSee('Mark as Confirmed');
         $this->actingAs($this->admin)->get(route('admin.report', ['q' => 'nobody-here']))->assertOk()->assertDontSee('Report Person');
+
+        // Search Route matches the ports of the booked schedule; the Boat filter matches its vessel.
+        $sanur = Port::factory()->create(['name' => 'Sanur Beach Port', 'area' => 'Bali']);
+        $penida = Port::factory()->create(['name' => 'Banjar Nyuh Nusa Penida', 'area' => 'Nusa Penida']);
+        $queen = Vessel::factory()->create(['name' => 'Sanjaya Ocean Queen']);
+        $schedule = Schedule::factory()->create(['from_port_id' => $sanur->id, 'to_port_id' => $penida->id, 'vessel_id' => $queen->id]);
+        Booking::factory()->create(['customer_name' => 'Route Person', 'bookable_type' => $schedule->getMorphClass(), 'bookable_id' => $schedule->id]);
+
+        $this->actingAs($this->admin)->get(route('admin.report', ['q' => 'Sanur to Nusa Penida']))
+            ->assertSee('Route Person')->assertDontSee('Report Person');
+        $this->actingAs($this->admin)->get(route('admin.report', ['vessel' => $queen->id]))
+            ->assertSee('Route Person')->assertDontSee('Report Person');
 
         $this->actingAs($this->admin)->patch(route('admin.report.update', $booking), ['status' => 'confirmed'])
             ->assertRedirect();
