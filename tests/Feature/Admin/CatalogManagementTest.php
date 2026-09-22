@@ -476,6 +476,28 @@ class CatalogManagementTest extends TestCase
         $this->assertDatabaseCount('hotels', 0);
     }
 
+    public function test_article_listing_matches_figma_and_filters_by_author_category_and_status(): void
+    {
+        Article::factory()->create(['title' => 'Complete Guide to Nusa Penida', 'category' => 'Travel Guides', 'author_name' => 'Capt. Wayan Sudira', 'author_role' => 'Master Mariner', 'views' => 42_500, 'status' => ArticleStatus::Published]);
+        Article::factory()->create(['title' => 'Top 7 Snorkeling Spots', 'category' => 'Activities', 'author_name' => 'Dewa Krisna', 'views' => 980, 'status' => ArticleStatus::Draft]);
+
+        $this->actingAs($this->admin)->get(route('admin.articles'))
+            ->assertOk()
+            ->assertSeeInOrder(['Search by title, keyword, or author...', 'Author:', 'All Authors', 'Category:', 'All Categories', 'Status:', 'All Statuses', 'Active Filters:', 'Category: All', 'Clear all'])
+            ->assertSeeInOrder(['Article Details', 'Category', 'Author & Role', 'Views', 'Published Date', 'Status', 'Quick Actions'])
+            ->assertSee('42.5K')->assertSee('Master Mariner');
+
+        $this->actingAs($this->admin)->get(route('admin.articles', ['author' => 'Dewa Krisna']))
+            ->assertSee('Top 7 Snorkeling Spots')->assertDontSee('Complete Guide to Nusa Penida');
+
+        $this->actingAs($this->admin)->get(route('admin.articles', ['category' => 'Travel Guides']))
+            ->assertSee('Complete Guide to Nusa Penida')->assertDontSee('Top 7 Snorkeling Spots');
+
+        $this->actingAs($this->admin)->get(route('admin.articles', ['status' => 'draft']))
+            ->assertSee('Top 7 Snorkeling Spots')->assertDontSee('Complete Guide to Nusa Penida')
+            ->assertSee('Status: Draft');
+    }
+
     public function test_article_scheduling_requires_a_date_and_drafts_stay_unpublished(): void
     {
         $base = ['title' => 'Crossing Tips', 'excerpt' => 'Short', 'category' => 'Boat Tips', 'body' => str_repeat('word ', 400), 'author_name' => 'Capt. Wayan'];

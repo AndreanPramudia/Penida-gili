@@ -20,13 +20,20 @@ class ArticleController extends Controller
     {
         $articles = Article::query()
             ->search($request->string('q')->value())
+            ->when($request->filled('author'), fn ($q) => $q->where('author_name', $request->string('author')->value()))
+            ->when($request->filled('category'), fn ($q) => $q->where('category', $request->string('category')->value()))
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')->value()))
             ->latest('published_at')
             ->latest()
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.articles', ['articles' => $articles, 'filters' => $request->only(['q', 'status'])]);
+        return view('admin.articles', [
+            'articles' => $articles,
+            'filters' => $request->only(['q', 'author', 'category', 'status']),
+            'authors' => Article::query()->distinct()->orderBy('author_name')->pluck('author_name')->all(),
+            'categories' => self::CATEGORIES,
+        ]);
     }
 
     /** Add New Article — Figma node 1:8059. */
