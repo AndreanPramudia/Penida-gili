@@ -526,12 +526,14 @@ class CatalogManagementTest extends TestCase
                 'Article Core Editorial', 'min read', 'Article Title', 'Subtitle / Summary Hook', 'Primary Category', 'Target Reader Segment', 'Author', '+ Add new author…',
                 'H2', 'H3', 'Word Count:',
                 'Featured Hero Image', 'Replace Photo', 'Image Caption', 'Descriptive Alt Text (Accessibility & SEO)',
-                'Publishing Settings', 'Publish Immediately', 'Schedule for Later', 'Save as Draft', 'Scheduled Release Date & Time',
+                'Publishing Settings', 'Publish Immediately', 'Save as Draft',
 
                 'SEO Optimization', 'Score:', 'URL Permalink Slug', 'Meta Title', '/60 chars', 'Meta Description', '/160 chars', 'Live Google SERP Preview',
                 'Tags & Taxonomy', 'Type tag and hit Enter...',
-                'Contextual Fast Ticket Desk', 'Embed Quick Fast Ticket Desk Widget', 'Pre-selected Route', 'Direct conversion tracking enabled',
-            ]);
+            ])
+            ->assertDontSee('Schedule for Later')
+            ->assertDontSee('Contextual Fast Ticket Desk')
+            ->assertDontSee('Keywords');
 
         $base = ['title' => 'Crossing Tips', 'excerpt' => 'Short summary', 'category' => 'Boat Tips', 'body' => 'Body text', 'author_id' => 'new', 'author_name' => 'Capt. Wayan', 'status' => 'published'];
 
@@ -542,8 +544,6 @@ class CatalogManagementTest extends TestCase
             'author_role' => 'Master Mariner',
             'reader_segment' => 'First-time Island Travelers',
             'hero_alt' => 'Fast boat at sea',
-            'embed_booking_widget' => 'on',
-            'widget_route' => 'Sanur → Banjar Nyuh',
             'submit_as' => 'draft',
         ])->assertSessionHasNoErrors()->assertRedirect(route('admin.articles'));
 
@@ -553,8 +553,6 @@ class CatalogManagementTest extends TestCase
         $this->assertSame('Master Mariner', $article->author_role);
         $this->assertSame('First-time Island Travelers', $article->reader_segment);
         $this->assertSame('Fast boat at sea', $article->hero_alt);
-        $this->assertTrue($article->embed_booking_widget);
-        $this->assertSame('Sanur → Banjar Nyuh', $article->widget_route);
         // The header "Save Draft" button beats the Publish Immediately radio.
         $this->assertSame(ArticleStatus::Draft, $article->status);
 

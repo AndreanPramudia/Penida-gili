@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreArticleRequest;
 use App\Models\Article;
 use App\Models\Author;
-use App\Models\Schedule;
 use App\Support\Uploads;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -80,13 +79,8 @@ class ArticleController extends Controller
             'categories' => self::CATEGORIES,
             'segments' => self::SEGMENTS,
             'authors' => Author::query()->orderBy('name')->get(),
-            'routes' => Schedule::query()->with(['fromPort', 'toPort'])->get()
-                ->unique(fn (Schedule $s) => $s->from_port_id.'-'.$s->to_port_id)
-                ->map(fn (Schedule $s) => $s->fromPort->name.' → '.$s->toPort->name)
-                ->values()->all(),
             'publishModes' => [
                 ['value' => ArticleStatus::Published->value, 'label' => 'Publish Immediately', 'description' => 'Live to all passenger channels right away'],
-                ['value' => ArticleStatus::Scheduled->value, 'label' => 'Schedule for Later', 'description' => 'Automated release at designated time'],
                 ['value' => ArticleStatus::Draft->value, 'label' => 'Save as Draft', 'description' => 'Internal review without public URL'],
             ],
         ]);
@@ -96,7 +90,9 @@ class ArticleController extends Controller
     private function payload(StoreArticleRequest $request, ?Article $existing = null): array
     {
         $data = $request->safe()->except(['cover', 'submit_as']);
-        $data['is_featured'] = $request->boolean('is_featured');
+        // Flags without a control on the Figma form keep their stored value.
+        $data['is_featured'] = $request->has('is_featured') ? $request->boolean('is_featured') : (bool) $existing?->is_featured;
+        $data['embed_booking_widget'] = $request->has('embed_booking_widget') ? $request->boolean('embed_booking_widget') : (bool) $existing?->embed_booking_widget;
 
         // AUTHOR bar: an existing author fills the byline; "new" creates one from the typed name.
         $author = $request->input('author_id') === 'new' || blank($request->input('author_id'))

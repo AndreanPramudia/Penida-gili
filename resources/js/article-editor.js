@@ -133,12 +133,6 @@ if (articleForm) {
     const q = (sel) => articleForm.querySelector(sel);
     const value = (name) => q(`[name="${name}"]`)?.value.trim() ?? '';
 
-    const scheduleAt = q('[data-schedule-at]');
-    const syncStatus = () => {
-        scheduleAt.hidden = q('input[name="status"]:checked')?.value !== 'scheduled';
-    };
-    articleForm.querySelectorAll('input[name="status"]').forEach((r) => r.addEventListener('change', syncStatus));
-
     // AUTHOR bar: "+ Add new author…" reveals the name / role fields.
     const authorSelect = q('[data-author-select]');
     const authorNew = q('[data-author-new]');
@@ -164,19 +158,17 @@ if (articleForm) {
 
         // Score: each SEO field filled within its ideal length earns points.
         let score = 0;
-        if (title) score += 15;
+        if (title) score += 20;
         if (value('excerpt')) score += 10;
         if (metaTitle.length >= 30 && metaTitle.length <= 60) score += 25;
         else if (metaTitle) score += 10;
         if (metaDescription.length >= 100 && metaDescription.length <= 160) score += 25;
         else if (metaDescription) score += 10;
-        if (value('meta_keywords')) score += 10;
         if (value('slug') || title) score += 5;
         if (q('[name="hero_alt"]').value.trim()) score += 10;
         q('[data-seo-score]').textContent = score;
     };
     ['title', 'excerpt', 'slug', 'meta_title', 'meta_description', 'hero_alt'].forEach((n) => q(`[name="${n}"]`).addEventListener('input', syncSeo));
-    q('[data-keywords] input[type="hidden"]')?.addEventListener('change', syncSeo);
     syncSeo();
 
     const body = q('[name="body"]');

@@ -236,16 +236,9 @@
 
                     <div class="mt-[16px] flex flex-col gap-[16px]">
                         <x-admin.radio-cards name="status" :options="$publishModes" :selected="$article->status?->value" />
+                        {{-- Keywords stay on the record even though the design has no keyword field --}}
+                        <input type="hidden" name="meta_keywords" value="{{ $keywords }}">
 
-                        {{-- Schedule Date Picker (1:8347) --}}
-                        <div class="flex flex-col gap-[6px]" data-schedule-at @if (old('status', $article->status?->value) !== 'scheduled') hidden @endif>
-                            <label for="article-published-at" class="{{ $sideLabel }}">Scheduled Release Date &amp; Time</label>
-                            <input id="article-published-at" name="published_at" type="datetime-local" value="{{ old('published_at', $article->published_at?->format('Y-m-d\TH:i')) }}"
-                                   class="{{ $input }} bg-surface text-[16px] leading-[24px]">
-                            @error('published_at') <span class="font-jakarta text-[13px] text-[#dc2626]">{{ $message }}</span> @enderror
-                        </div>
-
-                        <x-admin.toggle name="is_featured" label="Feature at the top of the blog" description="Shows this article as the featured guide" :checked="old('is_featured', $article->is_featured)" />
                     </div>
                 </section>
 
@@ -288,17 +281,6 @@
                                       class="{{ $input }} resize-y bg-surface py-[9px] text-[12px] leading-[16px]">{{ old('meta_description', $article->meta_description) }}</textarea>
                         </div>
 
-                        <div class="flex flex-col gap-[8px]" data-keywords>
-                            <span class="{{ $sideLabel }}">Keywords</span>
-                            <input type="hidden" name="meta_keywords" value="{{ $keywords }}">
-                            <div class="flex flex-wrap items-center gap-[6px] rounded-[8px] border border-[#c0c7d3] bg-surface px-[10px] py-[6px] focus-within:border-editorial">
-                                <span class="contents" data-keywords-list></span>
-                                <input type="text" placeholder="Type keyword and hit Enter..." autocomplete="off"
-                                       class="min-w-[120px] flex-1 bg-transparent py-[4px] font-jakarta text-[12px] leading-[16px] text-editorial-ink placeholder:text-editorial-meta focus:outline-none">
-                            </div>
-                            @error('meta_keywords') <span class="font-jakarta text-[13px] text-[#dc2626]">{{ $message }}</span> @enderror
-                        </div>
-
                         {{-- Google SERP Snippet Preview (1:8415) --}}
                         <div class="flex flex-col gap-[8px] border-t border-[#ebeef0] pt-[16px]">
                             <span class="{{ $sideLabel }}">Live Google SERP Preview</span>
@@ -334,44 +316,6 @@
                     </div>
                 </section>
 
-                {{-- 4. Contextual Fast Ticket Desk (1:8467) --}}
-                <section class="{{ $card }} p-[25px]">
-                    <div class="flex items-center gap-[8px] border-b border-[#ebeef0] pb-[13px]">
-                        <img src="{{ $icon('side-widget.svg') }}" alt="" class="size-[13.3px]">
-                        <h2 class="{{ $sideH }}">Contextual Fast Ticket Desk</h2>
-                    </div>
-                    <div class="mt-[16px] flex flex-col gap-[16px]">
-                        <label class="flex cursor-pointer items-start gap-[10px]">
-                            <input type="checkbox" name="embed_booking_widget" @checked(old('embed_booking_widget', $article->embed_booking_widget)) class="peer sr-only">
-                            <span class="mt-[2px] flex size-[18px] shrink-0 items-center justify-center rounded-[4px] border border-[#c0c7d3] bg-surface peer-checked:border-editorial peer-checked:bg-editorial [&>img]:opacity-0 peer-checked:[&>img]:opacity-100">
-                                <img src="{{ $icon('side-check.svg') }}" alt="" class="size-[16px]">
-                            </span>
-                            <span>
-                                <span class="block font-jakarta text-[12px] font-bold leading-[16px] text-editorial-ink">Embed Quick Fast Ticket Desk Widget</span>
-                                <span class="block font-jakarta text-[11px] leading-[16px] text-editorial-body">Renders an interactive route booking form within article side rail on public view.</span>
-                            </span>
-                        </label>
-
-                        <div class="flex flex-col gap-[6px]">
-                            <label for="article-route" class="{{ $sideLabel }}">Pre-selected Route</label>
-                            <span class="relative block">
-                                <img src="{{ $icon('side-route.svg') }}" alt="" class="pointer-events-none absolute left-[12px] top-1/2 size-[12px] -translate-y-1/2">
-                                <select id="article-route" name="widget_route" class="{{ $input }} appearance-none bg-surface py-[9px] pl-[32px] pr-[36px] text-[12px] leading-[16px]">
-                                    <option value="">Choose a route…</option>
-                                    @foreach ($routes as $route)
-                                        <option value="{{ $route }}" @selected(old('widget_route', $article->widget_route) === $route)>{{ $route }}</option>
-                                    @endforeach
-                                </select>
-                                <img src="{{ $icon('side-chevron.svg') }}" alt="" class="pointer-events-none absolute right-[10px] top-1/2 size-[16px] -translate-y-1/2">
-                            </span>
-                        </div>
-
-                        <span class="flex items-center gap-[6px] font-jakarta text-[11px] leading-[16px] text-[#065f46]">
-                            <img src="{{ $icon('side-tracking.svg') }}" alt="" class="size-[11px]">
-                            Direct conversion tracking enabled
-                        </span>
-                    </div>
-                </section>
             </aside>
         </form>
     </x-admin.form-page>
