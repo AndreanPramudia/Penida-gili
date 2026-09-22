@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use App\Enums\ArticleStatus;
+use App\Models\Author;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -60,7 +61,13 @@ class StoreArticleRequest extends FormRequest
             'embed_booking_widget' => ['nullable', 'boolean'],
             'widget_route' => ['nullable', 'string', 'max:120'],
             'submit_as' => ['nullable', Rule::in(['draft', 'publish'])],
-            'author_name' => ['required', 'string', 'max:120'],
+            // AUTHOR bar: pick an existing author, or "new" plus a typed name.
+            'author_id' => ['nullable', function (string $attribute, mixed $value, \Closure $fail): void {
+                if ($value !== 'new' && ! Author::query()->whereKey($value)->exists()) {
+                    $fail('Pick an author from the list.');
+                }
+            }],
+            'author_name' => ['nullable', 'string', 'max:120', Rule::requiredIf(fn () => $this->input('author_id') === 'new' || blank($this->input('author_id')))],
             'author_role' => ['nullable', 'string', 'max:120'],
             'read_time_minutes' => ['nullable', 'integer', 'min:1', 'max:60'],
             'tags' => ['nullable', 'array', 'max:10'],

@@ -7,6 +7,7 @@ use App\Enums\BookingStatus;
 use App\Enums\ListingStatus;
 use App\Models\Activity;
 use App\Models\Article;
+use App\Models\Author;
 use App\Models\BoatOperator;
 use App\Models\Booking;
 use App\Models\Hotel;
@@ -526,13 +527,13 @@ class CatalogManagementTest extends TestCase
                 'H2', 'H3', 'Word Count:',
                 'Featured Hero Image', 'Replace Photo', 'Image Caption', 'Descriptive Alt Text (Accessibility & SEO)',
                 'Publishing Settings', 'Publish Immediately', 'Schedule for Later', 'Save as Draft', 'Scheduled Release Date & Time',
-                'Author & Signature', 'Author Name', 'Author Role / Title',
+                'Author', '+ Add new author…', 'Author Name', 'Author Role / Title',
                 'SEO Optimization', 'Score:', 'URL Permalink Slug', 'Meta Title', '/60 chars', 'Meta Description', '/160 chars', 'Live Google SERP Preview',
                 'Tags & Taxonomy', 'Type tag and hit Enter...',
                 'Contextual Fast Ticket Desk', 'Embed Quick Fast Ticket Desk Widget', 'Pre-selected Route', 'Direct conversion tracking enabled',
             ]);
 
-        $base = ['title' => 'Crossing Tips', 'excerpt' => 'Short summary', 'category' => 'Boat Tips', 'body' => 'Body text', 'author_name' => 'Capt. Wayan', 'status' => 'published'];
+        $base = ['title' => 'Crossing Tips', 'excerpt' => 'Short summary', 'category' => 'Boat Tips', 'body' => 'Body text', 'author_id' => 'new', 'author_name' => 'Capt. Wayan', 'status' => 'published'];
 
         $this->actingAs($this->admin)->post(route('admin.articles.store'), $base + [
             'meta_title' => 'Crossing Tips | Penida Gili',
@@ -557,7 +558,15 @@ class CatalogManagementTest extends TestCase
         // The header "Save Draft" button beats the Publish Immediately radio.
         $this->assertSame(ArticleStatus::Draft, $article->status);
 
+        $author = Author::query()->sole();
+        $this->assertSame($author->id, $article->author_id);
         $this->actingAs($this->admin)->get(route('admin.articles.edit', $article))->assertOk()->assertSee('Capt. Wayan - Master Mariner');
+
+        // Picking an existing author from the bar fills the byline from that record.
+        $other = Author::factory()->create(['name' => 'Putri Pratiwi', 'role' => 'Travel Concierge']);
+        $this->actingAs($this->admin)->put(route('admin.articles.update', $article), ['author_id' => $other->id, 'submit_as' => 'publish'] + $base)->assertSessionHasNoErrors();
+        $this->assertSame('Putri Pratiwi', $article->fresh()->author_name);
+        $this->assertSame('Travel Concierge', $article->fresh()->author_role);
 
         $this->actingAs($this->admin)->put(route('admin.articles.update', $article), $base + [
             'submit_as' => 'publish',

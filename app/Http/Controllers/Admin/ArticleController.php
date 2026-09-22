@@ -6,6 +6,7 @@ use App\Enums\ArticleStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreArticleRequest;
 use App\Models\Article;
+use App\Models\Author;
 use App\Models\Schedule;
 use App\Support\Uploads;
 use Illuminate\Http\RedirectResponse;
@@ -78,6 +79,7 @@ class ArticleController extends Controller
             'article' => $article,
             'categories' => self::CATEGORIES,
             'segments' => self::SEGMENTS,
+            'authors' => Author::query()->orderBy('name')->get(),
             'routes' => Schedule::query()->with(['fromPort', 'toPort'])->get()
                 ->unique(fn (Schedule $s) => $s->from_port_id.'-'.$s->to_port_id)
                 ->map(fn (Schedule $s) => $s->fromPort->name.' → '.$s->toPort->name)
@@ -95,6 +97,14 @@ class ArticleController extends Controller
     {
         $data = $request->safe()->except(['cover', 'submit_as']);
         $data['is_featured'] = $request->boolean('is_featured');
+
+        // AUTHOR bar: an existing author fills the byline; "new" creates one from the typed name.
+        $author = $request->input('author_id') === 'new' || blank($request->input('author_id'))
+            ? Author::query()->firstOrCreate(['name' => trim($request->input('author_name'))], ['role' => $request->input('author_role')])
+            : Author::query()->findOrFail($request->input('author_id'));
+        $data['author_id'] = $author->id;
+        $data['author_name'] = $author->name;
+        $data['author_role'] = $author->role;
         $data['read_time_minutes'] = $data['read_time_minutes'] ?? max(1, (int) ceil(str_word_count(strip_tags($data['body'])) / 200));
 
         $status = ArticleStatus::from($data['status']);

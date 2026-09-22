@@ -11,10 +11,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'title', 'slug', 'category', 'excerpt', 'meta_title', 'meta_description', 'meta_keywords', 'subtitle', 'lead', 'lead_follow', 'body', 'content', 'image',
-    'hero_caption', 'hero_alt', 'reader_segment', 'author_name', 'author_role', 'read_time_minutes', 'views', 'tags', 'is_featured',
+    'hero_caption', 'hero_alt', 'reader_segment', 'author_id', 'author_name', 'author_role', 'read_time_minutes', 'views', 'tags', 'is_featured',
     'embed_booking_widget', 'widget_route', 'status', 'published_at',
 ])]
 class Article extends Model
@@ -37,6 +38,11 @@ class Article extends Model
     protected function slugSource(): string
     {
         return $this->title;
+    }
+
+    public function writer(): BelongsTo
+    {
+        return $this->belongsTo(Author::class, 'author_id');
     }
 
     #[Scope]

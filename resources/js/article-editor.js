@@ -139,15 +139,14 @@ if (articleForm) {
     };
     articleForm.querySelectorAll('input[name="status"]').forEach((r) => r.addEventListener('change', syncStatus));
 
-    const initials = (name) =>
-        name.split(/\s+/).filter(Boolean).map((w) => w[0].toUpperCase()).slice(0, 2).join('') || 'PG';
+    // AUTHOR bar: "+ Add new author…" reveals the name / role fields.
+    const authorSelect = q('[data-author-select]');
+    const authorNew = q('[data-author-new]');
     const syncAuthor = () => {
-        const name = value('author_name');
-        const role = value('author_role');
-        q('[data-author-avatar]').textContent = initials(name);
-        q('[data-author-signature]').textContent = (name || 'Author name') + (role ? ` - ${role}` : '');
+        authorNew.hidden = authorSelect.value !== 'new';
+        if (!authorNew.hidden) q('[name="author_name"]').focus();
     };
-    ['author_name', 'author_role'].forEach((n) => q(`[name="${n}"]`).addEventListener('input', syncAuthor));
+    authorSelect?.addEventListener('change', syncAuthor);
 
     const slugify = (text) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
     const syncSeo = () => {
