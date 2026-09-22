@@ -121,10 +121,9 @@ class HotelController extends Controller
             'amenities' => collect(self::AMENITIES)->map(fn ($a) => $a + ['checked' => in_array($a['label'], $selected, true)])->all(),
             'categories' => ['Luxury Resort', 'Resort', 'Hotel', 'Villa', 'Boutique'],
             'regions' => StoreHotelRequest::REGIONS,
-            'listingStatuses' => [
-                ['value' => ListingStatus::Active->value, 'label' => 'Active (Visible to island travelers)', 'description' => 'Bookable across every channel'],
-                ['value' => ListingStatus::Draft->value, 'label' => 'In Review (Pending harbor audit)', 'description' => 'Awaiting partner verification'],
-                ['value' => ListingStatus::Inactive->value, 'label' => 'Inactive (Hidden from booking engine)', 'description' => 'Retained but not listed'],
+            'publishModes' => [
+                ['value' => 'publish', 'label' => 'Publish Immediately', 'description' => 'Live to all passenger channels right away'],
+                ['value' => 'draft', 'label' => 'Save as Draft', 'description' => 'Internal review without public URL'],
             ],
         ]);
     }
@@ -132,10 +131,9 @@ class HotelController extends Controller
     /** @return array<string, mixed> */
     private function payload(StoreHotelRequest $request, ?Hotel $existing = null): array
     {
-        $data = $request->safe()->except(['cover', 'gallery', 'rooms', 'amenities', 'submit_as']);
+        $data = $request->safe()->except(['cover', 'gallery', 'rooms', 'amenities', 'submit_as', 'publish']);
         $picked = $request->input('amenities', []);
         $data['amenities'] = array_values(array_filter(self::AMENITIES, fn ($a) => in_array($a['label'], $picked, true)));
-        $data['commission_rate'] = $data['commission_rate'] ?? 15;
 
         if ($cover = Uploads::store($request->file('cover'), 'hotels')) {
             $data['image'] = $cover;

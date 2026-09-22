@@ -246,7 +246,12 @@
             </div>
 
             <aside class="flex flex-col gap-[24px]">
-                {{-- 1. Location & Harbor Proximity (1:7894) --}}
+                {{-- Publishing Settings — same radio cards as the boat/activity editors --}}
+                <x-admin.form-section title="Publishing Settings" icon="nav-schedule.svg">
+                    <x-admin.radio-cards name="publish" :options="$publishModes" :selected="$hotel->status === \App\Enums\ListingStatus::Draft ? 'draft' : 'publish'" />
+                </x-admin.form-section>
+
+                {{-- Location & Harbor Proximity (1:7894) --}}
                 <section class="rounded-[12px] border border-[rgba(192,199,211,0.3)] bg-surface p-[25px] shadow-[0_4px_10px_rgba(0,0,0,0.05)]">
                     <div class="flex items-center gap-[10px] border-b border-[#ebeef0] pb-[13px]">
                         <img src="{{ $icon('side-location.svg') }}" alt="" class="h-[16.6px] w-[11.6px]">
@@ -302,115 +307,6 @@
                     </div>
                 </section>
 
-                {{-- 2. Fastboat Transfer Bundle (1:7935) --}}
-                <section class="rounded-[12px] border border-[rgba(192,199,211,0.3)] bg-surface p-[25px] shadow-[0_4px_10px_rgba(0,0,0,0.05)]">
-                    <div class="flex items-center justify-between gap-[10px] border-b border-[#ebeef0] pb-[13px]">
-                        <div class="flex items-center gap-[10px]">
-                            <img src="{{ $icon('side-boat.svg') }}" alt="" class="h-[16.6px] w-[15.3px]">
-                            <h2 class="font-jakarta text-[24px] font-semibold leading-[32px] text-editorial-ink">Fastboat Transfer Bundle</h2>
-                        </div>
-                        <span class="shrink-0 rounded-[4px] bg-[#d2e4ff] px-[8px] py-[2px] text-center font-jakarta text-[10px] font-bold uppercase leading-[24px] text-editorial">Sanjaya Exclusive</span>
-                    </div>
-
-                    <div class="mt-[16px] flex flex-col gap-[16px]">
-                        <div class="rounded-[8px] border border-[rgba(0,94,161,0.3)] bg-[rgba(210,228,255,0.2)] p-[13px]">
-                            <x-admin.toggle name="transfer_bundle" label="Link with Sanjaya Fastboat transfers" description="Enable automated combo ticketing" :checked="old('transfer_bundle', $hotel->transfer_bundle ?? true)" />
-                        </div>
-
-                        <div class="flex flex-col gap-[6px]">
-                            <label for="hotel-port" class="{{ $label }}">Recommended Departure Port</label>
-                            <span class="flex items-center gap-[8px] rounded-[8px] bg-[#f1f4f6] p-[10px]">
-                                <img src="{{ $icon('side-port.svg') }}" alt="" class="h-[13.3px] w-[12px] shrink-0">
-                                <input id="hotel-port" name="departure_port" value="{{ old('departure_port', $hotel->departure_port) }}" placeholder="Sanur Beach Terminal (Berth 3 &amp; 4)"
-                                       class="w-full bg-transparent font-jakarta text-[12px] font-medium leading-[16px] text-editorial-ink placeholder:text-editorial-meta focus:outline-none">
-                            </span>
-                        </div>
-
-                        <div class="flex flex-col gap-[6px]">
-                            <label for="hotel-pier" class="{{ $label }}">Preferred Ferry Arrival Pier</label>
-                            <span class="flex items-center gap-[8px] rounded-[8px] bg-[#f1f4f6] p-[10px]">
-                                <img src="{{ $icon('side-pier.svg') }}" alt="" class="h-[14.6px] w-[8.7px] shrink-0">
-                                <input id="hotel-pier" name="arrival_pier" value="{{ old('arrival_pier', $hotel->arrival_pier) }}" placeholder="Banjar Nyuh Pier, Nusa Penida"
-                                       class="w-full bg-transparent font-jakarta text-[12px] font-medium leading-[16px] text-editorial-ink placeholder:text-editorial-meta focus:outline-none">
-                            </span>
-                        </div>
-
-                        <label class="flex cursor-pointer items-center gap-[8px]">
-                            <input type="checkbox" name="harbor_pickup" @checked(old('harbor_pickup', $hotel->harbor_pickup ?? true)) class="peer sr-only">
-                            <span class="flex size-[18px] shrink-0 items-center justify-center rounded-[4px] border border-[#c0c7d3] bg-surface peer-checked:border-editorial peer-checked:bg-editorial [&>img]:opacity-0 peer-checked:[&>img]:opacity-100">
-                                <img src="{{ $icon('side-check.svg') }}" alt="" class="size-[16px]">
-                            </span>
-                            <span class="font-jakarta text-[12px] font-semibold leading-[16px] text-editorial-ink">Free Harbor Pick-up included in bundle</span>
-                        </label>
-                    </div>
-                </section>
-
-                {{-- 3. Channel Manager & OTA Sync (1:7974) --}}
-                <section class="rounded-[12px] border border-[rgba(192,199,211,0.3)] bg-surface p-[25px] shadow-[0_4px_10px_rgba(0,0,0,0.05)]">
-                    <div class="flex items-center gap-[10px] border-b border-[#ebeef0] pb-[13px]">
-                        <img src="{{ $icon('side-sync.svg') }}" alt="" class="h-[15px] w-[16.6px]">
-                        <h2 class="font-jakarta text-[24px] font-semibold leading-[32px] text-editorial-ink">Channel Manager &amp; OTA Sync</h2>
-                    </div>
-
-                    <div class="mt-[16px] flex flex-col gap-[16px]">
-                        <div class="flex items-center gap-[12px] rounded-[8px] border border-[#a7f3d0] bg-[#ecfdf5] p-[13px]">
-                            <img src="{{ $icon('side-sync-ok.svg') }}" alt="" class="size-[16.6px] shrink-0">
-                            <span>
-                                <span class="block font-jakarta text-[12px] font-bold leading-[16px] text-[#022c22]">Direct Sync Status</span>
-                                <span class="block font-jakarta text-[11px] leading-[16px] text-[#065f46]">Connected to Agoda &amp; Booking.com API</span>
-                            </span>
-                        </div>
-                        <x-admin.toggle name="auto_sync" label="Auto-sync inventory" description="Update allotment every 15 minutes" :checked="old('auto_sync', $hotel->auto_sync ?? true)" />
-                    </div>
-                </section>
-
-                {{-- 4. Publishing & Commission (1:7998) --}}
-                <section class="rounded-[12px] border border-[rgba(192,199,211,0.3)] bg-surface p-[25px] shadow-[0_4px_10px_rgba(0,0,0,0.05)]">
-                    <div class="flex items-center gap-[10px] border-b border-[#ebeef0] pb-[13px]">
-                        <img src="{{ $icon('side-commission.svg') }}" alt="" class="h-[13.3px] w-[18.3px]">
-                        <h2 class="font-jakarta text-[24px] font-semibold leading-[32px] text-editorial-ink">Publishing &amp; Commission</h2>
-                    </div>
-
-                    <div class="mt-[16px] flex flex-col gap-[16px]">
-                        <div class="flex flex-col gap-[4px]">
-                            <label for="hotel-commission" class="{{ $label }}">Partner Commission Rate</label>
-                            <span class="relative block pt-[2px]">
-                                <input id="hotel-commission" name="commission_rate" type="number" min="0" max="100" value="{{ old('commission_rate', $hotel->commission_rate ?? 15) }}" required
-                                       class="{{ $input }} py-[9px] pl-[13px] pr-[33px] text-[14px] font-bold leading-[20px]">
-                                <span class="pointer-events-none absolute right-[12px] top-1/2 -translate-y-1/2 font-jakarta text-[12px] font-bold text-editorial-body">%</span>
-                            </span>
-                            <span class="font-jakarta text-[10px] leading-[16px] text-editorial-body">Net payout generated monthly on the 5th</span>
-                            @error('commission_rate') <span class="font-jakarta text-[13px] text-[#dc2626]">{{ $message }}</span> @enderror
-                        </div>
-
-                        <fieldset class="flex flex-col gap-[6px] pb-[8px]">
-                            <legend class="{{ $label }} mb-[6px]">Listing Status</legend>
-                            <div class="flex flex-col gap-[8px]">
-                                @foreach ($listingStatuses as $option)
-                                    <label class="cursor-pointer">
-                                        <input type="radio" name="status" value="{{ $option['value'] }}" @checked(old('status', $hotel->status?->value) === $option['value']) class="peer sr-only">
-                                        <span class="flex items-center gap-[10px] rounded-[8px] border border-[#c0c7d3] p-[9px] font-jakarta text-[12px] font-medium leading-[16px] text-editorial-body
-                                                     peer-checked:border-editorial peer-checked:bg-[rgba(210,228,255,0.2)] peer-checked:font-bold peer-checked:text-editorial-ink
-                                                     peer-checked:[&>span]:border-editorial peer-checked:[&>span]:bg-editorial peer-checked:[&>span>img]:opacity-100">
-                                            <span class="flex size-[16px] shrink-0 items-center justify-center rounded-full border border-[#6b7280] bg-surface">
-                                                <img src="{{ $icon('side-radio.svg') }}" alt="" class="size-[16px] opacity-0">
-                                            </span>
-                                            {{ $option['label'] }}
-                                        </span>
-                                    </label>
-                                @endforeach
-                            </div>
-                        </fieldset>
-
-                        {{-- Quick Confirmation Box (1:8038) --}}
-                        <button type="submit" name="submit_as" value="publish"
-                                class="flex w-full items-center justify-center gap-[8px] rounded-[8px] bg-editorial py-[12px] font-jakarta text-[14px] font-semibold tracking-[0.7px] text-white shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)]
-                                       transition-transform duration-300 ease-smooth hover:-translate-y-0.5">
-                            <img src="{{ $icon('side-publish.svg') }}" alt="" class="h-[8px] w-[10.8px]">
-                            Confirm &amp; Publish Partner
-                        </button>
-                    </div>
-                </section>
             </aside>
         </form>
     </x-admin.form-page>

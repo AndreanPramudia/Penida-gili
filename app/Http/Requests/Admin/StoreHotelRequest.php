@@ -21,15 +21,13 @@ class StoreHotelRequest extends FormRequest
             ->values()
             ->all();
 
-        // "Save Draft" parks the listing in review regardless of the chosen status.
-        $status = $this->input('submit_as') === 'draft' ? ListingStatus::Draft->value : $this->input('status');
+        // Publishing Settings: "Save as Draft" (radio or the header button) parks the listing
+        // in review; "Publish Immediately" makes it active.
+        $draft = $this->input('submit_as') === 'draft' || $this->input('publish') === 'draft';
 
         $this->merge([
             'rooms' => $rooms,
-            'status' => $status,
-            'transfer_bundle' => $this->boolean('transfer_bundle'),
-            'harbor_pickup' => $this->boolean('harbor_pickup'),
-            'auto_sync' => $this->boolean('auto_sync'),
+            'status' => $draft ? ListingStatus::Draft->value : ListingStatus::Active->value,
         ]);
     }
 
@@ -46,15 +44,10 @@ class StoreHotelRequest extends FormRequest
             'full_address' => ['nullable', 'string', 'max:255'],
             'harbor_distance' => ['nullable', 'string', 'max:120'],
             'coordinates' => ['nullable', 'string', 'max:60'],
-            'transfer_bundle' => ['nullable', 'boolean'],
-            'departure_port' => ['nullable', 'string', 'max:120'],
-            'arrival_pier' => ['nullable', 'string', 'max:120'],
-            'harbor_pickup' => ['nullable', 'boolean'],
-            'auto_sync' => ['nullable', 'boolean'],
-            'commission_rate' => ['nullable', 'integer', 'min:0', 'max:100'],
             'amenities' => ['nullable', 'array'],
             'amenities.*' => ['string', 'max:60'],
             'status' => ['required', Rule::enum(ListingStatus::class)],
+            'publish' => ['nullable', Rule::in(['publish', 'draft'])],
             'submit_as' => ['nullable', Rule::in(['draft', 'publish'])],
             'cover' => ['nullable', 'image', 'max:12288'],
             'gallery' => ['nullable', 'array', 'max:12'],

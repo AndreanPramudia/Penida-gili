@@ -18,8 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable([
     'name', 'slug', 'category', 'partner_label', 'stars', 'rating', 'review_count', 'description',
     'address', 'full_address', 'image', 'gallery', 'amenities', 'status',
-    'region', 'harbor_distance', 'coordinates', 'transfer_bundle', 'departure_port', 'arrival_pier',
-    'harbor_pickup', 'auto_sync', 'commission_rate',
+    'region', 'harbor_distance', 'coordinates',
 ])]
 class Hotel extends Model
 {
@@ -31,10 +30,6 @@ class Hotel extends Model
             'rating' => 'decimal:1',
             'gallery' => 'array',
             'amenities' => 'array',
-            'transfer_bundle' => 'boolean',
-            'harbor_pickup' => 'boolean',
-            'auto_sync' => 'boolean',
-            'commission_rate' => 'integer',
             'status' => ListingStatus::class,
         ];
     }

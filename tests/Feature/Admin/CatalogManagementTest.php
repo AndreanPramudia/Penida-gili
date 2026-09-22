@@ -416,11 +416,11 @@ class CatalogManagementTest extends TestCase
                 'Room Categories & Inventory Manager', 'Categories Active', '+ Add Another Room Category',
                 'Premium Hotel Amenities', 'Starlink Mesh', '24/7 Butler Service', 'Air Conditioning',
                 'Photo Gallery & Room Images', 'images uploaded', 'Browse Files', 'Featured Hero',
+                'Publishing Settings', 'Publish Immediately', 'Save as Draft',
                 'Location & Harbor Proximity', 'Island / Region', 'Specific Coastal Area', 'Harbor Transfer Distance', 'Map Pin Coordinates',
-                'Fastboat Transfer Bundle', 'Sanjaya Exclusive', 'Recommended Departure Port', 'Preferred Ferry Arrival Pier', 'Free Harbor Pick-up included in bundle',
-                'Channel Manager & OTA Sync', 'Auto-sync inventory',
-                'Publishing & Commission', 'Partner Commission Rate', 'Listing Status', 'In Review (Pending harbor audit)', 'Confirm & Publish Partner',
-            ]);
+            ])
+            ->assertDontSee('Fastboat Transfer Bundle')
+            ->assertDontSee('Partner Commission Rate');
 
         $payload = [
             'name' => 'Toya Pakeh Cliff Resort',
@@ -431,12 +431,7 @@ class CatalogManagementTest extends TestCase
             'address' => 'Toya Pakeh, Crystal Bay Road',
             'harbor_distance' => '8 minutes from Banjar Nyuh Harbor',
             'coordinates' => '-8.6792° S, 115.4851° E',
-            'transfer_bundle' => 'on',
-            'departure_port' => 'Sanur Beach Terminal (Berth 3 & 4)',
-            'arrival_pier' => 'Banjar Nyuh Pier, Nusa Penida',
-            'commission_rate' => '12',
-            'status' => 'active',
-            'submit_as' => 'draft',
+            'publish' => 'draft',
             'rooms' => [['name' => 'Deluxe', 'guests' => 2, 'price_per_night' => '2.500.000', 'stock' => 8]],
         ];
 
@@ -444,16 +439,11 @@ class CatalogManagementTest extends TestCase
             ->assertSessionHasNoErrors()->assertRedirect(route('admin.hotels'));
 
         $hotel = Hotel::query()->sole();
-        // Save Draft parks the listing in review even though Active was ticked.
+        // "Save as Draft" parks the listing in review.
         $this->assertSame(ListingStatus::Draft, $hotel->status);
         $this->assertSame('Nusa Penida', $hotel->region);
         $this->assertSame('8 minutes from Banjar Nyuh Harbor', $hotel->harbor_distance);
         $this->assertSame('-8.6792° S, 115.4851° E', $hotel->coordinates);
-        $this->assertTrue($hotel->transfer_bundle);
-        $this->assertFalse($hotel->harbor_pickup);
-        $this->assertFalse($hotel->auto_sync);
-        $this->assertSame('Banjar Nyuh Pier, Nusa Penida', $hotel->arrival_pier);
-        $this->assertSame(12, $hotel->commission_rate);
 
         $this->actingAs($this->admin)->get(route('admin.hotels.edit', $hotel))
             ->assertOk()
@@ -461,8 +451,9 @@ class CatalogManagementTest extends TestCase
             ->assertSee('8 Units Left')
             ->assertSee('IDR 2.500.000');
 
-        $this->actingAs($this->admin)->post(route('admin.hotels.store'), ['commission_rate' => '150'] + $payload)
-            ->assertSessionHasErrors('commission_rate');
+        // "Publish Immediately" (or the header button) flips it live.
+        $this->actingAs($this->admin)->put(route('admin.hotels.update', $hotel), ['publish' => 'publish'] + $payload)->assertSessionHasNoErrors();
+        $this->assertSame(ListingStatus::Active, $hotel->fresh()->status);
     }
 
     public function test_hotel_requires_at_least_one_room(): void
