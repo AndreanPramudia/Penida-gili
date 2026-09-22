@@ -13,6 +13,7 @@ document.querySelectorAll('[data-keywords]').forEach((root) => {
 
     const render = () => {
         hidden.value = keywords.join(', ');
+        hidden.dispatchEvent(new Event('change'));
         list.innerHTML = '';
         keywords.forEach((keyword, index) => {
             const chip = document.createElement('span');
@@ -66,7 +67,7 @@ document.querySelectorAll('[data-body-editor]').forEach((root) => {
 
     const count = () => {
         const words = textarea.value.trim().split(/\s+/).filter(Boolean).length;
-        counter.textContent = `${words} ${words === 1 ? 'kata' : 'kata'}`;
+        counter.textContent = words.toLocaleString('en-US');
     };
 
     textarea.addEventListener('input', count);
@@ -117,8 +118,74 @@ document.querySelectorAll('[data-cover-picker]').forEach((root) => {
         }
         img.src = URL.createObjectURL(file);
         img.hidden = false;
+        root.querySelector('[data-cover-empty]')?.remove();
         if (name) {
             name.textContent = file.name;
         }
     });
 });
+
+// Figma 1:8059 sidebar: scheduled date reveal, live author signature, SEO counters,
+// SERP preview and a rough SEO score; read time follows the word count.
+const articleForm = document.querySelector('[data-article-form]');
+
+if (articleForm) {
+    const q = (sel) => articleForm.querySelector(sel);
+    const value = (name) => q(`[name="${name}"]`)?.value.trim() ?? '';
+
+    const scheduleAt = q('[data-schedule-at]');
+    const syncStatus = () => {
+        scheduleAt.hidden = q('input[name="status"]:checked')?.value !== 'scheduled';
+    };
+    articleForm.querySelectorAll('input[name="status"]').forEach((r) => r.addEventListener('change', syncStatus));
+
+    const initials = (name) =>
+        name.split(/\s+/).filter(Boolean).map((w) => w[0].toUpperCase()).slice(0, 2).join('') || 'PG';
+    const syncAuthor = () => {
+        const name = value('author_name');
+        const role = value('author_role');
+        q('[data-author-avatar]').textContent = initials(name);
+        q('[data-author-signature]').textContent = (name || 'Author name') + (role ? ` - ${role}` : '');
+    };
+    ['author_name', 'author_role'].forEach((n) => q(`[name="${n}"]`).addEventListener('input', syncAuthor));
+
+    const slugify = (text) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    const syncSeo = () => {
+        const title = value('title');
+        const metaTitle = value('meta_title');
+        const metaDescription = value('meta_description');
+        const slug = value('slug') || slugify(title) || 'your-article';
+
+        articleForm.querySelectorAll('[data-count-for]').forEach((el) => {
+            el.textContent = value(el.dataset.countFor).length;
+        });
+        q('[data-serp-slug]').textContent = slug.length > 18 ? slug.slice(0, 18) + '…' : slug;
+        q('[data-serp-title]').textContent = metaTitle || title || 'Article title';
+        q('[data-serp-description]').textContent = metaDescription || value('excerpt') || 'Meta description preview appears here.';
+
+        // Score: each SEO field filled within its ideal length earns points.
+        let score = 0;
+        if (title) score += 15;
+        if (value('excerpt')) score += 10;
+        if (metaTitle.length >= 30 && metaTitle.length <= 60) score += 25;
+        else if (metaTitle) score += 10;
+        if (metaDescription.length >= 100 && metaDescription.length <= 160) score += 25;
+        else if (metaDescription) score += 10;
+        if (value('meta_keywords')) score += 10;
+        if (value('slug') || title) score += 5;
+        if (q('[name="hero_alt"]').value.trim()) score += 10;
+        q('[data-seo-score]').textContent = score;
+    };
+    ['title', 'excerpt', 'slug', 'meta_title', 'meta_description', 'hero_alt'].forEach((n) => q(`[name="${n}"]`).addEventListener('input', syncSeo));
+    q('[data-keywords] input[type="hidden"]')?.addEventListener('change', syncSeo);
+    syncSeo();
+
+    const body = q('[name="body"]');
+    const readTime = q('[data-read-time]');
+    const syncReadTime = () => {
+        const words = body.value.trim().split(/\s+/).filter(Boolean).length;
+        readTime.textContent = Math.max(1, Math.ceil(words / 200));
+    };
+    body.addEventListener('input', syncReadTime);
+    if (body.value.trim()) syncReadTime();
+}

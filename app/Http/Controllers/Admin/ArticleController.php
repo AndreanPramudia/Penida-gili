@@ -6,6 +6,7 @@ use App\Enums\ArticleStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreArticleRequest;
 use App\Models\Article;
+use App\Models\Schedule;
 use App\Support\Uploads;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,6 +15,9 @@ use Illuminate\View\View;
 class ArticleController extends Controller
 {
     public const CATEGORIES = ['Travel Guides', 'Boat Tips', 'Activities', 'Culture', 'Hotels', 'Fast Boat Transfers'];
+
+    /** Target Reader Segment options (Figma 1:8139). */
+    public const SEGMENTS = ['First-time Island Travelers', 'Returning Visitors', 'Families with Children', 'Divers & Snorkelers', 'Backpackers', 'Luxury Travelers'];
 
     /** Article listing — Figma node 1:9637. */
     public function index(Request $request): View
@@ -73,6 +77,11 @@ class ArticleController extends Controller
         return view('admin.articles-create', [
             'article' => $article,
             'categories' => self::CATEGORIES,
+            'segments' => self::SEGMENTS,
+            'routes' => Schedule::query()->with(['fromPort', 'toPort'])->get()
+                ->unique(fn (Schedule $s) => $s->from_port_id.'-'.$s->to_port_id)
+                ->map(fn (Schedule $s) => $s->fromPort->name.' → '.$s->toPort->name)
+                ->values()->all(),
             'publishModes' => [
                 ['value' => ArticleStatus::Published->value, 'label' => 'Publish Immediately', 'description' => 'Live to all passenger channels right away'],
                 ['value' => ArticleStatus::Scheduled->value, 'label' => 'Schedule for Later', 'description' => 'Automated release at designated time'],
@@ -84,7 +93,7 @@ class ArticleController extends Controller
     /** @return array<string, mixed> */
     private function payload(StoreArticleRequest $request, ?Article $existing = null): array
     {
-        $data = $request->safe()->except(['cover']);
+        $data = $request->safe()->except(['cover', 'submit_as']);
         $data['is_featured'] = $request->boolean('is_featured');
         $data['read_time_minutes'] = $data['read_time_minutes'] ?? max(1, (int) ceil(str_word_count(strip_tags($data['body'])) / 200));
 

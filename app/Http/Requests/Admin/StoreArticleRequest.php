@@ -24,7 +24,19 @@ class StoreArticleRequest extends FormRequest
             ->values()
             ->all();
 
-        $this->merge(['tags' => $tags, 'meta_keywords' => $keywords]);
+        // The header buttons override the Publishing Settings radios.
+        $status = match ($this->input('submit_as')) {
+            'draft' => ArticleStatus::Draft->value,
+            'publish' => ArticleStatus::Published->value,
+            default => $this->input('status'),
+        };
+
+        $this->merge([
+            'tags' => $tags,
+            'meta_keywords' => $keywords,
+            'status' => $status,
+            'embed_booking_widget' => $this->boolean('embed_booking_widget'),
+        ]);
     }
 
     public function rules(): array
@@ -43,6 +55,11 @@ class StoreArticleRequest extends FormRequest
             'category' => ['required', 'string', 'max:60'],
             'body' => ['required', 'string'],
             'hero_caption' => ['nullable', 'string', 'max:200'],
+            'hero_alt' => ['nullable', 'string', 'max:200'],
+            'reader_segment' => ['nullable', 'string', 'max:80'],
+            'embed_booking_widget' => ['nullable', 'boolean'],
+            'widget_route' => ['nullable', 'string', 'max:120'],
+            'submit_as' => ['nullable', Rule::in(['draft', 'publish'])],
             'author_name' => ['required', 'string', 'max:120'],
             'author_role' => ['nullable', 'string', 'max:120'],
             'read_time_minutes' => ['nullable', 'integer', 'min:1', 'max:60'],

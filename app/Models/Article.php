@@ -14,8 +14,8 @@ use Illuminate\Database\Eloquent\Model;
 
 #[Fillable([
     'title', 'slug', 'category', 'excerpt', 'meta_title', 'meta_description', 'meta_keywords', 'subtitle', 'lead', 'lead_follow', 'body', 'content', 'image',
-    'hero_caption', 'author_name', 'author_role', 'read_time_minutes', 'views', 'tags', 'is_featured',
-    'status', 'published_at',
+    'hero_caption', 'hero_alt', 'reader_segment', 'author_name', 'author_role', 'read_time_minutes', 'views', 'tags', 'is_featured',
+    'embed_booking_widget', 'widget_route', 'status', 'published_at',
 ])]
 class Article extends Model
 {
@@ -28,6 +28,7 @@ class Article extends Model
             'meta_keywords' => 'array',
             'tags' => 'array',
             'is_featured' => 'boolean',
+            'embed_booking_widget' => 'boolean',
             'status' => ArticleStatus::class,
             'published_at' => 'datetime',
         ];

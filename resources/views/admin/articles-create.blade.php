@@ -1,5 +1,4 @@
-{{-- Figma node 1:8059 — admin Add New Article (also serves Edit).
-     Section order follows the "Tambah Artikel" reference: SEO → article info → image & body → actions. --}}
+{{-- Figma node 1:8059 — admin Add New Article (also serves Edit). Figma is drawn at ~1.47×; sizes here are scaled down. --}}
 @extends('layouts.admin')
 
 @php
@@ -7,6 +6,19 @@
     $backHref = route('admin.articles');
     $keywords = old('meta_keywords', $article->meta_keywords ?? []);
     $keywords = is_array($keywords) ? implode(', ', $keywords) : $keywords;
+    $tags = old('tags', $article->tags ?? []);
+    $tags = is_array($tags) ? implode(', ', $tags) : $tags;
+    $icon = fn ($file) => asset('images/icons/admin/article/'.$file);
+    $label = 'font-jakarta text-[12px] font-bold uppercase leading-[16px] tracking-[0.6px] text-editorial-ink';
+    $sideLabel = 'font-jakarta text-[12px] font-bold uppercase leading-[16px] tracking-[0.6px] text-editorial-body';
+    $input = 'w-full rounded-[8px] border border-[#c0c7d3] bg-[#f7fafc] px-[13px] py-[11px] font-jakarta text-[14px] leading-[20px] text-editorial-ink placeholder:text-editorial-meta focus:outline-2 focus:outline-editorial';
+    $card = 'rounded-[12px] border border-[#ebeef0] bg-surface shadow-[0_4px_10px_rgba(0,0,0,0.05)]';
+    $head = 'flex items-center gap-[10px] border-b border-[#ebeef0] pb-[17px]';
+    $tile = 'flex size-[32px] shrink-0 items-center justify-center rounded-[8px] bg-[#d2e4ff]';
+    $h2 = 'font-jakarta text-[18px] font-bold leading-[28px] text-editorial-ink';
+    $sideH = 'font-jakarta text-[24px] font-semibold leading-[32px] text-editorial-ink';
+    $siteHost = parse_url(config('app.url'), PHP_URL_HOST) ?: 'penidagili.com';
+    $initials = fn ($name) => collect(preg_split('/\s+/', trim((string) $name)))->filter()->map(fn ($w) => mb_strtoupper(mb_substr($w, 0, 1)))->take(2)->implode('') ?: 'PG';
 @endphp
 
 @section('title', $editing ? 'Edit Article' : 'Add New Article')
@@ -16,150 +28,342 @@
 @section('content')
     <x-admin.form-page
         :heading="$editing ? 'Edit Article' : 'Add New Article'"
-        subtitle="Fill in the article content — everything here is saved to the database."
+        subtitle="Compose editorial guides, maritime safety tips, island port advice, and SEO content for passengers."
         :back-href="$backHref">
 
+        {{-- Header actions (1:8070 / 1:8074) --}}
         <x-slot:actions>
-            <button type="submit" form="article-form"
-                    class="flex items-center gap-[8px] rounded-[8px] bg-editorial px-[18px] py-[10px] font-jakarta text-[14px] font-semibold text-white
+            <button type="submit" form="article-form" name="submit_as" value="draft"
+                    class="flex items-center gap-[8px] rounded-[8px] border border-[#c0c7d3] bg-surface px-[21px] py-[11px] font-jakarta text-[14px] font-semibold text-editorial-ink
+                           transition-colors duration-300 hover:bg-[#f1f4f6]">
+                <img src="{{ asset('images/icons/admin/form-save.svg') }}" alt="" class="size-[13.5px]">
+                Save Draft
+            </button>
+            <button type="submit" form="article-form" name="submit_as" value="publish"
+                    class="flex items-center gap-[8px] rounded-[8px] bg-editorial px-[24px] py-[10px] font-jakarta text-[14px] font-semibold text-white shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)]
                            transition-transform duration-300 ease-smooth hover:-translate-y-0.5">
-                <img src="{{ asset('images/icons/admin/form-save.svg') }}" alt="" class="size-[16px]">
-                {{ $editing ? 'Save Changes' : 'Save Article' }}
+                <img src="{{ asset('images/icons/admin/nav-article.svg') }}" alt="" class="size-[12px]">
+                Publish Article
             </button>
         </x-slot:actions>
 
         <form id="article-form" action="{{ $editing ? route('admin.articles.update', $article) : route('admin.articles.store') }}" method="post" enctype="multipart/form-data"
-              class="grid [&>*]:min-w-0 gap-[24px] lg:grid-cols-[minmax(0,640fr)_minmax(0,320fr)]">
+              class="grid [&>*]:min-w-0 gap-[24px] lg:grid-cols-[minmax(0,68fr)_minmax(0,32fr)]" data-article-form>
             @csrf
             @if ($editing) @method('PUT') @endif
 
             <div class="flex flex-col gap-[24px]">
-                {{-- SEO (Google) --}}
-                <x-admin.panel title="SEO (Google)" icon="search.svg" description="How the article appears in search results." badge="Optional" badge-tone="muted">
-                    <div class="flex flex-col gap-[20px]">
-                        <x-admin.field label="Meta Title" name="meta_title" :value="$article->meta_title"
-                                       placeholder="Nusa Penida Fast Boat Guide 2026 | Penida Gili" help="Up to 70 characters." />
-                        <x-admin.field label="Meta Description" name="meta_description" type="textarea" :value="$article->meta_description"
-                                       placeholder="Complete fast boat schedules, ports and travel tips for Nusa Penida." help="Up to 160 characters." />
-
-                        <div class="flex flex-col gap-[8px]" data-keywords>
-                            <span class="font-jakarta text-[14px] font-semibold leading-[20px] tracking-[0.7px] text-editorial-ink">Keywords</span>
-                            <input type="hidden" name="meta_keywords" value="{{ $keywords }}">
-                            <div @class([
-                                'flex flex-wrap items-center gap-[8px] rounded-[8px] border bg-[#f7fafc] px-[12px] py-[8px] focus-within:border-editorial',
-                                'border-[#dc2626]' => $errors->has('meta_keywords') || $errors->has('meta_keywords.*'),
-                                'border-[rgba(192,199,211,0.5)]' => ! ($errors->has('meta_keywords') || $errors->has('meta_keywords.*')),
-                            ])>
-                                <span class="contents" data-keywords-list></span>
-                                <input type="text" placeholder="Type, then press Enter or comma" autocomplete="off"
-                                       class="min-w-[180px] flex-1 bg-transparent py-[5px] font-jakarta text-[16px] leading-[24px] text-editorial-ink placeholder:text-editorial-meta focus:outline-none">
-                            </div>
-                            <span class="font-jakarta text-[13px] leading-[18px] text-editorial-body">
-                                Optional. When left blank the page falls back to the article title and excerpt for SEO.
-                            </span>
-                            @error('meta_keywords') <span class="font-jakarta text-[13px] text-[#dc2626]">{{ $message }}</span> @enderror
-                        </div>
+                {{-- 1. Article Core Editorial (1:8096) --}}
+                <section class="{{ $card }} p-[33px]">
+                    <div class="{{ $head }} justify-between">
+                        <span class="flex items-center gap-[10px]">
+                            <span class="{{ $tile }}"><img src="{{ $icon('editor-core.svg') }}" alt="" class="size-[15px]"></span>
+                            <h2 class="{{ $h2 }}">Article Core Editorial</h2>
+                        </span>
+                        <span class="flex items-center gap-[6px] rounded-full bg-[#d5e2e9] px-[12px] py-[4px] font-jakarta text-[12px] font-semibold leading-[16px] text-[#58646a]">
+                            <img src="{{ $icon('read-clock.svg') }}" alt="" class="size-[11.7px]">
+                            <span data-read-time>{{ $article->read_time_minutes ?? 5 }}</span> min read
+                        </span>
                     </div>
-                </x-admin.panel>
 
-                {{-- Article information --}}
-                <x-admin.panel title="Article Information" icon="nav-article.svg" description="Headline, summary and who wrote it.">
-                    <div class="flex flex-col gap-[20px]">
-                        <x-admin.field label="Title" name="title" :value="$article->title" placeholder="Enter the article title" :required="true" />
-                        <x-admin.field label="Excerpt" name="excerpt" type="textarea" :value="$article->excerpt" placeholder="Short summary shown on listing cards" :required="true" />
-                        <x-admin.field label="Subtitle / Summary Hook" name="subtitle" type="textarea" :value="$article->subtitle" placeholder="One-line hook under the headline" />
-
-                        <div class="grid [&>*]:min-w-0 gap-[20px] sm:grid-cols-2">
-                            <x-admin.field label="Category" name="category" :value="$article->category" :options="$categories" :required="true" />
-                            <x-admin.field label="Author" name="author_name" :value="$article->author_name" placeholder="Penida Gili Team" :required="true" />
-                            <x-admin.field label="Author Role" name="author_role" :value="$article->author_role" placeholder="Marine Operations Lead" />
-                            <x-admin.field label="Publish Date & Time" name="published_at" type="datetime-local" :value="$article->published_at?->format('Y-m-d\TH:i')" help="Required when scheduling." />
+                    <div class="mt-[24px] flex flex-col gap-[20px]">
+                        <div class="flex flex-col gap-[8px]">
+                            <label for="article-title" class="{{ $label }}">Article Title <span class="text-[#ba1a1a]">*</span></label>
+                            <input id="article-title" name="title" value="{{ old('title', $article->title) }}" required placeholder="Complete Guide to Nusa Penida Fast Boat Transfers: Schedules, Ports, and Travel Tips"
+                                   class="{{ $input }} p-[13px] text-[16px] font-bold leading-[24px] shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
+                            @error('title') <span class="font-jakarta text-[13px] text-[#dc2626]">{{ $message }}</span> @enderror
                         </div>
 
-                        <div class="flex flex-col gap-[14px] border-t border-[rgba(192,199,211,0.3)] pt-[20px]">
-                            <x-admin.toggle name="is_featured" label="Feature at the top of the blog" description="Shows this article as the featured guide on the article page." :checked="old('is_featured', $article->is_featured)" />
+                        <div class="flex flex-col gap-[8px] pb-[6px]">
+                            <label for="article-excerpt" class="{{ $label }}">Subtitle / Summary Hook <span class="text-[#ba1a1a]">*</span></label>
+                            <textarea id="article-excerpt" name="excerpt" rows="3" required placeholder="Everything travelers need to know about navigating crossings from Sanur Harbor to Banjar Nyuh seamlessly…"
+                                      class="{{ $input }} resize-y p-[13px] leading-[23px] shadow-[0_1px_2px_rgba(0,0,0,0.05)]">{{ old('excerpt', $article->excerpt) }}</textarea>
+                            @error('excerpt') <span class="font-jakarta text-[13px] text-[#dc2626]">{{ $message }}</span> @enderror
                         </div>
-                    </div>
-                </x-admin.panel>
 
-                {{-- Image & body --}}
-                <x-admin.panel title="Image & Content" icon="form-camera.svg" description="Cover image and the article body.">
-                    <div class="flex flex-col gap-[20px]">
-                        <div class="flex flex-col gap-[8px]" data-cover-picker>
-                            <span class="font-jakarta text-[14px] font-semibold leading-[20px] tracking-[0.7px] text-editorial-ink">Cover Image</span>
-                            <label class="flex cursor-pointer flex-col items-center justify-center rounded-admin border-2 border-dashed border-[rgba(192,199,211,0.6)] bg-[#f7fafc] p-[28px]
-                                          transition-colors duration-300 hover:border-editorial hover:bg-[#eef4f8]">
-                                <input type="file" name="cover" accept="image/jpeg,image/png,image/webp" class="sr-only">
-                                <img data-cover-preview alt="" hidden class="mb-[16px] h-[160px] w-full max-w-[360px] rounded-[10px] object-cover">
-                                <span class="mb-[12px] flex size-[56px] items-center justify-center rounded-full bg-[#d5e2e9]">
-                                    <img src="{{ asset('images/icons/admin/form-upload.svg') }}" alt="" class="size-[20px]">
+                        {{-- Metadata Grid (1:8122) --}}
+                        <div class="grid [&>*]:min-w-0 gap-[16px] pt-[8px] sm:grid-cols-2">
+                            <div class="flex flex-col gap-[8px]">
+                                <label for="article-category" class="{{ $label }}">Primary Category</label>
+                                <span class="relative block">
+                                    <select id="article-category" name="category" class="{{ $input }} appearance-none pr-[40px] font-medium">
+                                        @foreach ($categories as $category)
+                                            <option value="{{ $category }}" @selected(old('category', $article->category) === $category)>{{ $category }}</option>
+                                        @endforeach
+                                    </select>
+                                    <img src="{{ $icon('field-chevron.svg') }}" alt="" class="pointer-events-none absolute right-[12px] top-1/2 h-[5.6px] w-[9px] -translate-y-1/2">
                                 </span>
-                                <span class="font-jakarta text-[14px] font-semibold leading-[20px] tracking-[0.7px] text-editorial-ink">Drag &amp; drop or click to upload</span>
-                                <span class="font-jakarta text-[14px] leading-[20px] text-editorial-body">JPG, PNG, WEBP (max. 4 MB)</span>
-                                <span data-cover-name class="mt-[6px] font-jakarta text-[13px] text-editorial"></span>
-                            </label>
-                            @error('cover') <span class="font-jakarta text-[13px] text-[#dc2626]">{{ $message }}</span> @enderror
-                            <x-admin.gallery-preview :cover="$article->image" folder="articles" />
-                        </div>
-
-                        <x-admin.field label="Image Caption" name="hero_caption" :value="$article->hero_caption" placeholder="En route to Nusa Penida: Sanjaya Express at 35 knots" />
-
-                        <div class="flex flex-col gap-[8px]" data-body-editor>
-                            <div class="flex items-center justify-between">
-                                <label for="article-body" class="font-jakarta text-[14px] font-semibold leading-[20px] tracking-[0.7px] text-editorial-ink">Article Body *</label>
-                                <span class="rounded-full bg-[#f1f4f6] px-[10px] py-[3px] font-jakarta text-[12px] font-semibold text-editorial-body">Paragraph</span>
                             </div>
-
-                            <div @class([
-                                'rounded-[8px] border bg-[#f7fafc]',
-                                'border-[#dc2626]' => $errors->has('body'),
-                                'border-[rgba(192,199,211,0.5)]' => ! $errors->has('body'),
-                            ])>
-                                <textarea id="article-body" name="body" rows="14" required placeholder="Start writing your article here…"
-                                          class="w-full resize-y bg-transparent px-[17px] py-[13px] font-jakarta text-[16px] leading-[28px] text-editorial-ink placeholder:text-editorial-meta focus:outline-none">{{ old('body', $article->body) }}</textarea>
-                                <div data-preview hidden class="flex flex-col gap-[16px] px-[17px] py-[13px] font-jakarta text-[16px] leading-[28px] text-editorial-ink"></div>
-
-                                <div class="flex items-center justify-between border-t border-[rgba(192,199,211,0.3)] px-[17px] py-[10px]">
-                                    <span data-word-count class="font-jakarta text-[13px] text-editorial-body">0 kata</span>
-                                    <button type="button" data-preview-toggle
-                                            class="rounded-[8px] border border-[rgba(192,199,211,0.5)] bg-surface px-[14px] py-[6px] font-jakarta text-[13px] font-semibold text-editorial-ink transition-colors hover:bg-[#f1f4f6]">
-                                        Pratinjau
-                                    </button>
-                                </div>
+                            <div class="flex flex-col gap-[8px]">
+                                <label for="article-segment" class="{{ $label }}">Target Reader Segment</label>
+                                <span class="relative block">
+                                    <select id="article-segment" name="reader_segment" class="{{ $input }} appearance-none pr-[40px] font-medium">
+                                        <option value="">Select segment…</option>
+                                        @foreach ($segments as $segment)
+                                            <option value="{{ $segment }}" @selected(old('reader_segment', $article->reader_segment) === $segment)>{{ $segment }}</option>
+                                        @endforeach
+                                    </select>
+                                    <img src="{{ $icon('field-chevron.svg') }}" alt="" class="pointer-events-none absolute right-[12px] top-1/2 h-[5.6px] w-[9px] -translate-y-1/2">
+                                </span>
                             </div>
-                            <span class="font-jakarta text-[13px] leading-[18px] text-editorial-body">Separate paragraphs with a blank line.</span>
-                            @error('body') <span class="font-jakarta text-[13px] text-[#dc2626]">{{ $message }}</span> @enderror
                         </div>
                     </div>
-                </x-admin.panel>
+                </section>
 
-                {{-- Actions --}}
-                <div class="flex flex-wrap items-center gap-[12px]">
-                    <button type="submit"
-                            class="flex items-center gap-[8px] rounded-[8px] bg-editorial px-[22px] py-[12px] font-jakarta text-[14px] font-semibold text-white
-                                   transition-transform duration-300 ease-smooth hover:-translate-y-0.5">
-                        <img src="{{ asset('images/icons/admin/form-save.svg') }}" alt="" class="size-[16px]">
-                        {{ $editing ? 'Save Changes' : 'Add Article' }}
-                    </button>
-                    <a href="{{ $backHref }}"
-                       class="rounded-[8px] border border-[rgba(192,199,211,0.5)] bg-surface px-[22px] py-[12px] font-jakarta text-[14px] font-semibold text-editorial-ink transition-colors hover:bg-[#f1f4f6]">
-                        Cancel
-                    </a>
-                </div>
+                {{-- 2. Rich Text Content Editor (1:8147): toolbar strip mirrors the design; paragraphs are stored as plain text --}}
+                <section class="{{ $card }} overflow-hidden" data-body-editor>
+                    <div class="flex flex-wrap items-center gap-[6px] border-b border-[#ebeef0] bg-[#f1f4f6] px-[16px] pb-[11px] pt-[10px]" aria-hidden="true">
+                        <span class="flex items-center gap-[2px] rounded-[8px] border border-[#c0c7d3] bg-surface p-[5px]">
+                            <span class="rounded-[4px] p-[6px] font-jakarta text-[12px] font-bold tracking-[-0.3px] text-editorial-ink">H2</span>
+                            <span class="rounded-[4px] p-[6px] font-jakarta text-[12px] font-bold tracking-[-0.3px] text-editorial-ink">H3</span>
+                        </span>
+                        <span class="flex items-center gap-[2px] rounded-[8px] border border-[#c0c7d3] bg-surface p-[5px]">
+                            <span class="p-[6px]"><img src="{{ $icon('rte-bold.svg') }}" alt="" class="h-[9.3px] w-[7px]"></span>
+                            <span class="p-[6px]"><img src="{{ $icon('rte-italic.svg') }}" alt="" class="h-[9.3px] w-[8.7px]"></span>
+                            <span class="p-[6px]"><img src="{{ $icon('rte-strike.svg') }}" alt="" class="h-[6.7px] w-[13.3px]"></span>
+                        </span>
+                        <span class="flex items-center gap-[2px] rounded-[8px] border border-[#c0c7d3] bg-surface p-[5px]">
+                            <span class="p-[6px]"><img src="{{ $icon('rte-ul.svg') }}" alt="" class="h-[8px] w-[11.3px]"></span>
+                            <span class="p-[6px]"><img src="{{ $icon('rte-ol.svg') }}" alt="" class="h-[10.7px] w-[12px]"></span>
+                            <span class="p-[6px]"><img src="{{ $icon('rte-quote.svg') }}" alt="" class="h-[13.3px] w-[12px]"></span>
+                        </span>
+                        <span class="flex items-center gap-[2px] rounded-[8px] border border-[#c0c7d3] bg-surface p-[5px]">
+                            <span class="p-[6px]"><img src="{{ $icon('rte-image.svg') }}" alt="" class="size-[12px]"></span>
+                            <span class="p-[6px]"><img src="{{ $icon('rte-link.svg') }}" alt="" class="size-[12px]"></span>
+                            <span class="p-[6px]"><img src="{{ $icon('rte-table.svg') }}" alt="" class="h-[8px] w-[13.3px]"></span>
+                        </span>
+                        <span class="ml-auto font-jakarta text-[12px] font-medium leading-[16px] text-editorial-body">Word Count: <span data-word-count class="font-bold text-editorial-ink">0</span></span>
+                    </div>
+
+                    <div class="px-[33px] py-[28px]">
+                        <label for="article-body" class="sr-only">Article Body</label>
+                        <textarea id="article-body" name="body" rows="18" required placeholder="The Badung Strait has long held legendary status among Indonesian seafarers…"
+                                  class="w-full resize-y bg-transparent font-jakarta text-[16px] leading-[28px] text-editorial-ink placeholder:text-editorial-meta focus:outline-none">{{ old('body', $article->body) }}</textarea>
+                        <div data-preview hidden class="flex flex-col gap-[16px] font-jakarta text-[16px] leading-[28px] text-editorial-ink"></div>
+                        <div class="mt-[12px] flex items-center justify-between border-t border-[rgba(192,199,211,0.3)] pt-[12px]">
+                            <span class="font-jakarta text-[12px] leading-[16px] text-editorial-body">Separate paragraphs with a blank line.</span>
+                            <button type="button" data-preview-toggle
+                                    class="rounded-[8px] border border-[rgba(192,199,211,0.5)] bg-surface px-[14px] py-[6px] font-jakarta text-[12px] font-semibold text-editorial-ink transition-colors hover:bg-[#f1f4f6]">
+                                Pratinjau
+                            </button>
+                        </div>
+                        @error('body') <span class="font-jakarta text-[13px] text-[#dc2626]">{{ $message }}</span> @enderror
+                    </div>
+                </section>
+
+                {{-- 3. Featured Hero Image (1:8275) --}}
+                <section class="{{ $card }} p-[33px]" data-cover-picker>
+                    <div class="{{ $head }}">
+                        <span class="{{ $tile }}"><img src="{{ $icon('editor-hero.svg') }}" alt="" class="size-[15px]"></span>
+                        <h2 class="{{ $h2 }}">Featured Hero Image</h2>
+                    </div>
+
+                    <div class="mt-[24px] flex flex-col gap-[16px]">
+                        <label class="group relative block cursor-pointer overflow-hidden rounded-[12px] border border-[#c0c7d3] bg-[#f1f4f6] p-px">
+                            <input type="file" name="cover" accept="image/jpeg,image/png,image/webp" class="sr-only">
+                            <img data-cover-preview src="{{ $article->image ? \App\Support\ImagePath::url($article->image, 'articles') : '' }}" alt="" @if (! $article->image) hidden @endif class="h-[288px] w-full rounded-[11px] object-cover">
+                            @if (! $article->image)
+                                <span data-cover-empty class="flex h-[288px] items-center justify-center font-jakarta text-[14px] text-editorial-body">Click to choose the hero image (JPG, PNG, WEBP up to 4 MB)</span>
+                            @endif
+                            {{-- Overlay actions (1:8285) appear on hover --}}
+                            <span class="absolute inset-0 flex items-center justify-center gap-[12px] bg-[rgba(45,49,51,0.4)] opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                                <span class="flex items-center gap-[6px] rounded-[8px] bg-surface px-[16px] py-[8px] font-jakarta text-[12px] font-bold text-editorial-ink shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1)]">
+                                    <img src="{{ $icon('hero-replace.svg') }}" alt="" class="size-[11.7px]">
+                                    Replace Photo
+                                </span>
+                            </span>
+                            <span class="absolute bottom-[12px] left-[12px] flex items-center gap-[6px] rounded-[6px] bg-[rgba(45,49,51,0.8)] px-[12px] py-[4px] font-jakarta text-[12px] leading-[16px] text-[#eef1f3] backdrop-blur-[2px]">
+                                <img src="{{ $icon('hero-info.svg') }}" alt="" class="size-[10px]">
+                                <span data-cover-name>{{ $article->image ? 'Current hero image' : 'Recommended 1920 × 1080px (WebP or JPG)' }}</span>
+                            </span>
+                        </label>
+                        @error('cover') <span class="font-jakarta text-[13px] text-[#dc2626]">{{ $message }}</span> @enderror
+
+                        {{-- Caption & Alt Inputs (1:8303) --}}
+                        <div class="grid [&>*]:min-w-0 gap-[16px] sm:grid-cols-2">
+                            <div class="flex flex-col gap-[8px]">
+                                <label for="article-caption" class="{{ $label }}">Image Caption</label>
+                                <input id="article-caption" name="hero_caption" value="{{ old('hero_caption', $article->hero_caption) }}" placeholder="En route to Nusa Penida: Sanjaya Express III crossing Badung Strait"
+                                       class="{{ $input }} text-[12px] leading-[16px]">
+                            </div>
+                            <div class="flex flex-col gap-[8px]">
+                                <label for="article-alt" class="{{ $label }}">Descriptive Alt Text (Accessibility &amp; SEO)</label>
+                                <input id="article-alt" name="hero_alt" value="{{ old('hero_alt', $article->hero_alt) }}" placeholder="Sanjaya Express III fastboat sailing towards Nusa Penida limestone cliffs"
+                                       class="{{ $input }} text-[12px] leading-[16px]">
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
 
             <aside class="flex flex-col gap-[24px]">
-                <x-admin.panel title="Publishing" icon="nav-schedule.svg">
-                    <x-admin.radio-cards name="status" :options="$publishModes" :selected="$article->status?->value" />
-                </x-admin.panel>
-
-                <x-admin.panel title="Permalink & Tags" icon="form-vessel.svg">
-                    <div class="flex flex-col gap-[16px]">
-                        <x-admin.field label="URL Slug" name="slug" :value="$article->slug" prefix="/artikel/" help="Leave blank to generate from the title." />
-                        <x-admin.field label="Read Time (minutes)" name="read_time_minutes" type="number" :value="$article->read_time_minutes" help="Estimated from the body when blank." />
-                        <x-admin.field label="Tags" name="tags" :value="implode(' ', $article->tags ?? [])" placeholder="#NusaPenida #FastBoatBali" help="Space or comma separated." />
+                {{-- 1. Publishing Settings (1:8317) --}}
+                <section class="{{ $card }} p-[25px]">
+                    <div class="flex items-center gap-[8px] border-b border-[#ebeef0] pb-[13px]">
+                        <img src="{{ $icon('side-publish.svg') }}" alt="" class="size-[13.3px]">
+                        <h2 class="{{ $sideH }}">Publishing Settings</h2>
                     </div>
-                </x-admin.panel>
+
+                    <div class="mt-[16px] flex flex-col gap-[16px]">
+                        <x-admin.radio-cards name="status" :options="$publishModes" :selected="$article->status?->value" />
+
+                        {{-- Schedule Date Picker (1:8347) --}}
+                        <div class="flex flex-col gap-[6px]" data-schedule-at @if (old('status', $article->status?->value) !== 'scheduled') hidden @endif>
+                            <label for="article-published-at" class="{{ $sideLabel }}">Scheduled Release Date &amp; Time</label>
+                            <input id="article-published-at" name="published_at" type="datetime-local" value="{{ old('published_at', $article->published_at?->format('Y-m-d\TH:i')) }}"
+                                   class="{{ $input }} bg-surface text-[16px] leading-[24px]">
+                            @error('published_at') <span class="font-jakarta text-[13px] text-[#dc2626]">{{ $message }}</span> @enderror
+                        </div>
+
+                        {{-- Author & Signature (1:8366): editable author form --}}
+                        <fieldset class="flex flex-col gap-[6px]" data-author>
+                            <legend class="{{ $sideLabel }} mb-[6px]">Author &amp; Signature</legend>
+                            <div class="flex items-center gap-[10px] rounded-[8px] border border-[#c0c7d3] bg-surface p-[9px]">
+                                <span class="flex size-[28px] shrink-0 items-center justify-center rounded-full bg-[rgba(0,94,161,0.1)] font-jakarta text-[12px] font-bold text-editorial" data-author-avatar>{{ $initials(old('author_name', $article->author_name)) }}</span>
+                                <span class="min-w-0 flex-1 truncate font-jakarta text-[12px] font-medium leading-[16px] text-editorial-ink" data-author-signature>
+                                    {{ old('author_name', $article->author_name) ?: 'Author name' }}{{ old('author_role', $article->author_role) ? ' - '.old('author_role', $article->author_role) : '' }}
+                                </span>
+                            </div>
+                            <div class="mt-[6px] grid [&>*]:min-w-0 gap-[10px]">
+                                <div class="flex flex-col gap-[4px]">
+                                    <label for="article-author" class="font-jakarta text-[11px] font-semibold text-editorial-body">Author Name <span class="text-[#ba1a1a]">*</span></label>
+                                    <input id="article-author" name="author_name" value="{{ old('author_name', $article->author_name) }}" required placeholder="Capt. Wayan Sudira" class="{{ $input }} py-[9px] text-[12px] leading-[16px]">
+                                    @error('author_name') <span class="font-jakarta text-[13px] text-[#dc2626]">{{ $message }}</span> @enderror
+                                </div>
+                                <div class="flex flex-col gap-[4px]">
+                                    <label for="article-author-role" class="font-jakarta text-[11px] font-semibold text-editorial-body">Author Role / Title</label>
+                                    <input id="article-author-role" name="author_role" value="{{ old('author_role', $article->author_role) }}" placeholder="Master Mariner" class="{{ $input }} py-[9px] text-[12px] leading-[16px]">
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <x-admin.toggle name="is_featured" label="Feature at the top of the blog" description="Shows this article as the featured guide" :checked="old('is_featured', $article->is_featured)" />
+                    </div>
+                </section>
+
+                {{-- 2. SEO Optimization (1:8378) --}}
+                <section class="{{ $card }} p-[25px]" data-seo>
+                    <div class="flex items-center justify-between gap-[8px] border-b border-[#ebeef0] pb-[13px]">
+                        <span class="flex items-center gap-[8px]">
+                            <img src="{{ $icon('side-seo.svg') }}" alt="" class="size-[13.3px]">
+                            <h2 class="{{ $sideH }}">SEO Optimization</h2>
+                        </span>
+                        <span class="shrink-0 rounded-full bg-[#d1fae5] px-[10px] py-[2px] font-jakarta text-[11px] font-semibold leading-[16px] text-[#065f46]">Score: <span data-seo-score>0</span>/100</span>
+                    </div>
+
+                    <div class="mt-[16px] flex flex-col gap-[16px]">
+                        <div class="flex flex-col gap-[6px]">
+                            <label for="article-slug" class="{{ $sideLabel }}">URL Permalink Slug</label>
+                            <span class="flex items-center overflow-hidden rounded-[8px] border border-[#c0c7d3] bg-surface">
+                                <span class="border-r border-[#c0c7d3] bg-[#f1f4f6] px-[10px] py-[9px] font-jakarta text-[12px] text-editorial-body">/artikel/</span>
+                                <input id="article-slug" name="slug" value="{{ old('slug', $article->slug) }}" placeholder="nusa-penida-fast-boat-transfers-guide"
+                                       class="w-full bg-transparent px-[10px] py-[9px] font-jakarta text-[12px] font-medium leading-[16px] text-editorial-ink placeholder:font-normal placeholder:text-editorial-meta focus:outline-none">
+                            </span>
+                            @error('slug') <span class="font-jakarta text-[13px] text-[#dc2626]">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="flex flex-col gap-[6px]">
+                            <span class="flex items-center justify-between">
+                                <label for="article-meta-title" class="{{ $sideLabel }}">Meta Title</label>
+                                <span class="font-jakarta text-[11px] text-editorial-body"><span data-count-for="meta_title">0</span>/60 chars</span>
+                            </span>
+                            <input id="article-meta-title" name="meta_title" value="{{ old('meta_title', $article->meta_title) }}" maxlength="70" placeholder="Nusa Penida Fast Boat Transfers Guide | Penida Gili"
+                                   class="{{ $input }} bg-surface py-[9px] text-[12px] leading-[16px]">
+                        </div>
+
+                        <div class="flex flex-col gap-[6px]">
+                            <span class="flex items-center justify-between">
+                                <label for="article-meta-description" class="{{ $sideLabel }}">Meta Description</label>
+                                <span class="font-jakarta text-[11px] text-editorial-body"><span data-count-for="meta_description">0</span>/160 chars</span>
+                            </span>
+                            <textarea id="article-meta-description" name="meta_description" rows="4" maxlength="160" placeholder="Planning a boat trip to Nusa Penida? Read official harbor reviews, departure timetables, luggage rules, and captain tips."
+                                      class="{{ $input }} resize-y bg-surface py-[9px] text-[12px] leading-[16px]">{{ old('meta_description', $article->meta_description) }}</textarea>
+                        </div>
+
+                        <div class="flex flex-col gap-[8px]" data-keywords>
+                            <span class="{{ $sideLabel }}">Keywords</span>
+                            <input type="hidden" name="meta_keywords" value="{{ $keywords }}">
+                            <div class="flex flex-wrap items-center gap-[6px] rounded-[8px] border border-[#c0c7d3] bg-surface px-[10px] py-[6px] focus-within:border-editorial">
+                                <span class="contents" data-keywords-list></span>
+                                <input type="text" placeholder="Type keyword and hit Enter..." autocomplete="off"
+                                       class="min-w-[120px] flex-1 bg-transparent py-[4px] font-jakarta text-[12px] leading-[16px] text-editorial-ink placeholder:text-editorial-meta focus:outline-none">
+                            </div>
+                            @error('meta_keywords') <span class="font-jakarta text-[13px] text-[#dc2626]">{{ $message }}</span> @enderror
+                        </div>
+
+                        {{-- Google SERP Snippet Preview (1:8415) --}}
+                        <div class="flex flex-col gap-[8px] border-t border-[#ebeef0] pt-[16px]">
+                            <span class="{{ $sideLabel }}">Live Google SERP Preview</span>
+                            <div class="rounded-[8px] border border-[#ebeef0] bg-surface p-[13px]">
+                                <span class="flex items-center gap-[8px]">
+                                    <span class="flex size-[24px] items-center justify-center rounded-full bg-[#f1f4f6] font-jakarta text-[12px] font-bold text-editorial-ink">{{ mb_strtoupper(mb_substr($siteHost, 0, 1)) }}</span>
+                                    <span class="truncate font-jakarta text-[11px] leading-[16px] text-editorial-body">{{ $siteHost }} › artikel › <span data-serp-slug>{{ \Illuminate\Support\Str::limit(old('slug', $article->slug) ?: 'your-article', 18) }}</span></span>
+                                </span>
+                                <span data-serp-title class="mt-[4px] block font-jakarta text-[14px] font-medium leading-[20px] text-[#1a0dab]">{{ old('meta_title', $article->meta_title) ?: (old('title', $article->title) ?: 'Article title') }}</span>
+                                <span data-serp-description class="mt-[2px] line-clamp-3 font-jakarta text-[12px] leading-[16px] text-editorial-body">{{ old('meta_description', $article->meta_description) ?: (old('excerpt', $article->excerpt) ?: 'Meta description preview appears here.') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {{-- 3. Tags & Taxonomy (1:8428) --}}
+                <section class="{{ $card }} p-[25px]">
+                    <div class="flex items-center gap-[8px] border-b border-[#ebeef0] pb-[13px]">
+                        <img src="{{ $icon('side-tags.svg') }}" alt="" class="size-[13.3px]">
+                        <h2 class="{{ $sideH }}">Tags &amp; Taxonomy</h2>
+                    </div>
+                    <div class="mt-[16px] flex flex-col gap-[8px]" data-keywords data-chip-class="bg-[#d5e2e9] text-[#58646a]">
+                        <input type="hidden" name="tags" value="{{ $tags }}">
+                        <div class="flex flex-wrap items-center gap-[6px]">
+                            <span class="contents" data-keywords-list></span>
+                        </div>
+                        <span class="relative block">
+                            <input type="text" placeholder="Type tag and hit Enter..." autocomplete="off"
+                                   class="{{ $input }} bg-surface py-[9px] pr-[36px] text-[12px] leading-[16px]">
+                            <img src="{{ $icon('tag-add.svg') }}" alt="" class="pointer-events-none absolute right-[12px] top-1/2 size-[11.7px] -translate-y-1/2">
+                        </span>
+                        @error('tags') <span class="font-jakarta text-[13px] text-[#dc2626]">{{ $message }}</span> @enderror
+                    </div>
+                </section>
+
+                {{-- 4. Contextual Fast Ticket Desk (1:8467) --}}
+                <section class="{{ $card }} p-[25px]">
+                    <div class="flex items-center gap-[8px] border-b border-[#ebeef0] pb-[13px]">
+                        <img src="{{ $icon('side-widget.svg') }}" alt="" class="size-[13.3px]">
+                        <h2 class="{{ $sideH }}">Contextual Fast Ticket Desk</h2>
+                    </div>
+                    <div class="mt-[16px] flex flex-col gap-[16px]">
+                        <label class="flex cursor-pointer items-start gap-[10px]">
+                            <input type="checkbox" name="embed_booking_widget" @checked(old('embed_booking_widget', $article->embed_booking_widget)) class="peer sr-only">
+                            <span class="mt-[2px] flex size-[18px] shrink-0 items-center justify-center rounded-[4px] border border-[#c0c7d3] bg-surface peer-checked:border-editorial peer-checked:bg-editorial [&>img]:opacity-0 peer-checked:[&>img]:opacity-100">
+                                <img src="{{ $icon('side-check.svg') }}" alt="" class="size-[16px]">
+                            </span>
+                            <span>
+                                <span class="block font-jakarta text-[12px] font-bold leading-[16px] text-editorial-ink">Embed Quick Fast Ticket Desk Widget</span>
+                                <span class="block font-jakarta text-[11px] leading-[16px] text-editorial-body">Renders an interactive route booking form within article side rail on public view.</span>
+                            </span>
+                        </label>
+
+                        <div class="flex flex-col gap-[6px]">
+                            <label for="article-route" class="{{ $sideLabel }}">Pre-selected Route</label>
+                            <span class="relative block">
+                                <img src="{{ $icon('side-route.svg') }}" alt="" class="pointer-events-none absolute left-[12px] top-1/2 size-[12px] -translate-y-1/2">
+                                <select id="article-route" name="widget_route" class="{{ $input }} appearance-none bg-surface py-[9px] pl-[32px] pr-[36px] text-[12px] leading-[16px]">
+                                    <option value="">Choose a route…</option>
+                                    @foreach ($routes as $route)
+                                        <option value="{{ $route }}" @selected(old('widget_route', $article->widget_route) === $route)>{{ $route }}</option>
+                                    @endforeach
+                                </select>
+                                <img src="{{ $icon('side-chevron.svg') }}" alt="" class="pointer-events-none absolute right-[10px] top-1/2 size-[16px] -translate-y-1/2">
+                            </span>
+                        </div>
+
+                        <span class="flex items-center gap-[6px] font-jakarta text-[11px] leading-[16px] text-[#065f46]">
+                            <img src="{{ $icon('side-tracking.svg') }}" alt="" class="size-[11px]">
+                            Direct conversion tracking enabled
+                        </span>
+                    </div>
+                </section>
             </aside>
         </form>
     </x-admin.form-page>

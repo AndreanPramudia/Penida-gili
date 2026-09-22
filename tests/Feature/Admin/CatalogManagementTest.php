@@ -517,11 +517,20 @@ class CatalogManagementTest extends TestCase
 
     public function test_article_form_renders_and_stores_seo_fields_with_fallbacks(): void
     {
+        // Figma 1:8059: editorial card, formatting toolbar, hero image, and the sidebar cards incl. the author form.
         $this->actingAs($this->admin)->get(route('admin.articles.create'))
             ->assertOk()
-            ->assertSee('SEO (Google)')
-            ->assertSee('Article Information')
-            ->assertSee('Image &amp; Content', false);
+            ->assertSeeInOrder([
+                'Save Draft', 'Publish Article',
+                'Article Core Editorial', 'min read', 'Article Title', 'Subtitle / Summary Hook', 'Primary Category', 'Target Reader Segment',
+                'H2', 'H3', 'Word Count:',
+                'Featured Hero Image', 'Replace Photo', 'Image Caption', 'Descriptive Alt Text (Accessibility & SEO)',
+                'Publishing Settings', 'Publish Immediately', 'Schedule for Later', 'Save as Draft', 'Scheduled Release Date & Time',
+                'Author & Signature', 'Author Name', 'Author Role / Title',
+                'SEO Optimization', 'Score:', 'URL Permalink Slug', 'Meta Title', '/60 chars', 'Meta Description', '/160 chars', 'Live Google SERP Preview',
+                'Tags & Taxonomy', 'Type tag and hit Enter...',
+                'Contextual Fast Ticket Desk', 'Embed Quick Fast Ticket Desk Widget', 'Pre-selected Route', 'Direct conversion tracking enabled',
+            ]);
 
         $base = ['title' => 'Crossing Tips', 'excerpt' => 'Short summary', 'category' => 'Boat Tips', 'body' => 'Body text', 'author_name' => 'Capt. Wayan', 'status' => 'published'];
 
@@ -529,11 +538,35 @@ class CatalogManagementTest extends TestCase
             'meta_title' => 'Crossing Tips | Penida Gili',
             'meta_description' => 'Everything about the crossing.',
             'meta_keywords' => 'nusa penida, fast boat, , fast boat',
-        ])->assertRedirect(route('admin.articles'));
+            'author_role' => 'Master Mariner',
+            'reader_segment' => 'First-time Island Travelers',
+            'hero_alt' => 'Fast boat at sea',
+            'embed_booking_widget' => 'on',
+            'widget_route' => 'Sanur → Banjar Nyuh',
+            'submit_as' => 'draft',
+        ])->assertSessionHasNoErrors()->assertRedirect(route('admin.articles'));
 
         $article = Article::query()->sole();
         $this->assertSame(['nusa penida', 'fast boat'], $article->meta_keywords);
         $this->assertSame('Crossing Tips | Penida Gili', $article->seo_title);
+        $this->assertSame('Master Mariner', $article->author_role);
+        $this->assertSame('First-time Island Travelers', $article->reader_segment);
+        $this->assertSame('Fast boat at sea', $article->hero_alt);
+        $this->assertTrue($article->embed_booking_widget);
+        $this->assertSame('Sanur → Banjar Nyuh', $article->widget_route);
+        // The header "Save Draft" button beats the Publish Immediately radio.
+        $this->assertSame(ArticleStatus::Draft, $article->status);
+
+        $this->actingAs($this->admin)->get(route('admin.articles.edit', $article))->assertOk()->assertSee('Capt. Wayan - Master Mariner');
+
+        $this->actingAs($this->admin)->put(route('admin.articles.update', $article), $base + [
+            'submit_as' => 'publish',
+            'meta_title' => 'Crossing Tips | Penida Gili',
+            'meta_description' => 'Everything about the crossing.',
+            'meta_keywords' => 'nusa penida, fast boat',
+        ])->assertSessionHasNoErrors();
+        $article->refresh();
+        $this->assertSame(ArticleStatus::Published, $article->status);
 
         $this->get(route('articles.show', $article))
             ->assertOk()
