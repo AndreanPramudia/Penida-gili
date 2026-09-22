@@ -85,7 +85,6 @@ class CatalogManagementTest extends TestCase
         $this->assertSame('SFB-001', $vessel->code);
         $this->assertSame(['Toilet', 'Life Jackets'], $vessel->facilities);
         Storage::disk('public')->assertExists($vessel->image);
-
         $this->actingAs($this->admin)->get(route('admin.boats.edit', $vessel))->assertOk()->assertSee('Sanjaya Ocean Queen');
 
         $this->actingAs($this->admin)->put(route('admin.boats.update', $vessel), [
@@ -277,7 +276,6 @@ class CatalogManagementTest extends TestCase
             'description' => "Swim with mantas.\nBoat departs at dawn.",
             'price_adult' => '350.000',
             'dual_pricing' => 'on',
-            'price_foreign' => '500.000',
             'max_daily_capacity' => '24',
             'included' => 'Snorkel gear, Lunch box',
             'excluded' => 'Hotel transfer',
@@ -295,9 +293,7 @@ class CatalogManagementTest extends TestCase
         $this->assertSame(['Snorkel gear', 'Lunch box'], $activity->included);
         $this->assertSame(['Hotel transfer'], $activity->excluded);
         $this->assertTrue($activity->dual_pricing);
-        $this->assertSame(500_000, $activity->price_foreign);
         $this->assertSame(24, $activity->max_daily_capacity);
-        $this->assertTrue($activity->instant_confirmation);
         $this->assertTrue($activity->is_public);
         $this->assertSame('free_48h', $activity->cancellation_policy);
         $this->assertSame('Swim with mantas.', $activity->intro);

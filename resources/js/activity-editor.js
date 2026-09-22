@@ -19,10 +19,6 @@ if (form) {
     };
     form.querySelectorAll('input[name="status"]').forEach((radio) => radio.addEventListener('change', syncStatus));
 
-    const dual = form.querySelector('input[name="dual_pricing"]');
-    const foreign = form.querySelector('[data-foreign-price]');
-    dual?.addEventListener('change', () => (foreign.hidden = !dual.checked));
-
     // "Displays 50% discount badge to customers" — derived from base vs strikethrough price.
     const base = form.querySelector('input[name="price_adult"]');
     const was = form.querySelector('input[name="price_was"]');

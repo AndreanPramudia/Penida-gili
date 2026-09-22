@@ -64,7 +64,7 @@ class StoreActivityRequest extends FormRequest
             'price_child' => ['nullable', 'integer', 'min:0'],
             'price_was' => ['nullable', 'integer', 'min:0'],
             'dual_pricing' => ['nullable', 'boolean'],
-            'price_foreign' => ['nullable', 'integer', 'min:0', Rule::requiredIf(fn () => $this->boolean('dual_pricing'))],
+            'price_foreign' => ['nullable', 'integer', 'min:0'],
             'price_note' => ['nullable', 'string', 'max:160'],
             'max_daily_capacity' => ['required', 'integer', 'min:1', 'max:10000'],
             'included' => ['nullable', 'string', 'max:2000'],
@@ -85,7 +85,6 @@ class StoreActivityRequest extends FormRequest
     {
         return [
             'publish_at.required' => 'Pick the date and time the activity should go live.',
-            'price_foreign.required' => 'Enter the foreign-visitor price or switch dual-tier pricing off.',
         ];
     }
 

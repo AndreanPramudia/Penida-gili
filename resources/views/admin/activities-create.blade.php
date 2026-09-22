@@ -185,7 +185,7 @@
                         <x-admin.field label="Base Price per Pax (IDR)" name="price_adult" :value="$money($activity->price_adult)" placeholder="75.000" prefix="Rp" :required="true" />
                         <div>
                             <x-admin.field label="Original / Strikethrough Price" name="price_was" :value="$money($activity->price_was)" placeholder="150.000" prefix="Rp" />
-                            <p data-discount-note class="mt-[6px] font-jakarta text-[13px] leading-[18px] text-editorial-body" @if (! $activity->price_was) hidden @endif>
+                            <p data-discount-note class="mt-[6px] font-jakarta text-[13px] leading-[18px] text-editorial" @if (! $activity->price_was) hidden @endif>
                                 Displays {{ $activity->price_was ? round((1 - $activity->price_adult / max(1, $activity->price_was)) * 100) : 0 }}% discount badge to customers
                             </p>
                         </div>
@@ -193,12 +193,6 @@
                         <div class="rounded-[8px] border border-[rgba(192,199,211,0.5)] bg-[#f7fafc] px-[16px] py-[14px]">
                             <x-admin.toggle name="dual_pricing" label="Domestic vs Foreign Price" description="Enable dual-tier pricing model" :checked="old('dual_pricing', $activity->dual_pricing ?? false)" />
                         </div>
-                        <div data-foreign-price @if (! old('dual_pricing', $activity->dual_pricing)) hidden @endif>
-                            <x-admin.field label="Foreign Visitor Price (IDR)" name="price_foreign" :value="$money($activity->price_foreign)" placeholder="150.000" prefix="Rp" />
-                        </div>
-
-                        <x-admin.field label="Child Price (IDR)" name="price_child" :value="$money($activity->price_child)" placeholder="50.000" prefix="Rp" />
-
                         <div class="flex flex-col gap-[8px]">
                             <label for="max-daily-capacity" class="font-jakarta text-[14px] font-semibold leading-[20px] tracking-[0.7px] text-editorial-ink">Max Daily Capacity / Quota *</label>
                             <span @class(['flex items-center rounded-[8px] border bg-[#f7fafc] pr-[17px]', 'border-[#dc2626]' => $errors->has('max_daily_capacity'), 'border-[rgba(192,199,211,0.5)]' => ! $errors->has('max_daily_capacity')])>
@@ -208,8 +202,6 @@
                             </span>
                             @error('max_daily_capacity') <span class="font-jakarta text-[13px] text-[#dc2626]">{{ $message }}</span> @enderror
                         </div>
-
-                        <x-admin.field label="Price Note" name="price_note" :value="$activity->price_note" placeholder="Price is valid for Domestic tourists or KITAS Holders" />
                     </div>
                 </x-admin.panel>
             </aside>
