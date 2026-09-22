@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\BookingStatus;
 use App\Enums\ListingStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreHotelRequest;
+use App\Models\Booking;
 use App\Models\Hotel;
+use App\Models\HotelRoom;
 use App\Support\Uploads;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -44,10 +47,24 @@ class HotelController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        // "Bookings (Mo)": stays booked this month per property, with units against the room stock.
+        $monthlyBookings = Booking::query()
+            ->where('bookable_type', (new HotelRoom)->getMorphClass())
+            ->where('bookings.status', '!=', BookingStatus::Cancelled)
+            ->whereBetween('bookings.created_at', [now()->startOfMonth(), now()->endOfMonth()])
+            ->join('hotel_rooms', 'hotel_rooms.id', '=', 'bookings.bookable_id')
+            ->groupBy('hotel_rooms.hotel_id')
+            ->selectRaw('hotel_rooms.hotel_id, count(*) as stays, sum(bookings.rooms) as units')
+            ->get()
+            ->keyBy('hotel_id');
+
         return view('admin.hotels', [
             'hotels' => $hotels,
             'filters' => $request->only(['q', 'destination', 'stars', 'status']),
             'destinations' => self::DESTINATIONS,
+            'monthlyBookings' => $monthlyBookings,
+            'activeCount' => Hotel::query()->active()->count(),
+            'totalCount' => Hotel::query()->count(),
         ]);
     }
 

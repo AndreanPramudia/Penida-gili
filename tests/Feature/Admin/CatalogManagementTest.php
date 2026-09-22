@@ -519,6 +519,9 @@ class CatalogManagementTest extends TestCase
             ->assertOk()
             ->assertSee('Search by hotel name, beach or area...')
             ->assertSeeInOrder(['All Destinations', 'Nusa Penida', 'All Star Ratings', '5 Stars', 'Status: All', 'Status: Active'])
+            ->assertSeeInOrder(['Registered Partner Accommodations', '1 of 2 Active Listed', 'Refresh Rates'])
+            ->assertSeeInOrder(['Hotel / Resort', 'Location', 'Rating', 'Room Types', 'Starting Price / Night', 'Status', 'Bookings (Mo)', 'Actions'])
+            ->assertSee('Excl. taxes')->assertSee('% full')
             ->assertSee('Semabu Hills')->assertSee('Batu Karang');
 
         $this->actingAs($this->admin)->get(route('admin.hotels', ['q' => 'hilltop']))
