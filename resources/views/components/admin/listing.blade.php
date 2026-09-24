@@ -48,12 +48,15 @@
 
     @if ($panelTitle)
         <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[rgba(192,199,211,0.2)] px-[24px] py-[20px]">
-            <h2 class="flex items-center gap-[10px] text-[20px] font-semibold text-editorial-ink">
+            <h2 class="flex items-center gap-[10px] text-[18px] font-bold leading-[28px] text-editorial-ink">
                 {{ $panelTitle }}
                 @if ($panelBadge)
-                    <span class="rounded-full bg-[#d2e4ff] px-[10px] py-[2px] text-[12px] font-semibold text-editorial">{{ $panelBadge }}</span>
+                    <span class="rounded-full bg-[#d2e4ff] px-[10px] py-[2px] text-[12px] font-normal text-[#00497e]">{{ $panelBadge }}</span>
                 @endif
             </h2>
+            @isset($panelAction)
+                {{ $panelAction }}
+            @endisset
         </div>
     @endif
 

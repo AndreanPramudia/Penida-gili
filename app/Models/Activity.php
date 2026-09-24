@@ -19,8 +19,9 @@ use Illuminate\Support\Carbon;
 #[Fillable([
     'name', 'slug', 'badge', 'category', 'location', 'place_label', 'opens_at', 'closes_at', 'duration_label',
     'description', 'intro', 'summary', 'summary_image', 'image', 'gallery', 'highlights', 'experiences',
-    'included', 'excluded', 'days', 'price_adult', 'price_child', 'price_was', 'price_note',
-    'rating', 'review_count', 'sold_count', 'status',
+    'included', 'excluded', 'important_notes', 'days', 'price_adult', 'price_child', 'price_was', 'dual_pricing', 'price_foreign',
+    'price_note', 'max_daily_capacity', 'instant_confirmation', 'cancellation_policy', 'rating', 'review_count', 'sold_count',
+    'status', 'is_public', 'publish_at',
 ])]
 class Activity extends Model
 {
@@ -39,6 +40,12 @@ class Activity extends Model
             'price_adult' => 'integer',
             'price_child' => 'integer',
             'price_was' => 'integer',
+            'price_foreign' => 'integer',
+            'max_daily_capacity' => 'integer',
+            'instant_confirmation' => 'boolean',
+            'dual_pricing' => 'boolean',
+            'is_public' => 'boolean',
+            'publish_at' => 'datetime',
             'status' => ListingStatus::class,
         ];
     }
@@ -99,6 +106,22 @@ class Activity extends Model
         return Attribute::get(fn () => $this->opens_at && $this->closes_at
             ? Carbon::parse($this->opens_at)->format('H:i').' - '.Carbon::parse($this->closes_at)->format('H:i')
             : null);
+    }
+
+    /** Console category pill glyph (Figma 1:9970); matched loosely so new categories still get one. */
+    protected function categoryIcon(): Attribute
+    {
+        return Attribute::get(function (): string {
+            $category = mb_strtolower((string) $this->category);
+
+            return match (true) {
+                str_contains($category, 'water') => 'cat-water-sports.svg',
+                str_contains($category, 'wildlife'), str_contains($category, 'nature'), str_contains($category, 'adventure') => 'cat-wildlife-nature.svg',
+                str_contains($category, 'show'), str_contains($category, 'dance') => 'cat-cultural-show.svg',
+                str_contains($category, 'culture') => 'cat-photography-culture.svg',
+                default => 'cat-photography.svg',
+            };
+        });
     }
 
     protected function priceLabel(): Attribute

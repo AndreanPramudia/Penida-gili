@@ -1,7 +1,7 @@
 {{-- Figma node 1:4274 — "activity order full" (mobile, 390px). Rendered below lg only; the desktop layout is hidden there. --}}
 @props(['order'])
 
-<form action="{{ $order['action'] }}" method="post" data-quote="{{ json_encode($order['quote']) }}" data-confirm="{{ json_encode($order['confirm']) }}" data-email="{{ config('penida.booking.email') }}" class="bg-[#f7fafc] lg:hidden">
+<form action="{{ $order['action'] }}" method="post" data-quote="{{ json_encode($order['quote']) }}" data-confirm="booking" data-email="{{ config('penida.booking.email') }}" data-confirm-product="{{ $order['rows'][0]['value'] ?? '' }}" class="bg-[#f7fafc] lg:hidden">
     @csrf
         @include('partials.order.hidden-fields', ['order' => $order])
 

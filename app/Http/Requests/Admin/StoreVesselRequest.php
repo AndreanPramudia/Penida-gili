@@ -13,13 +13,14 @@ class StoreVesselRequest extends FormRequest
         $vesselId = $this->route('vessel')?->id;
 
         return [
-            'boat_operator_id' => ['required', Rule::exists('boat_operators', 'id')],
+            'boat_operator_id' => ['nullable', Rule::exists('boat_operators', 'id')],
             'name' => ['required', 'string', 'max:120'],
             'code' => ['nullable', 'string', 'max:20', Rule::unique('vessels', 'code')->ignore($vesselId)],
             'type' => ['required', 'string', 'max:80'],
             'capacity' => ['required', 'integer', 'min:1', 'max:1000'],
             'top_speed_knots' => ['nullable', 'integer', 'min:1', 'max:80'],
             'engine' => ['nullable', 'string', 'max:160'],
+            'publish' => ['nullable', Rule::in(['publish', 'draft'])],
             'status' => ['required', Rule::enum(ListingStatus::class)],
             'inspected_at' => ['nullable', 'date'],
             'facilities' => ['nullable', 'array'],

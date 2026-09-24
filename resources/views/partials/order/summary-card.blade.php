@@ -40,16 +40,16 @@
 
             {{-- Pricing breakdown --}}
             <div class="mt-[11px] rounded-[11px] bg-[#f1f4f6] p-[21.6px]">
-                @foreach ($order['lines'] as $line)
-                    <div class="flex items-center justify-between">
+                {{-- Two-column grid: labels may wrap, amounts sit in one left-aligned column sized to the widest figure. --}}
+                <div class="grid grid-cols-[minmax(0,1fr)_auto] gap-x-[24px] gap-y-[4px]">
+                    @foreach ($order['lines'] as $line)
                         <span class="text-[18.9px] leading-[27px] text-editorial-body">{{ $line['label'] }}</span>
-                        <span class="text-[18.9px] leading-[27px] text-editorial-ink">{{ $line['amount'] }}</span>
-                    </div>
-                @endforeach
+                        <span class="whitespace-nowrap text-[18.9px] leading-[27px] text-editorial-ink">{{ $line['amount'] }}</span>
+                    @endforeach
 
-                <div class="mt-[11px] flex items-center justify-between border-t border-editorial-line pt-[12px]">
-                    <span class="text-[21.6px] leading-[32px] text-brand">Total</span>
-                    <span data-quote-total class="text-[24.3px] leading-[38px] text-brand">{{ $order['total'] }}</span>
+                    <span class="col-span-2 mt-[7px] border-t border-editorial-line" aria-hidden="true"></span>
+                    <span class="self-center text-[21.6px] leading-[32px] text-brand">Total</span>
+                    <span data-quote-total class="whitespace-nowrap text-[24.3px] leading-[38px] text-brand">{{ $order['total'] }}</span>
                 </div>
             </div>
         </div>

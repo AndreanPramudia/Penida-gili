@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ListingStatus;
 use App\Models\Hotel;
 use App\Support\BookingQuote;
 use Illuminate\Http\Request;
@@ -25,7 +26,7 @@ class HotelController extends Controller
      */
     public function show(Hotel $hotel): View
     {
-        abort_unless($hotel->status->value === 'active', 404);
+        abort_unless($hotel->status === ListingStatus::Active, 404);
 
         $hotel->load(['rooms', 'reviews' => fn ($q) => $q->where('is_published', true)->take(4)]);
 
@@ -38,8 +39,13 @@ class HotelController extends Controller
      */
     public function order(Request $request, Hotel $hotel): View
     {
+        abort_unless($hotel->status === ListingStatus::Active, 404);
+
+        // Without ?room= the cheapest listed room type is offered, never an arbitrary row.
         $room = $hotel->rooms()
             ->when($request->filled('room'), fn ($q) => $q->whereKey($request->integer('room')))
+            ->orderBy('sort_order')
+            ->orderBy('price_per_night')
             ->firstOrFail();
 
         $room->setRelation('hotel', $hotel);
@@ -51,13 +57,16 @@ class HotelController extends Controller
             $checkOut = $checkIn->copy()->addDay();
         }
 
+        // The sidebar sends guests as "4-2" (guests-rooms); explicit adults/rooms params win.
+        [$guests, $guestRooms] = array_pad(array_map('intval', explode('-', (string) $request->input('guests', '2-1'))), 2, 0);
+
         $quote = BookingQuote::forRoom(
             $room,
             $checkIn,
             $checkOut,
-            $request->integer('adults', $request->integer('guests', 2)),
+            $request->integer('adults', max(1, $guests)),
             $request->integer('children', 0),
-            $request->integer('rooms', 1),
+            $request->integer('rooms', max(1, $guestRooms)),
         );
 
         return view('pages.hotel-order', [

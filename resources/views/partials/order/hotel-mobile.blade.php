@@ -3,7 +3,7 @@
 
 @php [$adults, , $roomsGroup] = $order['party']; @endphp
 
-<form action="{{ $order['action'] }}" method="post" data-quote="{{ json_encode($order['quote']) }}" data-confirm="{{ json_encode($order['confirm']) }}" data-email="{{ config('penida.booking.email') }}" class="bg-[#f7fafc] lg:hidden">
+<form action="{{ $order['action'] }}" method="post" data-quote="{{ json_encode($order['quote']) }}" data-confirm="booking" data-email="{{ config('penida.booking.email') }}" data-confirm-product="{{ $order['property'] }}" class="bg-[#f7fafc] lg:hidden">
     @csrf
         @include('partials.order.hidden-fields', ['order' => $order])
 
@@ -79,7 +79,7 @@
                             </select>
                             <img src="{{ asset('images/icons/mobile/order/chevron-down.svg') }}" alt="" class="pointer-events-none absolute right-[6px] top-1/2 size-[18px] -translate-y-1/2">
                         </span>
-                        <input id="m-phone" name="phone" type="tel" inputmode="numeric" pattern="[0-9 ()-]{6,20}" title="6-15 digits, without the country code" placeholder="812 3456 7890" value="{{ old('phone') }}" required
+                        <input id="m-phone" name="phone" type="tel" inputmode="numeric" pattern="[0-9 \(\)\-]{6,20}" title="6-15 digits, without the country code" placeholder="812 3456 7890" value="{{ old('phone') }}" required
                                class="min-w-0 flex-1 rounded-r-[8px] border border-[#c0c7d3] bg-[#f7fafc] px-[17px] pb-[15px] pt-[14px] text-[16px] text-[#181c1e] placeholder:text-[#6b7280] focus:border-brand focus:outline-none">
                     </div>
                 </div>

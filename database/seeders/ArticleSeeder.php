@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\ArticleStatus;
 use App\Models\Article;
+use App\Models\Author;
 use Illuminate\Database\Seeder;
 
 class ArticleSeeder extends Seeder
@@ -94,5 +95,11 @@ class ArticleSeeder extends Seeder
                 'status' => ArticleStatus::Published,
             ]);
         }
+
+        // Every seeded byline becomes a selectable author for the editor's AUTHOR bar.
+        Article::query()->get(['author_name', 'author_role'])->unique('author_name')->each(function (Article $article): void {
+            $author = Author::query()->firstOrCreate(['name' => $article->author_name], ['role' => $article->author_role]);
+            Article::query()->where('author_name', $author->name)->whereNull('author_id')->update(['author_id' => $author->id]);
+        });
     }
 }

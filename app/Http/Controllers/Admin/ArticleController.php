@@ -6,6 +6,7 @@ use App\Enums\ArticleStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreArticleRequest;
 use App\Models\Article;
+use App\Models\Author;
 use App\Support\Uploads;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,18 +16,28 @@ class ArticleController extends Controller
 {
     public const CATEGORIES = ['Travel Guides', 'Boat Tips', 'Activities', 'Culture', 'Hotels', 'Fast Boat Transfers'];
 
+    /** Target Reader Segment options (Figma 1:8139). */
+    public const SEGMENTS = ['First-time Island Travelers', 'Returning Visitors', 'Families with Children', 'Divers & Snorkelers', 'Backpackers', 'Luxury Travelers'];
+
     /** Article listing — Figma node 1:9637. */
     public function index(Request $request): View
     {
         $articles = Article::query()
             ->search($request->string('q')->value())
+            ->when($request->filled('author'), fn ($q) => $q->where('author_name', $request->string('author')->value()))
+            ->when($request->filled('category'), fn ($q) => $q->where('category', $request->string('category')->value()))
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')->value()))
             ->latest('published_at')
             ->latest()
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.articles', ['articles' => $articles, 'filters' => $request->only(['q', 'status'])]);
+        return view('admin.articles', [
+            'articles' => $articles,
+            'filters' => $request->only(['q', 'author', 'category', 'status']),
+            'authors' => Article::query()->distinct()->orderBy('author_name')->pluck('author_name')->all(),
+            'categories' => self::CATEGORIES,
+        ]);
     }
 
     /** Add New Article — Figma node 1:8059. */
@@ -66,9 +77,10 @@ class ArticleController extends Controller
         return view('admin.articles-create', [
             'article' => $article,
             'categories' => self::CATEGORIES,
+            'segments' => self::SEGMENTS,
+            'authors' => Author::query()->orderBy('name')->get(),
             'publishModes' => [
                 ['value' => ArticleStatus::Published->value, 'label' => 'Publish Immediately', 'description' => 'Live to all passenger channels right away'],
-                ['value' => ArticleStatus::Scheduled->value, 'label' => 'Schedule for Later', 'description' => 'Automated release at designated time'],
                 ['value' => ArticleStatus::Draft->value, 'label' => 'Save as Draft', 'description' => 'Internal review without public URL'],
             ],
         ]);
@@ -77,8 +89,18 @@ class ArticleController extends Controller
     /** @return array<string, mixed> */
     private function payload(StoreArticleRequest $request, ?Article $existing = null): array
     {
-        $data = $request->safe()->except(['cover']);
-        $data['is_featured'] = $request->boolean('is_featured');
+        $data = $request->safe()->except(['cover', 'submit_as']);
+        // Flags without a control on the Figma form keep their stored value.
+        $data['is_featured'] = $request->has('is_featured') ? $request->boolean('is_featured') : (bool) $existing?->is_featured;
+        $data['embed_booking_widget'] = $request->has('embed_booking_widget') ? $request->boolean('embed_booking_widget') : (bool) $existing?->embed_booking_widget;
+
+        // AUTHOR bar: an existing author fills the byline; "new" creates one from the typed name.
+        $author = $request->input('author_id') === 'new' || blank($request->input('author_id'))
+            ? Author::query()->firstOrCreate(['name' => trim($request->input('author_name'))], ['role' => $request->input('author_role')])
+            : Author::query()->findOrFail($request->input('author_id'));
+        $data['author_id'] = $author->id;
+        $data['author_name'] = $author->name;
+        $data['author_role'] = $author->role;
         $data['read_time_minutes'] = $data['read_time_minutes'] ?? max(1, (int) ceil(str_word_count(strip_tags($data['body'])) / 200));
 
         $status = ArticleStatus::from($data['status']);

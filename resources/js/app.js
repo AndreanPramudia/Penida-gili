@@ -1,6 +1,11 @@
 import './stepper';
 import './order-quote';
-import './order-confirm';
+import './article-editor';
+import './confirm-submit';
+import './schedule-summary';
+import './activity-editor';
+import './hotel-editor';
+import './order-email';
 
 /**
  * Reveal elements as they scroll into view.

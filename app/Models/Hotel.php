@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable([
     'name', 'slug', 'category', 'partner_label', 'stars', 'rating', 'review_count', 'description',
     'address', 'full_address', 'image', 'gallery', 'amenities', 'status',
+    'region', 'harbor_distance', 'coordinates',
 ])]
 class Hotel extends Model
 {
@@ -91,10 +92,15 @@ class Hotel extends Model
         return Attribute::get(fn () => Money::compact($this->price_from));
     }
 
-    /** @return array<int, string> guests => label */
+    /**
+     * Sidebar picker choices; the value is "guests-rooms" so the label's room count
+     * is what the order page actually quotes.
+     *
+     * @return array<string, string> "guests-rooms" => label
+     */
     protected function guestOptions(): Attribute
     {
-        return Attribute::get(fn () => [2 => '2 Guests, 1 Room', 3 => '3 Guests, 1 Room', 4 => '4 Guests, 2 Rooms']);
+        return Attribute::get(fn () => ['2-1' => '2 Guests, 1 Room', '3-1' => '3 Guests, 1 Room', '4-2' => '4 Guests, 2 Rooms']);
     }
 
     protected function defaultNights(): Attribute

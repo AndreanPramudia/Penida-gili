@@ -1,7 +1,12 @@
 {{-- Figma node 1:2380 — article detail (desktop) / 1:6261 — article detail full (mobile) --}}
 @extends('layouts.app')
 
-@section('title', 'Article')
+{{-- SEO fields come from the admin form; each falls back to the editorial copy when blank. --}}
+@section('title', $article['seo_title'] ?? $article['title'] ?? 'Article')
+@section('meta-description', $article['seo_description'] ?? $article['excerpt'] ?? '')
+@if (! empty($article['meta_keywords']))
+    @section('meta-keywords', implode(', ', $article['meta_keywords']))
+@endif
 
 @section('nav-active', 'artikel')
 
@@ -165,7 +170,7 @@
                         and exclusive voucher codes for Bali archipelago transfers.
                     </p>
 
-                    <form action="{{ route('newsletter.store') }}" method="post" class="flex flex-wrap gap-[15.5px] pt-[20.7px]">
+                    <form action="{{ route('newsletter.store') }}" method="post" data-confirm="newsletter" class="flex flex-wrap gap-[15.5px] pt-[20.7px]">
                         @csrf
                         <input type="hidden" name="source" value="article-detail">
                         <input type="text" name="website" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">

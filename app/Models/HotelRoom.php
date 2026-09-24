@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\BookingStatus;
 use App\Support\Money;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,6 +21,7 @@ class HotelRoom extends Model
     {
         return [
             'price_per_night' => 'integer',
+            'stock' => 'integer',
         ];
     }
 
@@ -30,6 +33,24 @@ class HotelRoom extends Model
     public function bookings(): MorphMany
     {
         return $this->morphMany(Booking::class, 'bookable');
+    }
+
+    /**
+     * Units already reserved for any night in [$checkIn, $checkOut). Two stays overlap
+     * when one starts before the other ends; cancelled bookings free their units.
+     */
+    public function unitsBookedBetween(CarbonInterface $checkIn, CarbonInterface $checkOut): int
+    {
+        return (int) $this->bookings()
+            ->where('status', '!=', BookingStatus::Cancelled)
+            ->whereDate('travel_date', '<', $checkOut->toDateString())
+            ->whereDate('check_out', '>', $checkIn->toDateString())
+            ->sum('rooms');
+    }
+
+    public function unitsAvailableBetween(CarbonInterface $checkIn, CarbonInterface $checkOut): int
+    {
+        return max(0, $this->stock - $this->unitsBookedBetween($checkIn, $checkOut));
     }
 
     protected function priceLabel(): Attribute

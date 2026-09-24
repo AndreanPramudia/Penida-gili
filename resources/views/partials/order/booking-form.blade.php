@@ -60,7 +60,7 @@
                         <img src="{{ asset('images/icons/order/chevron-down.svg') }}" alt=""
                              class="pointer-events-none absolute right-[14px] top-1/2 h-[10px] w-[16px] -translate-y-1/2">
                     </div>
-                    <input id="phone" name="phone" type="tel" inputmode="numeric" pattern="[0-9 ()-]{6,20}" title="6-15 digits, without the country code" placeholder="812 3456 7890" value="{{ old('phone') }}" required
+                    <input id="phone" name="phone" type="tel" inputmode="numeric" pattern="[0-9 \(\)\-]{6,20}" title="6-15 digits, without the country code" placeholder="812 3456 7890" value="{{ old('phone') }}" required
                            class="min-w-0 flex-1 rounded-r-[11px] border border-l-0 border-[#c0c7d3] bg-[#f7fafc] px-[17.6px] pb-[15px] pt-[13.5px] text-[21.6px] text-editorial-ink placeholder:text-[#6b7280] focus:border-brand focus:outline-none">
                 </div>
             </div>

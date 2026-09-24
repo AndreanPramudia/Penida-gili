@@ -126,7 +126,7 @@
 
     {{-- Newsletter CTA (1:6170) --}}
     <section class="px-[20px] pb-[32px]">
-        <form action="{{ route('newsletter.store') }}" method="post" data-reveal
+        <form action="{{ route('newsletter.store') }}" method="post" data-confirm="newsletter" data-reveal
               class="relative flex flex-col gap-[4px] overflow-hidden rounded-[16px] p-[20px] text-white shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)]"
               style="background-image: linear-gradient(140deg, #005ea1 0%, #2178c3 50%, #00386b 100%)">
             @csrf

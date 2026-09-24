@@ -40,7 +40,11 @@ class VesselController extends Controller
 
     public function store(StoreVesselRequest $request): RedirectResponse
     {
-        $vessel = Vessel::query()->create($this->payload($request) + ['code' => $request->input('code') ?: Vessel::nextCode()]);
+        // The Figma form has no operator picker: the fleet belongs to the (single) operator on file.
+        $vessel = Vessel::query()->create($this->payload($request) + [
+            'code' => $request->input('code') ?: Vessel::nextCode(),
+            'boat_operator_id' => $request->input('boat_operator_id') ?: BoatOperator::query()->orderBy('id')->value('id'),
+        ]);
 
         return redirect()->route('admin.boats')->with('flash', "{$vessel->name} added to the fleet.");
     }
@@ -68,20 +72,32 @@ class VesselController extends Controller
     {
         return view('admin.boats-create', [
             'vessel' => $vessel,
-            'operators' => BoatOperator::query()->orderBy('name')->pluck('name', 'id'),
             'facilities' => collect(self::FACILITIES)->map(fn ($label) => [
                 'label' => $label,
                 'checked' => in_array($label, old('facilities', $vessel->facilities ?? []), true),
             ])->all(),
             'types' => ['Catamaran Fast Ferry', 'Mono-hull Fastboat', 'Luxury Catamaran'],
+            'publishModes' => [
+                ['value' => 'publish', 'label' => 'Publish Immediately', 'description' => 'Visible in the fleet and available for schedules right away'],
+                ['value' => 'draft', 'label' => 'Save as Draft', 'description' => 'Keep the boat hidden until you are ready'],
+            ],
+            'operationalStatuses' => [
+                ListingStatus::Active->value => 'Active (Ready for Routes)',
+                ListingStatus::Inactive->value => 'Non-Active (Maintenance)',
+            ],
         ]);
     }
 
     /** @return array<string, mixed> */
     private function payload(StoreVesselRequest $request): array
     {
-        $data = $request->safe()->except(['photos', 'code']);
+        $data = $request->safe()->except(['photos', 'code', 'publish']);
         $data['facilities'] = $request->input('facilities', []);
+
+        // "Save as Draft" hides the boat regardless of the operational status picked below it.
+        $data['status'] = $request->input('publish') === 'draft'
+            ? ListingStatus::Draft->value
+            : $request->input('status', ListingStatus::Active->value);
 
         if ($photo = Uploads::store($request->file('photos.0'), 'vessels')) {
             $data['image'] = $photo;
