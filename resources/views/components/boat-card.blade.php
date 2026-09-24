@@ -35,8 +35,8 @@
                 {{ $routes }} Routes
             </span>
             <span class="flex items-center gap-[12px] text-[16px] leading-[30px] text-ink-muted">
-                <img src="{{ asset('images/icons/icon-vessel.svg') }}" alt="" class="size-[16px]">
-                {{ $vessels }} Vessel
+                <img src="{{ asset('images/icons/icon-boat.svg') }}" alt="" class="h-[18px] w-[16.6px]">
+                {{ $vessels }} {{ \Illuminate\Support\Str::plural('Boat', $vessels) }}
             </span>
         </div>
 

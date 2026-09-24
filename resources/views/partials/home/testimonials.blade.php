@@ -1,10 +1,4 @@
 {{-- Figma node 1:56 — "Testimonials from Our Guests" --}}
-@php
-    $testimonials = [
-        ['quote' => 'The booking process was incredibly easy and fast. The boat left on time, the AC was cold, and the crew was super helpful with our luggage. Our trip to the Gilis was completely stress-free!', 'name' => 'Andi R.', 'city' => 'Jakarta'],
-        ['quote' => 'Renting a private boat for our family vacation to Nusa Penida was the best decision. Complete privacy, a friendly crew, and we could stop at snorkeling spots whenever we wanted.', 'name' => 'Sarah & Family', 'city' => 'Surabaya'],
-    ];
-@endphp
 
 <section class="container-page pt-[80px] lg:pt-[191px] pb-[41px] lg:pb-[97px]">
     @include('partials.section-heading', [
@@ -20,11 +14,11 @@
                            transition-[transform,box-shadow] duration-500 ease-smooth hover:-translate-y-2 hover:shadow-card-hover">
                 <img src="{{ asset('images/icons/stars-5.svg') }}" alt="5 out of 5 stars" class="h-[24.5px] w-[166px]">
                 <blockquote class="mt-[31px] max-w-[353px] text-[16px] leading-[30px] text-ink-muted">
-                    {{ $testimonial['quote'] }}
+                    {{ trim($testimonial['quote'], '\"') }}
                 </blockquote>
                 <figcaption class="mt-auto">
                     <p class="text-[20px] leading-[41px] text-ink">{{ $testimonial['name'] }}</p>
-                    <p class="text-[16px] leading-[30px] text-ink-muted">{{ $testimonial['city'] }}</p>
+                    <p class="text-[16px] leading-[30px] text-ink-muted">{{ $testimonial->experienceLabel('Traveled') ?? 'Verified guest' }}</p>
                 </figcaption>
             </figure>
         @endforeach

@@ -20,10 +20,14 @@ class BoatOperatorSeeder extends Seeder
             ['icon' => 'insurance.svg', 'label' => 'Insurance'],
         ];
 
-        $gallery = [
-            ['image' => 'maruti-side.png', 'alt' => 'Side view'],
-            ['image' => 'maruti-front.png', 'alt' => 'Front view'],
-            ['image' => 'maruti-deck.png', 'alt' => 'Deck view'],
+        // Only Maruti has studio shots on disk; the others fall back to their own photo
+        // through BoatOperator::galleryPhotos().
+        $galleries = [
+            'Maruti Fast Boat' => [
+                ['image' => 'maruti-side.png', 'alt' => 'Side view'],
+                ['image' => 'maruti-front.png', 'alt' => 'Front view'],
+                ['image' => 'maruti-deck.png', 'alt' => 'Deck view'],
+            ],
         ];
 
         $operators = [
@@ -82,7 +86,7 @@ class BoatOperatorSeeder extends Seeder
 
             $operator = BoatOperator::query()->updateOrCreate(
                 ['name' => $data['name']],
-                $data + ['hero_image' => 'hero-boat-detail.png', 'facilities' => $facilities, 'gallery' => $gallery],
+                $data + ['hero_image' => $data['image'], 'facilities' => $facilities, 'gallery' => $galleries[$data['name']] ?? []],
             );
 
             $vesselIds = [];

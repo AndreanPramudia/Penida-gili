@@ -35,5 +35,7 @@
     @include('partials.mobile-tabbar')
 
     @include('partials.confirm-modal')
+
+    @include('partials.lightbox')
 </body>
 </html>

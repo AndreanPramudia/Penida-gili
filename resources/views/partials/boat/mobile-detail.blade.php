@@ -21,6 +21,23 @@
 
     <div class="flex flex-col gap-[18px] px-[20px] pt-[32px] pb-[32px]">
         {{-- Boat Information (1:4819) --}}
+        @if ($boat['vessels']->isNotEmpty())
+            <section class="flex flex-col gap-[12px] px-[20px] pt-[24px]">
+                <h2 class="text-[18px] font-bold leading-[27px] text-[#181c1e]">Our Fleet</h2>
+
+                @foreach ($boat['vessels'] as $vessel)
+                    <article class="flex items-center gap-[12px] rounded-[12px] border border-[rgba(192,199,211,0.4)] bg-white p-[12px]">
+                        <img src="{{ $vessel['image_url'] }}" alt="{{ $vessel['name'] }}" class="size-[56px] shrink-0 rounded-[8px] object-cover">
+                        <span class="min-w-0">
+                            <span class="block truncate text-[15px] font-bold leading-[22px] text-[#181c1e]">{{ $vessel['name'] }}</span>
+                            <span class="block text-[13px] leading-[19px] text-[#414751]">{{ $vessel['type'] }}</span>
+                            <span class="block text-[12px] leading-[18px] text-[#717782]">{{ $vessel['capacity'] }} Pax</span>
+                        </span>
+                    </article>
+                @endforeach
+            </section>
+        @endif
+
         <section class="flex flex-col gap-[16px]">
             <h2 data-reveal class="text-[28px] font-bold leading-[36px] text-brand">Boat Information</h2>
 

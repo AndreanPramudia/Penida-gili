@@ -35,7 +35,7 @@
                 </span>
                 <span class="flex items-center gap-[8px]">
                     <img src="{{ asset('images/icons/mobile/list/boat.svg') }}" alt="" class="h-[11.7px] w-[10.8px]">
-                    {{ $vessels }} Boat
+                    {{ $vessels }} {{ \Illuminate\Support\Str::plural('Boat', $vessels) }}
                 </span>
             </div>
 

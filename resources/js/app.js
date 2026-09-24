@@ -6,6 +6,9 @@ import './schedule-summary';
 import './activity-editor';
 import './hotel-editor';
 import './order-email';
+import './admin-login';
+import './uploader';
+import './lightbox';
 
 /**
  * Reveal elements as they scroll into view.

@@ -96,19 +96,19 @@
        absolute px values. On narrower desktops scale the whole page down
        proportionally (viewport / 1920) so it matches the design at 100% zoom. */
     @media (64rem <= width < 1200px) {
-        html { zoom: 0.6; }
+        html:not([data-no-zoom]) { zoom: 0.6; }
     }
     @media (1200px <= width < 1400px) {
-        html { zoom: 0.68; }
+        html:not([data-no-zoom]) { zoom: 0.68; }
     }
     @media (1400px <= width < 1600px) {
-        html { zoom: 0.78; }
+        html:not([data-no-zoom]) { zoom: 0.78; }
     }
     @media (1600px <= width < 1800px) {
-        html { zoom: 0.88; }
+        html:not([data-no-zoom]) { zoom: 0.88; }
     }
     @media (1800px <= width < 1920px) {
-        html { zoom: 0.95; }
+        html:not([data-no-zoom]) { zoom: 0.95; }
     }
 }
 

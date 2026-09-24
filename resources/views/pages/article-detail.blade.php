@@ -100,8 +100,11 @@
 
         {{-- Figma node 1:2453 — hero image with caption --}}
         <figure data-reveal class="relative mt-[41px] overflow-hidden rounded-editorial shadow-editorial">
-            <img src="{{ asset('images/articles/detail/hero-fastboat.png') }}" alt="{{ $article['hero_caption'] }}"
-                 class="h-[260px] lg:h-[620px] w-full object-cover">
+            <button type="button" class="block w-full cursor-zoom-in"
+                    data-lightbox="{{ asset('images/articles/detail/hero-fastboat.png') }}" data-lightbox-alt="{{ $article['hero_caption'] }}">
+                <img src="{{ asset('images/articles/detail/hero-fastboat.png') }}" alt="{{ $article['hero_caption'] }}"
+                     class="h-[260px] lg:h-[620px] w-full object-cover">
+            </button>
 
             <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(24,28,30,0.6)] to-transparent" aria-hidden="true"></span>
 

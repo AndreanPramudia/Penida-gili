@@ -44,6 +44,7 @@ class BoatOperatorController extends Controller
         abort_unless($boat->is_active, 404);
 
         $boat->load([
+            'vessels' => fn ($q) => $q->active()->orderBy('name'),
             'schedules' => fn ($q) => $q->active()->with(['fromPort', 'toPort']),
             'reviews' => fn ($q) => $q->where('is_published', true)->take(4),
         ]);

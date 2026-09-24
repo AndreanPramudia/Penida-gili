@@ -19,13 +19,12 @@
         <div class="flex flex-col gap-[65px]">
             {{-- Figma node 1:1184 — vessel info bento --}}
             <section>
-                <h2 data-reveal class="text-[24px] lg:text-[48.4px] font-bold leading-[30px] lg:leading-[59px] tracking-[-0.48px] text-brand">Vessel Information</h2>
+                <h2 data-reveal class="text-[24px] lg:text-[48.4px] font-bold leading-[30px] lg:leading-[59px] tracking-[-0.48px] text-brand">Boat Information</h2>
 
                 <div class="mt-[43px] grid [&>*]:min-w-0 gap-[21.5px] sm:grid-cols-4">
                     @foreach ($boat['specs'] as $index => $spec)
                         <div data-reveal style="--reveal-delay: {{ $index * 90 }}ms"
-                             class="flex flex-col items-center justify-center gap-[16px] rounded-detail bg-surface px-[32px] py-[51px] shadow-detail
-                                    transition-[transform,box-shadow] duration-500 ease-smooth hover:-translate-y-1 hover:shadow-card-hover">
+                             class="flex flex-col items-center justify-center gap-[16px] rounded-detail bg-surface px-[32px] py-[51px] shadow-detail">
                             <span class="flex size-[64.5px] items-center justify-center rounded-full bg-[#d5e2e9]">
                                 <img src="{{ asset('images/icons/vessel/'.$spec['icon']) }}" alt="" class="h-[21.5px] w-[27px] object-contain">
                             </span>
@@ -52,21 +51,48 @@
                 </div>
             </section>
 
+            {{-- Vessels registered to this operator in the console. --}}
+            @if ($boat['vessels']->isNotEmpty())
+                <section>
+                    <h2 data-reveal class="text-[24px] lg:text-[48.4px] font-bold leading-[30px] lg:leading-[59px] tracking-[-0.48px] text-brand">Our Boats</h2>
+
+                    <div class="mt-[43px] grid [&>*]:min-w-0 gap-[21.5px] sm:grid-cols-2">
+                        @foreach ($boat['vessels'] as $index => $vessel)
+                            <article data-reveal style="--reveal-delay: {{ $index * 90 }}ms"
+                                     class="flex items-center gap-[21.5px] rounded-detail bg-surface p-[27px] shadow-detail">
+                                <img src="{{ $vessel['image_url'] }}" alt="{{ $vessel['name'] }}"
+                                     class="size-[86px] shrink-0 rounded-[12px] object-cover">
+
+                                <div class="min-w-0">
+                                    <h3 class="truncate text-[24px] font-semibold leading-[32px] text-editorial-ink">{{ $vessel['name'] }}</h3>
+                                    <p class="text-[18.8px] leading-[27px] text-editorial-body">{{ $vessel['type'] }}</p>
+                                    <p class="pt-[6px] text-[18.8px] leading-[27px] text-editorial-meta">
+                                        {{ $vessel['capacity'] }} Pax{{ $vessel['top_speed_knots'] ? ' · '.$vessel['top_speed_knots'].' Knots' : '' }}
+                                    </p>
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+
             {{-- Figma node 1:1231 — fleet gallery --}}
             <section>
-                <h2 data-reveal class="text-[24px] lg:text-[48.4px] font-bold leading-[30px] lg:leading-[59px] tracking-[-0.48px] text-brand">Fleet Gallery</h2>
+                <h2 data-reveal class="text-[24px] lg:text-[48.4px] font-bold leading-[30px] lg:leading-[59px] tracking-[-0.48px] text-brand">Boats Gallery</h2>
 
                 <div class="mt-[43px] grid grid-cols-2 gap-[21.5px]">
                     @foreach ($boat['gallery_photos'] as $index => $photo)
-                        <figure data-reveal style="--reveal-delay: {{ $index * 90 }}ms"
+                        {{-- data-lightbox: resources/js/lightbox.js opens the full photo in a dialog. --}}
+                        <button type="button" data-reveal style="--reveal-delay: {{ $index * 90 }}ms"
+                                data-lightbox-group="boat" data-lightbox="{{ $photo['url'] }}" data-lightbox-alt="{{ $photo['alt'] }}"
                                 @class([
-                                    'group overflow-hidden rounded-detail shadow-editorial',
+                                    'group block cursor-zoom-in overflow-hidden rounded-detail shadow-editorial',
                                     'col-span-2 h-[220px] lg:h-[344px]' => $loop->first,
                                     'h-[258px]' => ! $loop->first,
                                 ])>
                             <img src="{{ $photo['url'] }}" alt="{{ $photo['alt'] }}"
                                  class="size-full object-cover transition-transform duration-700 ease-smooth group-hover:scale-105">
-                        </figure>
+                        </button>
                     @endforeach
                 </div>
             </section>
@@ -78,8 +104,7 @@
                 <div class="mt-[43px] grid [&>*]:min-w-0 gap-[32px] sm:grid-cols-2">
                     @foreach ($boat['reviews'] as $index => $review)
                         <figure data-reveal style="--reveal-delay: {{ $index * 90 }}ms"
-                                class="flex flex-col gap-[21.5px] rounded-detail border border-editorial-rule bg-surface p-[44px] shadow-detail
-                                       transition-[transform,box-shadow] duration-500 ease-smooth hover:-translate-y-1 hover:shadow-card-hover">
+                                class="flex flex-col gap-[21.5px] rounded-detail border border-editorial-rule bg-surface p-[44px] shadow-detail">
                             <div class="flex gap-[5.4px]" role="img" aria-label="{{ $review['stars'] }} out of 5 stars">
                                 @for ($star = 1; $star <= 5; $star++)
                                     <img src="{{ asset('images/icons/vessel/'.($star <= $review['stars'] ? 'star-full.svg' : 'star-empty.svg')) }}"

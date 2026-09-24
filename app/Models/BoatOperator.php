@@ -65,9 +65,22 @@ class BoatOperator extends Model
                 ->map(fn (array $photo) => $photo + ['url' => ImagePath::url($photo['image'], 'boats/gallery')])
                 ->values();
 
-            return $items->isNotEmpty()
-                ? $items->all()
-                : [['image' => $this->image, 'alt' => $this->name, 'url' => ImagePath::url($this->image, 'boats')]];
+            if ($items->isNotEmpty()) {
+                return $items->all();
+            }
+
+            // No studio shots yet: show the operator's own photo, plus any vessel photos.
+            $fallback = collect([['image' => $this->image, 'alt' => $this->name, 'url' => ImagePath::url($this->image, 'boats')]]);
+
+            return $fallback
+                ->merge($this->vessels->map(fn ($vessel) => [
+                    'image' => $vessel->image,
+                    'alt' => $vessel->name,
+                    'url' => $vessel->image_url,
+                ]))
+                ->unique('url')
+                ->values()
+                ->all();
         });
     }
 
@@ -79,7 +92,7 @@ class BoatOperator extends Model
 
     protected function heroImageUrl(): Attribute
     {
-        return Attribute::get(fn () => ImagePath::url($this->hero_image ?: 'hero-boat-detail.png', 'boats'));
+        return Attribute::get(fn () => ImagePath::url($this->hero_image ?: $this->image, 'boats'));
     }
 
     /** "120+" style label for the detail hero. */

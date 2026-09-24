@@ -24,22 +24,22 @@
     {{-- Figma node 1:1698 — hero gallery, 1 large + 4 small --}}
     <section class="container-page pt-[54px]">
         <div data-reveal class="grid [&>*]:min-w-0 gap-[20px] overflow-hidden rounded-detail md:grid-cols-4 md:grid-rows-2">
-            <figure class="group overflow-hidden rounded-detail md:col-span-2 md:row-span-2">
-                <img src="{{ $hotel['gallery_photos'][0]['url'] }}" alt="{{ $hotel['gallery_photos'][0]['alt'] }}"
-                     class="size-full object-cover transition-transform duration-700 ease-smooth group-hover:scale-105">
-            </figure>
-
-            @foreach (array_slice($hotel['gallery_photos'], 1) as $photo)
-                <figure class="group relative h-[180px] overflow-hidden rounded-detail md:h-auto">
+            @foreach ($hotel['gallery_photos'] as $photo)
+                <button type="button" data-lightbox-group="hotel" data-lightbox="{{ $photo['url'] }}" data-lightbox-alt="{{ $photo['alt'] }}"
+                        @class([
+                            'group relative block cursor-zoom-in overflow-hidden rounded-detail',
+                            'md:col-span-2 md:row-span-2' => $loop->first,
+                            'h-[180px] md:h-auto' => ! $loop->first,
+                        ])>
                     <img src="{{ $photo['url'] }}" alt="{{ $photo['alt'] }}"
                          class="size-full object-cover transition-transform duration-700 ease-smooth group-hover:scale-105">
 
                     @if (! empty($photo['more']))
-                        <figcaption class="absolute inset-0 flex items-center justify-center bg-black/30 text-[29.9px] font-semibold leading-[40px] text-white">
+                        <span class="absolute inset-0 flex items-center justify-center bg-black/30 text-[29.9px] font-semibold leading-[40px] text-white">
                             {{ $photo['more'] }}
-                        </figcaption>
+                        </span>
                     @endif
-                </figure>
+                </button>
             @endforeach
         </div>
     </section>

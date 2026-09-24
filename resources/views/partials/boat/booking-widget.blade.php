@@ -8,30 +8,34 @@
         <ul class="mt-[22px] space-y-[32px]">
             @foreach ($routes as $route)
                 <li class="rounded-[11px] border border-editorial-rule p-[23px]">
-                    <div class="flex items-center justify-between gap-[11px]">
-                        <div>
-                            <p class="text-[18.8px] font-bold leading-[27px] tracking-[0.94px] text-editorial-ink">{{ $route['from'] }}</p>
-                            <p class="text-[18.8px] leading-[27px] text-editorial-meta">{{ $route['departure'] }}</p>
+                    <div class="flex items-center gap-[8px]">
+                        <div class="min-w-0 shrink">
+                            <p class="truncate text-[17.5px] font-bold leading-[26px] tracking-[0.5px] text-editorial-ink">{{ $route['from'] }}</p>
+                            <p class="text-[16.5px] leading-[24px] text-editorial-meta">{{ $route['departure'] }}</p>
                         </div>
 
-                        <span class="relative flex min-w-0 flex-1 items-center justify-center px-[11px]" aria-hidden="true">
+                        {{-- The connector takes the leftover width but never collapses. --}}
+                        <span class="relative flex h-[27px] min-w-[28px] flex-1 items-center justify-center" aria-hidden="true">
                             <span class="h-px w-full bg-[#c0c7d3]"></span>
                             <img src="{{ asset('images/icons/vessel/route-arrow.svg') }}" alt=""
-                                 class="absolute size-[12.5px] bg-surface px-[5px] box-content">
+                                 class="absolute size-[12.5px] box-content bg-surface px-[4px]">
                         </span>
 
-                        <div class="text-right">
-                            <p class="text-[18.8px] font-bold leading-[27px] tracking-[0.94px] text-editorial-ink">{{ $route['to'] }}</p>
-                            <p class="text-[18.8px] leading-[27px] text-editorial-meta">{{ $route['arrival'] }}</p>
+                        <div class="min-w-0 shrink text-right">
+                            <p class="truncate text-[17.5px] font-bold leading-[26px] tracking-[0.5px] text-editorial-ink">{{ $route['to'] }}</p>
+                            <p class="text-[16.5px] leading-[24px] text-editorial-meta">{{ $route['arrival'] }}</p>
                         </div>
                     </div>
 
-                    <div class="mt-[22px] flex items-center justify-between">
-                        <p class="text-[23.8px] font-semibold leading-[32px] text-brand">{{ $route['price'] }}</p>
-                        <p class="text-[18.8px] leading-[27px] text-editorial-meta">/pax</p>
+                    {{-- Fare and unit read as one phrase; the button holds the right edge. --}}
+                    <div class="mt-[22px] flex items-center justify-between gap-[12px]">
+                        <p class="flex min-w-0 items-baseline gap-[4px]">
+                            <span class="whitespace-nowrap text-[21px] font-semibold leading-[30px] text-brand">{{ $route['price'] }}</span>
+                            <span class="text-[16px] leading-[24px] text-editorial-meta">/pax</span>
+                        </p>
 
                         <a href="{{ route('boats.order', [$slug, 'schedule' => $route['id']]) }}"
-                           class="rounded-[8px] bg-editorial/10 px-[21px] py-[11px] text-[18.8px] font-semibold leading-[27px] tracking-[0.94px] text-brand
+                           class="shrink-0 whitespace-nowrap rounded-[8px] bg-editorial/10 px-[16px] py-[10px] text-[17px] font-semibold leading-[25px] tracking-[0.85px] text-brand
                                   transition-colors duration-300 hover:bg-editorial/20">
                             Book Now
                         </a>

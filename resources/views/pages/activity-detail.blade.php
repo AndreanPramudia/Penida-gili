@@ -24,17 +24,18 @@
     {{-- Figma node 1:1447 — image grid --}}
     <section class="container-page pt-[43px]">
         <div data-reveal class="grid [&>*]:min-w-0 gap-[21.4px] overflow-hidden rounded-detail md:grid-cols-3 md:grid-rows-2">
-            {{-- Fixed heights keep the collage the same shape regardless of the uploaded photo's aspect ratio. --}}
-            <figure class="group h-[461px] lg:h-[667px] overflow-hidden rounded-detail md:col-span-2 md:row-span-2">
-                <img src="{{ $activity['gallery_photos'][0]['url'] }}" alt="{{ $activity['gallery_photos'][0]['alt'] }}"
-                     class="size-full object-cover transition-transform duration-700 ease-smooth group-hover:scale-105">
-            </figure>
-
-            @foreach (array_slice($activity['gallery_photos'], 1, 2) as $photo)
-                <figure class="group h-[220px] lg:h-[323px] overflow-hidden rounded-detail">
+            {{-- Fixed heights keep the collage the same shape regardless of the uploaded photo's aspect ratio.
+                 data-lightbox-group ties the three frames together so the viewer can page through them. --}}
+            @foreach (array_slice($activity['gallery_photos'], 0, 3) as $index => $photo)
+                <button type="button" data-lightbox-group="activity" data-lightbox="{{ $photo['url'] }}" data-lightbox-alt="{{ $photo['alt'] }}"
+                        @class([
+                            'group block cursor-zoom-in overflow-hidden rounded-detail',
+                            'h-[461px] lg:h-[667px] md:col-span-2 md:row-span-2' => $loop->first,
+                            'h-[220px] lg:h-[323px]' => ! $loop->first,
+                        ])>
                     <img src="{{ $photo['url'] }}" alt="{{ $photo['alt'] }}"
                          class="size-full object-cover transition-transform duration-700 ease-smooth group-hover:scale-105">
-                </figure>
+                </button>
             @endforeach
         </div>
     </section>

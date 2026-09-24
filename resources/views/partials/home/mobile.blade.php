@@ -11,10 +11,6 @@
         ['icon' => 'feature-safety.svg',  'w' => 16, 'h' => 20, 'title' => 'Guaranteed Safety',            'body' => 'All our vessels undergo regular maintenance and meet international maritime safety standards.'],
         ['icon' => 'feature-support.svg', 'w' => 20, 'h' => 18, 'title' => '24/7 Customer Support',        'body' => 'Our dedicated team is always on standby to assist with schedule changes or answer your questions.'],
     ];
-    $mTestimonials = [
-        ['quote' => '"The booking process was incredibly easy and fast. The boat left on time, the AC was cold, and the crew was super helpful with our luggage."', 'name' => 'Andi R.', 'city' => 'Jakarta'],
-        ['quote' => '"Renting a private boat for our family vacation to Nusa Penida was the best decision. Complete privacy, a friendly crew, and we could stop at snorkeling spots whenever we wanted."', 'name' => 'Sarah & Family', 'city' => 'Surabaya'],
-    ];
 @endphp
 
 <div class="lg:hidden">
@@ -170,7 +166,7 @@
                             </span>
                             <span class="flex items-center gap-[4px]">
                                 <img src="{{ asset('images/icons/mobile/boat.svg') }}" alt="" class="h-[11.7px] w-[10.8px]">
-                                {{ $operator['vessels_count'] }} Boat
+                                {{ $operator['vessels_count'] }} {{ \Illuminate\Support\Str::plural('Boat', $operator['vessels_count']) }}
                             </span>
                         </div>
                     </div>
@@ -187,7 +183,7 @@
         </div>
 
         <div class="mt-[40px] flex flex-col gap-[24px]">
-            @foreach ($mTestimonials as $index => $t)
+            @foreach ($testimonials as $index => $t)
                 <figure data-reveal style="--reveal-delay: {{ $index * 90 }}ms"
                         class="flex flex-col gap-[16px] rounded-[16px] border border-[#f3f4f6] bg-[#f8fafc] p-[25px]">
                     <div class="flex gap-[4px]">
@@ -198,7 +194,7 @@
                     <blockquote class="font-jakarta text-[14px] italic leading-[20px] text-[#64748b]">{{ $t['quote'] }}</blockquote>
                     <figcaption class="pt-[8px]">
                         <p class="text-[14px] font-bold leading-[20px] text-[#0f172a]">{{ $t['name'] }}</p>
-                        <p class="text-[12px] leading-[16px] text-[#94a3b8]">{{ $t['city'] }}</p>
+                        <p class="text-[12px] leading-[16px] text-[#94a3b8]">{{ $t->experienceLabel('Traveled') ?? 'Verified guest' }}</p>
                     </figcaption>
                 </figure>
             @endforeach
