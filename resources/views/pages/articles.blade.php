@@ -9,18 +9,14 @@
     {{-- Mobile (< lg) gets its own header + list from the mobile Figma frame. --}}
     @include('partials.article.mobile-list', ['featured' => $featured, 'articles' => $articles])
 
-    <header class="relative hidden h-[276px] w-full overflow-hidden lg:block">
-        <img src="{{ asset('images/articles/hero-article.png') }}" alt=""
-             class="absolute inset-0 size-full object-cover object-bottom">
-
-        <div class="relative z-10">
-            @include('partials.nav', ['active' => 'artikel'])
-
-            <div class="container-page mt-[27px] text-center">
-                <h1 data-reveal class="text-[24px] lg:text-[48px] font-bold leading-[30px] lg:leading-[60px] text-on-hero">Article</h1>
-            </div>
-        </div>
-    </header>
+    <div class="hidden lg:block">
+        @include('partials.page-hero', [
+            'image'    => asset('images/articles/hero-article.png'),
+            'title'    => 'Article',
+            'subtitle' => 'Travel guides, boat tips and island stories from the Penida Gili crew.',
+            'active'   => 'artikel',
+        ])
+    </div>
 @endsection
 
 @section('content')

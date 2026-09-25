@@ -24,7 +24,11 @@ class BoatOperatorController extends Controller
 
         $operators = BoatOperator::query()
             ->active()
-            ->withCount(['schedules', 'vessels'])
+            // Only what the public can actually book: drafts and retired boats stay out of the counts.
+            ->withCount([
+                'schedules as schedules_count' => fn (Builder $q) => $q->active(),
+                'vessels as vessels_count' => fn (Builder $q) => $q->active(),
+            ])
             ->when($from || $to, fn (Builder $q) => $q->whereHas('schedules', fn (Builder $s) => $s->active()->betweenPorts($from, $to)))
             ->orderByDesc('rating')
             ->paginate(9)

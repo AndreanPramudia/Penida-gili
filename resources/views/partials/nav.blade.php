@@ -7,7 +7,7 @@
         'boat'     => ['label' => 'Boat',     'route' => route('boats.index')],
         'activity' => ['label' => 'Activity', 'route' => route('activities.index')],
         'hotel'    => ['label' => 'Hotel',    'route' => route('hotels.index')],
-        'artikel'  => ['label' => 'Artikel',  'route' => route('articles.index')],
+        'artikel'  => ['label' => 'Article',  'route' => route('articles.index')],
     ];
 @endphp
 
