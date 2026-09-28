@@ -22,17 +22,17 @@
         :selectable="true">
 
         <x-slot:toolbar>
-            @include('partials.admin.article-filters', [
-                'action' => route('admin.articles'),
-                'filters' => $filters,
-                'authors' => $authors,
-                'categories' => $categories,
-                'bulkDelete' => true,
-                {{-- Scheduled publishing is not offered in the editor, so it is not a filter either. --}}
-                'statuses' => collect(\App\Enums\ArticleStatus::cases())
-                    ->reject(fn ($s) => $s === \App\Enums\ArticleStatus::Scheduled)
-                    ->mapWithKeys(fn ($s) => [$s->value => $s->label()])->all(),
-            ])
+        {{-- Scheduled publishing is not offered in the editor, so it is not a filter either. --}}
+        @include('partials.admin.article-filters', [
+        'action' => route('admin.articles'),
+        'filters' => $filters,
+        'authors' => $authors,
+        'categories' => $categories,
+        'bulkDelete' => true,
+        'statuses' => collect(\App\Enums\ArticleStatus::cases())
+        ->reject(fn ($s) => $s === \App\Enums\ArticleStatus::Scheduled)
+        ->mapWithKeys(fn ($s) => [$s->value => $s->label()])->all(),
+])
         </x-slot:toolbar>
 
         @forelse ($articles as $article)

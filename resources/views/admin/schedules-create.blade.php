@@ -6,7 +6,7 @@
     $editing = $schedule->exists;
     $backHref = route('admin.schedules');
     $selectedDays = old('days', $schedule->days ?? $days);
-    $currentRoute = old('route', $schedule->from_port_id && $schedule->to_port_id ? $schedule->from_port_id.'-'.$schedule->to_port_id : null);
+   $currentRoute = old('route', $schedule->route_id);
     $isDraft = old('publish', $schedule->status === \App\Enums\ListingStatus::Draft ? 'draft' : 'publish') === 'draft';
     $time = fn ($value) => $value ? \Illuminate\Support\Carbon::parse($value)->format('H:i') : null;
 @endphp
