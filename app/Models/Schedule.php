@@ -94,10 +94,23 @@ class Schedule extends Model
                 )
             );
     }
+    public function nextDate(?Carbon $from = null): Carbon
+    {
+    $date = ($from ?? Carbon::today())->copy();
+
+    for ($i = 0; $i < 7 && ! $this->operatesOn($date); $i++) {
+        $date->addDay();
+    }
+
+    return $date;
+    }
+
     public function operatesOn(Carbon $date): bool
     {
-        return empty($this->days) || in_array($date->format('D'), $this->days, true);
+    return empty($this->days) || in_array($date->format('D'), $this->days, true);
     }
+
+    
 
     protected function from(): Attribute
     {

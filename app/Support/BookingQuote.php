@@ -239,7 +239,7 @@ final class BookingQuote
             ],
             $this->bookable instanceof Schedule => [
                 ['label' => 'Booking', 'value' => $this->bookable->operator->name],
-                ['label' => 'Route', 'value' => $this->bookable->fromPort->name.' → '.$this->bookable->toPort->name],
+                ['label' => 'Route', 'value' => $this->bookable->route->originPort->name.' → '.$this->bookable->route->destinationPort->name],
                 ['label' => 'Departure', 'value' => $this->date->format('D, d M Y').' · '.Carbon::parse($this->bookable->departure_time)->format('H:i')],
             ],
             $this->bookable instanceof Activity => [
@@ -261,8 +261,8 @@ final class BookingQuote
             'date' => $this->date->format('D, d M Y'),
             'departure' => Carbon::parse($schedule->departure_time)->format('H:i'),
             'arrival' => Carbon::parse($schedule->arrival_time)->format('H:i'),
-            'from' => $schedule->fromPort->name,
-            'to' => $schedule->toPort->name,
+            'from' => $schedule->route->originPort->name,
+            'to' => $schedule->route->destinationPort->name,
         ];
     }
 

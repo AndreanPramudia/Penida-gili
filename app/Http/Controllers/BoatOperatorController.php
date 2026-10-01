@@ -29,10 +29,13 @@ class BoatOperatorController extends Controller
             ->active()
             ->with('operator')
             ->whereHas('operator', fn (Builder $q) => $q->active())
-            ->when($from || $to, fn (Builder $q) => $q->whereHas(
-                'operator.schedules',
-                fn (Builder $s) => $s->active()->betweenPorts($from, $to),
-            ))
+            ->when(
+                $from || $to,
+                fn (Builder $q) => $q->whereHas(
+                    'operator.schedules',
+                    fn (Builder $s) => $s->active()->betweenPorts($from, $to),
+                )
+            )
             ->with(['schedules' => fn ($q) => $q->active()])
             ->orderBy('name')
             ->paginate(9)
@@ -40,7 +43,12 @@ class BoatOperatorController extends Controller
 
         return view('pages.boats', [
             'boats' => $boats,
-            'search' => ['from' => $from, 'to' => $to, 'date' => $date?->toDateString(), 'guests' => $request->integer('guests') ?: null],
+            'search' => [
+                'from' => $from,
+                'to' => $to,
+                'date' => $date?->toDateString(),
+                'guests' => $request->integer('guests') ?: null,
+            ],
         ]);
     }
 
@@ -49,11 +57,18 @@ class BoatOperatorController extends Controller
      */
     public function vessel(Vessel $vessel): View
     {
-        abort_unless($vessel->status === ListingStatus::Active && $vessel->operator->is_active, 404);
+        abort_unless(
+            $vessel->status === ListingStatus::Active &&
+            $vessel->operator->is_active,
+            404
+        );
 
         $vessel->load([
             'operator',
-            'schedules' => fn ($q) => $q->active()->with(['fromPort', 'toPort']),
+            'schedules' => fn ($q) => $q->active()->with([
+                'route.originPort',
+                'route.destinationPort',
+            ]),
             'reviews' => fn ($q) => $q->where('is_published', true),
         ]);
 
@@ -66,8 +81,16 @@ class BoatOperatorController extends Controller
      */
     public function order(Request $request, BoatOperator $boat): View
     {
-        $schedule = $boat->schedules()->active()->with(['fromPort', 'toPort'])
-            ->when($request->filled('schedule'), fn ($q) => $q->whereKey($request->integer('schedule')))
+        $schedule = $boat->schedules()
+            ->active()
+            ->with([
+                'route.originPort',
+                'route.destinationPort',
+            ])
+            ->when(
+                $request->filled('schedule'),
+                fn ($q) => $q->whereKey($request->integer('schedule'))
+            )
             ->firstOrFail();
 
         $schedule->setRelation('operator', $boat);
@@ -80,7 +103,9 @@ class BoatOperatorController extends Controller
         );
 
         return view('pages.boat-order', [
-            'order' => $quote->toOrderDraft() + ['action' => route('boats.book', $boat)],
+            'order' => $quote->toOrderDraft() + [
+                'action' => route('boats.book', $boat),
+            ],
         ]);
     }
 }

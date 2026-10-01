@@ -19,6 +19,12 @@ class StoreBoatBookingRequest extends StoreBookingRequest
 
     public function schedule(): Schedule
     {
-        return Schedule::query()->with(['operator', 'fromPort', 'toPort'])->findOrFail($this->integer('schedule_id'));
+        return Schedule::query()
+        ->with([
+        'operator',
+        'route.originPort',
+        'route.destinationPort',
+        ])
+    ->findOrFail($this->integer('schedule_id'));
     }
 }

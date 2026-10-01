@@ -95,8 +95,8 @@ class Booking extends Model
     {
         [$from, $to, $vessel] = match (true) {
             $this->bookable instanceof Schedule => [
-                $this->bookable->fromPort->name,
-                $this->bookable->toPort->name,
+                $this->bookable->route->originPort->name,
+                $this->bookable->route->destinationPort->name,
                 $this->bookable->vessel?->name ?? $this->bookable->operator->name,
             ],
             $this->bookable instanceof HotelRoom => [$this->bookable->hotel->name, $this->bookable->name, 'Hotel stay'],
@@ -150,7 +150,7 @@ class Booking extends Model
             ],
             $this->bookable instanceof Schedule => [
                 'Operator: '.$this->bookable->operator->name,
-                'Route: '.$this->bookable->fromPort->name.' - '.$this->bookable->toPort->name,
+                'Route: '.$this->bookable->route->originPort->name.' - '.$this->bookable->route->destinationPort->name,
                 'Departure: '.$this->travel_date->format('j F Y').' '.$this->bookable->departure_label,
                 'Passengers: '.$this->adults.' adult(s), '.$this->children.' child(ren)',
             ],

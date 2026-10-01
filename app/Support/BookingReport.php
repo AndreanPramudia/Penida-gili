@@ -32,27 +32,106 @@ final class BookingReport
 
         return Booking::query()
             ->with(['bookable' => fn (MorphTo $morph) => $morph->morphWith([
-                Schedule::class => ['operator', 'vessel', 'fromPort', 'toPort'],
+                Schedule::class => [
+                    'operator',
+                    'vessel',
+                    'route.originPort',
+                    'route.destinationPort',
+                ],
                 HotelRoom::class => ['hotel'],
             ])])
-            // "Search Route" (Figma 1:10428) also matches the passenger / reference; "Sanur to Nusa Penida"
-            // matches both ports, a single word matches either end.
+
             ->when($request->filled('q'), function (Builder $q) use ($request): void {
                 $term = $request->string('q')->value();
-                [$from, $to] = array_pad(preg_split('/\s+(?:to|-|→)\s+/iu', $term, 2), 2, null);
+
+                [$from, $to] = array_pad(
+                    preg_split('/\s+(?:to|-|→|>)\s+/iu', $term, 2),
+                    2,
+                    null
+                );
 
                 $q->where(fn (Builder $w) => $w
                     ->search($term)
-                    ->orWhereHasMorph('bookable', [Schedule::class], fn (Builder $s) => $s
-                        ->whereHas('fromPort', fn (Builder $p) => $p->where('name', 'like', "%{$from}%"))
-                        ->when($to, fn (Builder $x) => $x->whereHas('toPort', fn (Builder $p) => $p->where('name', 'like', "%{$to}%"))))
-                    ->when(! $to, fn (Builder $x) => $x->orWhereHasMorph('bookable', [Schedule::class], fn (Builder $s) => $s
-                        ->whereHas('toPort', fn (Builder $p) => $p->where('name', 'like', "%{$from}%")))));
+
+                    ->orWhereHasMorph(
+                        'bookable',
+                        [Schedule::class],
+                        fn (Builder $s) => $s
+                            ->whereHas(
+                                'route.originPort',
+                                fn (Builder $p) => $p->where(
+                                    'name',
+                                    'like',
+                                    "%{$from}%"
+                                )
+                            )
+                            ->when(
+                                $to,
+                                fn (Builder $x) => $x->whereHas(
+                                    'route.destinationPort',
+                                    fn (Builder $p) => $p->where(
+                                        'name',
+                                        'like',
+                                        "%{$to}%"
+                                    )
+                                )
+                            )
+                    )
+
+                    ->when(
+                        ! $to,
+                        fn (Builder $x) => $x->orWhereHasMorph(
+                            'bookable',
+                            [Schedule::class],
+                            fn (Builder $s) => $s->whereHas(
+                                'route.destinationPort',
+                                fn (Builder $p) => $p->where(
+                                    'name',
+                                    'like',
+                                    "%{$from}%"
+                                )
+                            )
+                        )
+                    )
+                );
             })
-            ->when(isset(self::PRODUCTS[$type]), fn (Builder $q) => $q->where('bookable_type', self::PRODUCTS[$type]))
-            ->when($request->filled('vessel'), fn (Builder $q) => $q->whereHasMorph('bookable', [Schedule::class], fn (Builder $s) => $s->where('vessel_id', $request->integer('vessel'))))
-            ->when($request->filled('status'), fn (Builder $q) => $q->where('status', $request->string('status')->value()))
-            ->when($request->filled('date'), fn (Builder $q) => $q->whereDate('travel_date', $request->date('date')))
+
+            ->when(
+                isset(self::PRODUCTS[$type]),
+                fn (Builder $q) => $q->where(
+                    'bookable_type',
+                    self::PRODUCTS[$type]
+                )
+            )
+
+            ->when(
+                $request->filled('vessel'),
+                fn (Builder $q) => $q->whereHasMorph(
+                    'bookable',
+                    [Schedule::class],
+                    fn (Builder $s) => $s->where(
+                        'vessel_id',
+                        $request->integer('vessel')
+                    )
+                )
+            )
+
+            ->when(
+                $request->filled('status'),
+                fn (Builder $q) => $q->where(
+                    'status',
+                    $request->string('status')->value()
+                )
+            )
+
+            ->when(
+                $request->filled('date'),
+                fn (Builder $q) => $q->whereDate(
+                    'travel_date',
+                    $request->date('date')
+                )
+            )
+
             ->latest();
     }
 }

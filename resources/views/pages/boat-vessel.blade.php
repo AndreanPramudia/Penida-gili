@@ -159,7 +159,7 @@
                             <li class="rounded-[11px] border border-editorial-rule p-[20px]">
                                 <div class="flex items-center gap-[8px]">
                                     <div class="min-w-0 shrink">
-                                        <p class="truncate text-[17px] font-bold leading-[26px] text-editorial-ink">{{ $schedule->fromPort->name }}</p>
+                                        <p class="truncate text-[17px] font-bold leading-[26px] text-editorial-ink">{{ $schedule->route->originPort->name }}</p>
                                         <p class="text-[16px] leading-[24px] text-editorial-meta">{{ $schedule->departure_label }}</p>
                                     </div>
 
@@ -170,7 +170,7 @@
                                     </span>
 
                                     <div class="min-w-0 shrink text-right">
-                                        <p class="truncate text-[17px] font-bold leading-[26px] text-editorial-ink">{{ $schedule->toPort->name }}</p>
+                                        <p class="truncate text-[17px] font-bold leading-[26px] text-editorial-ink">{{ $schedule->route->destinationPort->name }}</p>
                                         <p class="text-[16px] leading-[24px] text-editorial-meta">{{ $schedule->arrival_label }}</p>
                                     </div>
                                 </div>

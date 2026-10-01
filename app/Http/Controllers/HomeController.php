@@ -27,7 +27,9 @@ class HomeController extends Controller
                 ->orderBy('name')
                 ->take(3)
                 ->get(),
+
             'popularRoutes' => $this->popularRoutes(),
+
             'testimonials' => Review::query()
                 ->where('is_published', true)
                 ->whereMorphedTo('reviewable', Vessel::class)
@@ -45,20 +47,33 @@ class HomeController extends Controller
      */
     private function popularRoutes(): Collection
     {
-        $icons = ['route-penida.svg', 'route-gili.svg', 'route-lembongan.svg'];
+        $icons = [
+            'route-penida.svg',
+            'route-gili.svg',
+            'route-lembongan.svg',
+        ];
 
         // "· by Island Runner, Penida Express" — omitted when no boat is assigned yet.
         $boats = function ($group): string {
             $names = $group->pluck('vessel.name')->filter()->unique();
 
-            return $names->isEmpty() ? '' : ', sailed by '.$names->join(', ');
+            return $names->isEmpty()
+                ? ''
+                : ', sailed by '.$names->join(', ');
         };
 
         return Schedule::query()
             ->active()
-            ->with(['fromPort', 'toPort', 'vessel'])
+            ->with([
+                'route.originPort',
+                'route.destinationPort',
+                'vessel',
+            ])
             ->get()
-            ->groupBy(fn (Schedule $schedule) => $schedule->from_port_id.'-'.$schedule->to_port_id)
+            ->groupBy(
+                fn (Schedule $schedule) =>
+                    $schedule->route->origin_port_id.'-'.$schedule->route->destination_port_id
+            )
             ->sortByDesc(fn ($group) => $group->count())
             ->take(3)
             ->values()
@@ -69,13 +84,21 @@ class HomeController extends Controller
 
                 return [
                     'icon' => $icons[$index % count($icons)],
-                    'title' => $first->fromPort->name.' ➔ '.$first->toPort->name,
+
+                    'title' => $first->route->originPort->name
+                        .' ➔ '.$first->route->destinationPort->name,
+
                     // Named after the boats that sail it, so the copy follows what the console manages.
-                    'body' => $sailings.' daily sailing'.($sailings > 1 ? 's' : '')
+                    'body' => $sailings.' daily sailing'
+                        .($sailings > 1 ? 's' : '')
                         .' from '.$group->min('departure_label')
                         .$boats($group).'. Fares from '
                         .Money::idr($group->min('price_adult')).'.',
-                    'href' => route('boats.index', ['from' => $first->fromPort->name, 'to' => $first->toPort->name]),
+
+                    'href' => route('boats.index', [
+                        'from' => $first->route->originPort->name,
+                        'to' => $first->route->destinationPort->name,
+                    ]),
                 ];
             });
     }
